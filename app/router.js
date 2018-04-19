@@ -18,5 +18,5 @@ const proxy = k2c(httpProxy({
 module.exports = app => {
   const { router, controller } = app;
   router.all('/hbapi/*', proxy)
-  router.get('/*', controller.home.index);
+  router.get(/^\/(?!public))/, controller.home.index);
 };
