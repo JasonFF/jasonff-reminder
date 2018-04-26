@@ -37,6 +37,18 @@ const zbtradeproxy = k2c(httpProxy({
   },
 }));
 
+const hbotcapi = k2c(httpProxy({
+  target: 'https://otc-api.huobipro.com/v1/otc/trade/list/public',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/hbotcapi/*' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -45,5 +57,6 @@ module.exports = app => {
   router.all('/hbapi/*', hbproxy)
   router.all('/zbapi/*', zbproxy)
   router.all('/zbtradeapi/*', zbtradeproxy)
+  router.all('/hbotcapi/*', hbotcapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
