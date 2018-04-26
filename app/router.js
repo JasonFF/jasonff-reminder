@@ -5,7 +5,7 @@ const hbproxy = k2c(httpProxy({
   target: 'https://api.huobipro.com',
   changeOrigin: true,
   pathRewrite: {
-    '^/hbapi/*' : '/',     // rewrite path
+    '^/hbapi/' : '/',     // rewrite path
   },
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
@@ -17,7 +17,7 @@ const zbproxy = k2c(httpProxy({
   target: 'http://api.zb.com/data/v1',
   changeOrigin: true,
   pathRewrite: {
-    '^/zbapi/*' : '/',     // rewrite path
+    '^/zbapi/' : '/',     // rewrite path
   },
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
@@ -29,7 +29,7 @@ const zbtradeproxy = k2c(httpProxy({
   target: 'https://trade.zb.com/api',
   changeOrigin: true,
   pathRewrite: {
-    '^/zbtradeapi/*' : '/',     // rewrite path
+    '^/zbtradeapi/' : '/',     // rewrite path
   },
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
@@ -41,7 +41,7 @@ const hbotcapi = k2c(httpProxy({
   target: 'https://otc-api.huobipro.com/v1/otc/trade/list/public',
   changeOrigin: true,
   pathRewrite: {
-    '^/hbotcapi/*' : '/',     // rewrite path
+    '^/hbotcapi/' : '/',     // rewrite path
   },
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
