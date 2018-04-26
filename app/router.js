@@ -14,7 +14,7 @@ const hbproxy = k2c(httpProxy({
 }));
 
 const zbproxy = k2c(httpProxy({
-  target: 'http://api.zb.com/data/v1',
+  target: 'http://api.zb.com/',
   changeOrigin: true,
   pathRewrite: {
     '^/zbapi/' : '/',     // rewrite path
@@ -26,7 +26,7 @@ const zbproxy = k2c(httpProxy({
 }));
 
 const zbtradeproxy = k2c(httpProxy({
-  target: 'https://trade.zb.com/api',
+  target: 'https://trade.zb.com/',
   changeOrigin: true,
   pathRewrite: {
     '^/zbtradeapi/' : '/',     // rewrite path
