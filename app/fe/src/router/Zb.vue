@@ -48,7 +48,9 @@
     <div class="item"></div>
     <div class="item">
       <div style="height: 100%;display:flex;flex-direction:column;justify-content: center">
-        <cube-input v-model="money" ></cube-input>
+        <div>
+          <cube-input v-model="money" ></cube-input>
+        </div>
       </div>
     </div>
     <div class="item-small">
