@@ -45,11 +45,15 @@
         percent: {{diffZbHlPercent}}
       </div>
     </div>
+    <div class="item"></div>
     <div class="item">
-
+      <div style="height: 100%;display:flex;flex-direction:column;justify-content: center">
+        <cube-input v-model="money" ></cube-input>
+      </div>
     </div>
-    <div class="item">
-
+    <div class="item-small">
+      <div>income: {{income}}</div>
+      <div>percent: {{incomePercent}}</div>
     </div>
   </div>
 </template>
@@ -73,7 +77,8 @@
       return {
         hbPrice: '',
         zbPrice: '',
-        hlPrice: ''
+        hlPrice: '',
+        money: 50000
       }
     },
     computed: {
@@ -89,6 +94,15 @@
       diffZbHlPercent() {
         return getFixed((this.zbPrice - this.hlPrice) / this.hlPrice * 100) + '%'
       },
+      income() {
+        const zbusdt = this.money/this.zbPrice
+        const hbusdt = zbusdt-20
+        const hbMoney = hbusdt*this.hbPrice
+        return getFixed(hbMoney-this.money)
+      },
+      incomePercent() {
+        return getFixed(this.income/this.money*100)+'%'
+      }
     },
     methods: {
       getHL() {
