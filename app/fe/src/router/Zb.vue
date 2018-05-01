@@ -134,7 +134,7 @@
             range: 0
           }
         }).then(res => {
-          this.hbPrice = res.data.data[1].price
+          this.hbPrice = res.data.data[4].price
         })
       }
     }
