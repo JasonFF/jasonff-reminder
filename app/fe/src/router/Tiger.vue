@@ -48,12 +48,27 @@
             {{btc_tusd|getPercent}} %
           </td>
         </tr>
+        <tr>
+          <td>
+            btc_tusd_cny
+          </td>
+          <td>
+            {{btc_tusd_cny.close|getFixed}}
+          </td>
+          <td>
+            {{btc_tusd_cny|getPercent}} %
+          </td>
+        </tr>
       </tbody>
     </table>
+    <div>
+      bitcny price: 
+    </div>
   </div>
 </template>
 <script>
 import axios from 'axios'
+import jsonp from 'jsonp'
 const baseUrl = 'http://www.abichi.club'
 
 function getFixed(val) {
@@ -68,6 +83,8 @@ export default {
   created() {
     this.get_btc_bitcny()
     this.get_tusd_btc()
+    this.getHL()
+    this.get_bitcny_price()
   },
   filters: {
     getPercent(coinObj) {
@@ -81,10 +98,27 @@ export default {
     return {
       btc_bitcny: {},
       tusd_btc: {},
-      btc_tusd: {}
+      btc_tusd: {},
+      hlPrice: ''
+    }
+  },
+  computed: {
+    btc_tusd_cny() {
+      if (!this.hlPrice||!this.btc_tusd.open) {
+        return {}
+      }
+      return {
+        open: this.hlPrice*this.btc_tusd.open,
+        close: this.hlPrice*this.btc_tusd.close
+      }
     }
   },
   methods: {
+    get_bitcny_price() {
+      axios(`${baseUrl}/tigerapi/exchange/api/ctc/config?`).then(res => {
+        console.log(res)
+      })
+    },
     get_btc_tusd(tusd_btc) {
       const open = 1 / tusd_btc.open
       const close = 1 / tusd_btc.close
@@ -92,6 +126,11 @@ export default {
         open,
         close
       }
+    },
+    getHL() {
+      jsonp("https://api.money.126.net/data/feed/FX_USDCNY", null, (err, data) => {
+        this.hlPrice = data.FX_USDCNY.price
+      })
     },
     get_btc_bitcny() {
       axios(`${baseUrl}/tigerapi/exchange/trading/api/market/detail`, {
