@@ -62,7 +62,7 @@
       </tbody>
     </table>
     <div>
-      bitcny price: 
+      bitcny price: {{bitcnyPrice.buy}}|{{bitcnyPrice.sell}}
     </div>
   </div>
 </template>
@@ -99,7 +99,12 @@ export default {
       btc_bitcny: {},
       tusd_btc: {},
       btc_tusd: {},
-      hlPrice: ''
+      hlPrice: '',
+      bitcnyPrice: {
+        buy: '',
+        sell: ''
+      },
+      money: 10000
     }
   },
   computed: {
@@ -111,11 +116,34 @@ export default {
         open: this.hlPrice*this.btc_tusd.open,
         close: this.hlPrice*this.btc_tusd.close
       }
+    },
+    bitcnyAmount() {
+      if (this.money && this.bitcnyPrice) {
+        return this.money/this.bitcnyPrice.buy
+      }
+      return 0
+    },
+    btcAmount() {
+      if (this.bitcnyAmount && this.btc_bitcny.close) {
+        return this.bitcnyAmount /this.btc_bitcny.close  * 0.999
+      }
+    },
+    tusdAmount() {
+      if (this.btcAmount && this.tusd_btc.close) {
+        return this.btcAmount / this.tusd_btc.close  * 0.999
+      }
+    },
+    tusdPrice() {
+      if (this.tusdAmount) {
+        return this.money / this.tusdAmount
+      }
     }
   },
   methods: {
     get_bitcny_price() {
-      axios(`${baseUrl}/tigerapi/exchange/api/ctc/config?`).then(res => {
+      axios(`${baseUrl}/tigerctcapi/exchange/api/ctc/config?`).then(res => {
+        this.bitcnyPrice.buy = res.data.buyPrice
+        this.bitcnyPrice.sell = res.data.sellPrice
         console.log(res)
       })
     },
