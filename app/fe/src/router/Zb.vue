@@ -67,6 +67,39 @@
         tidexBuy:{{tidexBuy}}
       </div>
     </div>
+    <div>
+      <div style="width: 50%;float:left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>ask</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in zbAsks">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div style="width: 50%; float: left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>bid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in zbBids">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      
+    </div>
   </div>
 </template>
 <script>
@@ -85,6 +118,7 @@
       this.getHbOtcData()
       this.getHL()
       this.getTidexData()
+      this.getZbDepth()
     },
     data() {
       return {
@@ -93,6 +127,8 @@
         hlPrice: '',
         money: 50000,
         tidexBuy: '',
+        zbAsks: [],
+        zbBids: []
       }
     },
     filters: {
@@ -133,6 +169,16 @@
       }
     },
     methods: {
+      getZbDepth() {
+        axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
+          this.zbAsks = res.data.asks.filter(it => {
+            return it[1] >= 10000
+          })
+          this.zbBids = res.data.bids.filter(it => {
+            return it[1] >= 10000
+          })
+        })
+      },
       getTidexData() {
         axios(`${baseUrl}/tidexapi/api/3/ticker/wusd_usdt`).then(res => {
           this.tidexBuy = res.data.wusd_usdt.buy
