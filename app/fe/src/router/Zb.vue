@@ -1,15 +1,5 @@
 <template>
   <div class="container">
-
-    <div class="item">
-
-      <div class="left">
-        hb
-      </div>
-      <div class="right">
-        {{hbPrice}}
-      </div>
-    </div>
     <div class="item">
       <div class="left">
         zb
@@ -20,42 +10,62 @@
     </div>
     <div class="item">
       <div class="left">
-        diff
+        money
       </div>
       <div class="right">
-        {{diff}}
+        <cube-input
+          v-model="money"
+        ></cube-input>
       </div>
     </div>
-    <div class="item">
-      <div class="left">
-        percent
+    <div class="table-box">
+      <table class="table-zb">
+        <thead>
+          <tr>
+            <th>
+              platform
+            </th>
+            <th>
+              buy
+            </th>
+            <th>
+              diff
+            </th>
+            <th>
+              diffPercent
+            </th>
+            <th>
+              profit
+            </th>
+          </tr>
+        </thead>
+        <thead>
+          <tr>
+            <td>hb</td>
+            <td>{{hbPrice}}</td>
+            <td>{{diffZbHb}}</td>
+            <td>{{diffZbHbPercent}}</td>
+            <td>{{hbPrice|getHbProfit(zbPrice, money)}}</td>
+          </tr>
+          <tr>
+            <td>tidex</td>
+            <td>{{tidexBuyHl}}</td>
+            <td>{{diffZbTidex}}</td>
+            <td>{{diffZbTidexPercent}}</td>
+            <td>{{tidexBuyHl|getTidexProfit(zbPrice, money)}}</td>
+          </tr>
+          <tr>
+            <td>exchange</td>
+            <td>{{hlPrice}}</td>
+            <td>{{diffZbHl}}</td>
+            <td>{{diffZbHlPercent}}</td>
+            <td> - </td>
+          </tr>
+        </thead>
+      </table>
+      <div style="font-size: 12px;margin:20px 0;">
+        tidexBuy:{{tidexBuy}}
       </div>
-      <div class="right">
-        {{diffPercent}}
-      </div>
-    </div>
-    <div class="item-small">
-      <div>
-        exchange rate: {{hlPrice}}
-      </div>
-      <div>
-        diff: {{diffZbHl}}
-      </div>
-      <div>
-        percent: {{diffZbHlPercent}}
-      </div>
-    </div>
-    <div class="item"></div>
-    <div class="item">
-      <div style="height: 100%;display:flex;flex-direction:column;justify-content: center">
-        <div>
-          <cube-input v-model="money" ></cube-input>
-        </div>
-      </div>
-    </div>
-    <div class="item-small">
-      <div>income: {{income}}</div>
-      <div>percent: {{incomePercent}}</div>
     </div>
   </div>
 </template>
@@ -74,20 +84,36 @@
       this.getZbData()
       this.getHbOtcData()
       this.getHL()
+      this.getTidexData()
     },
     data() {
       return {
         hbPrice: '',
         zbPrice: '',
         hlPrice: '',
-        money: 50000
+        money: 50000,
+        tidexBuy: '',
       }
     },
+    filters: {
+      getHbProfit(hb, zb, money) {
+        const zbusdt = money/zb
+        const hbusdt = zbusdt-20
+        const hbMoney = hbusdt*hb
+        return getFixed(hbMoney-money)
+      },
+      getTidexProfit(tidex, zb, money) {
+        const zbusdt = money/zb
+        const hbusdt = zbusdt-20
+        const hbMoney = hbusdt*tidex*0.999
+        return getFixed(hbMoney-money)
+      },
+    },
     computed: {
-      diff() {
+      diffZbHb() {
         return getFixed(this.hbPrice - this.zbPrice)
       },
-      diffPercent() {
+      diffZbHbPercent() {
         return getFixed((this.hbPrice - this.zbPrice) / this.zbPrice * 100) + '%'
       },
       diffZbHl() {
@@ -96,17 +122,22 @@
       diffZbHlPercent() {
         return getFixed((this.zbPrice - this.hlPrice) / this.hlPrice * 100) + '%'
       },
-      income() {
-        const zbusdt = this.money/this.zbPrice
-        const hbusdt = zbusdt-20
-        const hbMoney = hbusdt*this.hbPrice
-        return getFixed(hbMoney-this.money)
+      tidexBuyHl() {
+        return getFixed(this.tidexBuy * this.hlPrice)
       },
-      incomePercent() {
-        return getFixed(this.income/this.money*100)+'%'
+      diffZbTidex() {
+        return getFixed(this.tidexBuyHl - this.zbPrice)
+      },
+      diffZbTidexPercent() {
+        return getFixed((this.tidexBuyHl - this.zbPrice) / this.zbPrice * 100) + '%'
       }
     },
     methods: {
+      getTidexData() {
+        axios(`${baseUrl}/tidexapi/api/3/ticker/wusd_usdt`).then(res => {
+          this.tidexBuy = res.data.wusd_usdt.buy
+        })
+      },
       getHL() {
         jsonp("https://api.money.126.net/data/feed/FX_USDCNY", null, (err, data) => {
           this.hlPrice = data.FX_USDCNY.price
@@ -143,39 +174,42 @@
 </script>
 
 <style lang="less" scoped>
-  .container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background-color: #333;
-    color: #fff;
+.table-zb {
+  width: 100%;
+  text-align: center;
+  th {
+    padding: 10px 5px;
+    font-weight: bold
   }
-
+  td {
+    padding: 10px 5px
+  }
+}
+.container {
+  padding: 20px 30px;
+  background-color: #333;
+  min-height: 100%;
+  color: #fff;
+}
   .item {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    height: 8%;
-    font-size: 18px;
-    boder-bottom: 1px solid #eee;
-  }
-
-  .left {
-    width: 20%;
-    text-align: right;
-    margin-right: 5%;
-  }
-
-  .right {
-    width: 60%;
-    text-align: left
-  }
-
-  .item-small {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around
+    line-height: 40px;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    &:after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+    .left {
+      float: left;
+      width: 20%;
+      text-align: right
+    }
+    .right {
+      float: left;
+      width: 60%;
+      margin-left: 5%;
+    }
   }
 
 </style>
