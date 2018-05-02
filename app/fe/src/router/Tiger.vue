@@ -1,11 +1,139 @@
 <template>
-  <div>
-    Tiger
+  <div class="container">
+    <table class="table-tiger">
+      <thead>
+        <tr>
+          <th>
+            coin
+          </th>
+          <th>
+            price
+          </th>
+          <th>
+            percent
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            btc_bitcny
+          </td>
+          <td>
+            {{btc_bitcny.close}}
+          </td>
+          <td>
+            {{btc_bitcny|getPercent}} %
+          </td>
+        </tr>
+        <tr>
+          <td>
+            tusd_btc
+          </td>
+          <td>
+            {{tusd_btc.close}}
+          </td>
+          <td>
+            {{tusd_btc|getPercent}} %
+          </td>
+        </tr>
+        <tr>
+          <td>
+            btc_tusd
+          </td>
+          <td>
+            {{btc_tusd.close|getFixed}}
+          </td>
+          <td>
+            {{btc_tusd|getPercent}} %
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 <script>
+import axios from 'axios'
+const baseUrl = 'http://www.abichi.club'
+
+function getFixed(val) {
+  if (!val) {
+    return ''
+  }
+  return val.toFixed(3)
+}
+
 export default {
-  name: 'Tiger'
+  name: 'Tiger',
+  created() {
+    this.get_btc_bitcny()
+    this.get_tusd_btc()
+  },
+  filters: {
+    getPercent(coinObj) {
+      const open = coinObj.open
+      const close = coinObj.close
+      return getFixed((close - open) / open * 100)
+    },
+    getFixed
+  },
+  data() {
+    return {
+      btc_bitcny: {},
+      tusd_btc: {},
+      btc_tusd: {}
+    }
+  },
+  methods: {
+    get_btc_tusd(tusd_btc) {
+      const open = 1 / tusd_btc.open
+      const close = 1 / tusd_btc.close
+      return {
+        open,
+        close
+      }
+    },
+    get_btc_bitcny() {
+      axios(`${baseUrl}/tigerapi/exchange/trading/api/market/detail`, {
+        params: {
+          api_key: 'fbe68a0e-cfed-4afc-b98c-699d937ba7fd',
+          symbol: 'btcbitcny'
+        }
+      }).then(res => {
+        this.btc_bitcny = res.data.data.trade_ticker_data.tick
+      })
+    },
+    get_tusd_btc() {
+      axios(`${baseUrl}/tigerapi/exchange/trading/api/market/detail`, {
+        params: {
+          api_key: 'fbe68a0e-cfed-4afc-b98c-699d937ba7fd',
+          symbol: 'tusdbtc'
+        }
+      }).then(res => {
+        this.tusd_btc = res.data.data.trade_ticker_data.tick
+        this.btc_tusd = this.get_btc_tusd(this.tusd_btc) 
+      })
+    }
+  }
 }
 </script>
+<style lang="less">
+.container {
+  min-height: 100%;
+  background: #333;
+  color: #fff;
+  padding: 20px 30px;
+}
+.table-tiger {
+  width: 100%;
+  text-align: center;
+  th {
+    padding: 10px 5px;
+    font-weight: bold
+  }
+  td {
+    padding: 10px 5px;
+  }
+}
+</style>
 
