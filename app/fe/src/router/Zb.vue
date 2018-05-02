@@ -1,5 +1,8 @@
 <template>
   <div class="container">
+    <router-link to="/bitcny" class="navigation">
+      
+    </router-link>
     <div class="item">
       <div class="left">
         zb
@@ -48,13 +51,6 @@
             <td>{{hbPrice|getHbProfit(zbPrice, money)}}</td>
           </tr>
           <tr>
-            <td>tidex</td>
-            <td>{{tidexBuyHl}}</td>
-            <td>{{diffZbTidex}}</td>
-            <td>{{diffZbTidexPercent}}</td>
-            <td>{{tidexBuyHl|getTidexProfit(zbPrice, money)}}</td>
-          </tr>
-          <tr>
             <td>exchange</td>
             <td>{{hlPrice}}</td>
             <td>{{diffZbHl}}</td>
@@ -63,9 +59,16 @@
           </tr>
         </thead>
       </table>
-      <div style="font-size: 12px;margin:20px 0;">
-        tidexBuy:{{tidexBuy}}
-      </div>
+      
+    </div>
+    <div style="margin: 10px 0; border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;padding: 10px 0;">
+      <p>
+        usdt_bitCNY: {{usdt_bitCNY}}
+      </p>
+      <div style="height: 10px"></div>
+      <p>
+        diffExchange: {{UCDiffExchange}}
+      </p>
     </div>
     <div>
       <div style="width: 50%;float:left">
@@ -117,8 +120,8 @@
       this.getZbData()
       this.getHbOtcData()
       this.getHL()
-      this.getTidexData()
       this.getZbDepth()
+      this.getBitCNY()
     },
     data() {
       return {
@@ -126,9 +129,9 @@
         zbPrice: '',
         hlPrice: '',
         money: 50000,
-        tidexBuy: '',
         zbAsks: [],
-        zbBids: []
+        zbBids: [],
+        bitCNYPrice: ''
       }
     },
     filters: {
@@ -137,13 +140,7 @@
         const hbusdt = zbusdt-20
         const hbMoney = hbusdt*hb
         return getFixed(hbMoney-money)
-      },
-      getTidexProfit(tidex, zb, money) {
-        const zbusdt = money/zb
-        const hbusdt = zbusdt-20
-        const hbMoney = hbusdt*tidex*0.999
-        return getFixed(hbMoney-money)
-      },
+      }
     },
     computed: {
       diffZbHb() {
@@ -158,17 +155,27 @@
       diffZbHlPercent() {
         return getFixed((this.zbPrice - this.hlPrice) / this.hlPrice * 100) + '%'
       },
-      tidexBuyHl() {
-        return getFixed(this.tidexBuy * this.hlPrice)
+      usdt_bitCNY() {
+        if (this.zbPrice && this.bitCNYPrice) {
+          return getFixed(this.zbPrice/this.bitCNYPrice)
+        }
       },
-      diffZbTidex() {
-        return getFixed(this.tidexBuyHl - this.zbPrice)
-      },
-      diffZbTidexPercent() {
-        return getFixed((this.tidexBuyHl - this.zbPrice) / this.zbPrice * 100) + '%'
+      UCDiffExchange() {
+        if (this.usdt_bitCNY && this.hlPrice) {
+          return getFixed(this.usdt_bitCNY - this.hlPrice)
+        }
       }
     },
     methods: {
+      getBitCNY() {
+        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
+            params: {
+              market: 'bitCNY_qc',
+            }
+          }).then(res => {
+            this.bitCNYPrice = res.data.ticker.sell
+          })
+      },
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
@@ -177,11 +184,6 @@
           this.zbBids = res.data.bids.filter(it => {
             return it[1] >= 5000
           })
-        })
-      },
-      getTidexData() {
-        axios(`${baseUrl}/tidexapi/api/3/ticker/wusd_usdt`).then(res => {
-          this.tidexBuy = res.data.wusd_usdt.buy
         })
       },
       getHL() {
@@ -220,6 +222,14 @@
 </script>
 
 <style lang="less" scoped>
+.navigation {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #ddd;
+}
 .table-zb {
   width: 100%;
   text-align: center;
