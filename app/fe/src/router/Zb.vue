@@ -172,10 +172,10 @@
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
-            return it[1] >= 10000
+            return it[1] >= 5000
           })
           this.zbBids = res.data.bids.filter(it => {
-            return it[1] >= 10000
+            return it[1] >= 5000
           })
         })
       },
