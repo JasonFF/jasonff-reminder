@@ -8,7 +8,7 @@
         zb
       </div>
       <div class="right">
-        {{zbPrice}}
+        {{zbPrice}}/{{zbPrice_R}}
       </div>
     </div>
     <div class="item">
@@ -29,7 +29,7 @@
               platform
             </th>
             <th>
-              buy
+              price
             </th>
             <th>
               diff
@@ -49,6 +49,13 @@
             <td>{{diffZbHb}}</td>
             <td>{{diffZbHbPercent}}</td>
             <td>{{hbPrice|getHbProfit(zbPrice, money)}}</td>
+          </tr>
+          <tr>
+            <td>r-hb</td>
+            <td>{{hbPrice_R}}</td>
+            <td>{{diffHbZb}}</td>
+            <td>{{diffHbZbPercent}}</td>
+            <td>{{zbPrice_R|getHbProfit(hbPrice_R, money)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -135,15 +142,17 @@
         money: 50000,
         zbAsks: [],
         zbBids: [],
-        bitCNYPrice: ''
+        bitCNYPrice: '',
+        hbPrice_R: '',
+        zbPrice_R: ''
       }
     },
     filters: {
-      getHbProfit(hb, zb, money) {
-        const zbusdt = money/zb
-        const hbusdt = zbusdt-20
-        const hbMoney = hbusdt*hb
-        return getFixed(hbMoney-money)
+      getHbProfit(to, from, money) {
+        const fromusdt = money/from
+        const tousdt = fromusdt-20
+        const toMoney = tousdt*to
+        return getFixed(toMoney-money)
       }
     },
     computed: {
@@ -152,6 +161,12 @@
       },
       diffZbHbPercent() {
         return getFixed((this.hbPrice - this.zbPrice) / this.zbPrice * 100) + '%'
+      },
+      diffHbZb() {
+        return getFixed(this.zbPrice_R - this.hbPrice_R)
+      },
+      diffHbZbPercent() {
+        return getFixed((this.zbPrice_R- this.hbPrice_R) / this.hbPrice_R * 100) + '%'
       },
       diffZbHl() {
         return getFixed(this.zbPrice - this.hlPrice)
@@ -202,6 +217,7 @@
           }
         }).then(res => {
           this.zbPrice = res.data.ticker.sell
+          this.zbPrice_R = res.data.ticker.buy
         })
       },
       getHbOtcData() {
@@ -218,6 +234,21 @@
           }
         }).then(res => {
           this.hbPrice = res.data.data[4].price
+        })
+        
+        axios(`${baseUrl}/hbotcapi/`, {
+          params: {
+            country: 0,
+            currency: 1,
+            payMethod: 0,
+            currPage: 1,
+            coinId: 2,
+            tradeType: 1,
+            merchant: 1,
+            online: 1,
+          }
+        }).then(res => {
+          this.hbPrice_R = res.data.data[4].price
         })
       }
     }
