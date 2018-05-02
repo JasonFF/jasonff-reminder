@@ -8,7 +8,7 @@
         zb
       </div>
       <div class="right">
-        {{zbPrice}}/{{zbPrice_R}}
+        {{zbPrice}}/{{zbPrice_s}}
       </div>
     </div>
     <div class="item">
@@ -34,9 +34,9 @@
             <th>
               diff
             </th>
-            <th>
+            <!-- <th>
               diffPercent
-            </th>
+            </th> -->
             <th>
               profit
             </th>
@@ -46,22 +46,29 @@
           <tr>
             <td>hb</td>
             <td>{{hbPrice}}</td>
-            <td>{{diffZbHb}}</td>
-            <td>{{diffZbHbPercent}}</td>
-            <td>{{hbPrice|getHbProfit(zbPrice, money)}}</td>
+            <td>{{hbPrice|diff(zbPrice)}}</td>
+            <!-- <td>{{diffZbHbPercent}}</td> -->
+            <td>{{hbPrice|getProfit(zbPrice, money, 20)}}</td>
           </tr>
           <tr>
-            <td>r-hb</td>
-            <td>{{hbPrice_R}}</td>
-            <td>{{diffHbZb}}</td>
-            <td>{{diffHbZbPercent}}</td>
-            <td>{{zbPrice_R|getHbProfit(hbPrice_R, money)}}</td>
+            <td>gate</td>
+            <td>{{gatePrice_s}}</td>
+            <td>{{gatePrice_s|diff(zbPrice)}}</td>
+            <!-- <td>{{diffZbHbPercent}}</td> -->
+            <td>{{gatePrice_s|getProfit(zbPrice, money, 20)}}</td>
+          </tr>
+          <tr>
+            <td>gate to zb</td>
+            <td>{{gatePrice_b}}</td>
+            <td>{{zbPrice_s|diff(gatePrice_b)}}</td>
+            <!-- <td>{{}}</td> -->
+            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 15)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
             <td>{{hlPrice}}</td>
-            <td>{{diffZbHl}}</td>
-            <td>{{diffZbHlPercent}}</td>
+            <td>{{zbPrice|diff(hlPrice)}}</td>
+            <!-- <td>{{diffZbHlPercent}}</td> -->
             <td> - </td>
           </tr>
         </thead>
@@ -81,7 +88,7 @@
         diffExchange: {{UCDiffExchange}}
       </p>
     </div>
-    <div>
+    <div class="clearBoth">
       <div style="width: 50%;float:left">
         <table class="table-zb">
         <thead>
@@ -133,6 +140,7 @@
       this.getHL()
       this.getZbDepth()
       this.getBitCNY()
+      this.getGateCtcData()
     },
     data() {
       return {
@@ -143,37 +151,23 @@
         zbAsks: [],
         zbBids: [],
         bitCNYPrice: '',
-        hbPrice_R: '',
-        zbPrice_R: ''
+        zbPrice_s: '',
+        gatePrice_b: '',
+        gatePrice_s: ''
       }
     },
     filters: {
-      getHbProfit(to, from, money) {
+      getProfit(to, from, money, fee) {
         const fromusdt = money/from
-        const tousdt = fromusdt-20
+        const tousdt = fromusdt-fee
         const toMoney = tousdt*to
         return getFixed(toMoney-money)
+      },
+      diff(to, from) {
+        return getFixed(to - from)
       }
     },
     computed: {
-      diffZbHb() {
-        return getFixed(this.hbPrice - this.zbPrice)
-      },
-      diffZbHbPercent() {
-        return getFixed((this.hbPrice - this.zbPrice) / this.zbPrice * 100) + '%'
-      },
-      diffHbZb() {
-        return getFixed(this.zbPrice_R - this.hbPrice_R)
-      },
-      diffHbZbPercent() {
-        return getFixed((this.zbPrice_R- this.hbPrice_R) / this.hbPrice_R * 100) + '%'
-      },
-      diffZbHl() {
-        return getFixed(this.zbPrice - this.hlPrice)
-      },
-      diffZbHlPercent() {
-        return getFixed((this.zbPrice - this.hlPrice) / this.hlPrice * 100) + '%'
-      },
       usdt_bitCNY() {
         if (this.zbPrice && this.bitCNYPrice) {
           return getFixed(this.zbPrice/this.bitCNYPrice)
@@ -217,7 +211,20 @@
           }
         }).then(res => {
           this.zbPrice = res.data.ticker.sell
-          this.zbPrice_R = res.data.ticker.buy
+          this.zbPrice_s = res.data.ticker.buy
+        })
+      },
+      getGateCtcData() {
+        axios(`${baseUrl}/gatectcapi/json_svr/query_push/`, {
+          params: {
+            u: 13,
+            c: 64975,
+            type: 'push_order_list',
+            symbol: 'USDT_CNY'
+          }
+        }).then(res => {
+          this.gatePrice_b = res.data.push_order[18].rate
+          this.gatePrice_s = res.data.push_order[22].rate
         })
       },
       getHbOtcData() {
@@ -235,21 +242,6 @@
         }).then(res => {
           this.hbPrice = res.data.data[4].price
         })
-        
-        axios(`${baseUrl}/hbotcapi/`, {
-          params: {
-            country: 0,
-            currency: 1,
-            payMethod: 0,
-            currPage: 1,
-            coinId: 2,
-            tradeType: 1,
-            merchant: 1,
-            online: 1,
-          }
-        }).then(res => {
-          this.hbPrice_R = res.data.data[4].price
-        })
       }
     }
   }
@@ -257,6 +249,13 @@
 </script>
 
 <style lang="less" scoped>
+.clearBoth {
+  &:after{
+    content: '';
+    display:block;
+    clear: both;
+  }
+}
 .navigation {
   position: absolute;
   right: 20px;
