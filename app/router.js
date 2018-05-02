@@ -37,19 +37,6 @@ const zbtradeproxy = k2c(httpProxy({
   },
 }));
 
-const tidexproxy = k2c(httpProxy({
-  target: 'https://api.tidex.com/',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/tidexapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-
 const hbotcapi = k2c(httpProxy({
   target: 'https://otc-api.huobipro.com/v1/otc/trade/list/public',
   changeOrigin: true,
@@ -86,6 +73,30 @@ const tigerctcapi = k2c(httpProxy({
   },
 }));
 
+const gatectcapi = k2c(httpProxy({
+  target: 'https://gate.io',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/gatectcapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
+const gateapi = k2c(httpProxy({
+  target: 'http://data.gateio.io',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/gateapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -95,8 +106,9 @@ module.exports = app => {
   router.all('/zbapi/*', zbproxy)
   router.all('/zbtradeapi/*', zbtradeproxy)
   router.all('/hbotcapi/*', hbotcapi)
-  router.all('/tidexapi/*', tidexproxy)
   router.all('/tigerapi/*', tigerapi)
   router.all('/tigerctcapi/*', tigerctcapi)
+  router.all('/gatectcapi/*', gatectcapi)
+  router.all('/gateapi/*', gateapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
