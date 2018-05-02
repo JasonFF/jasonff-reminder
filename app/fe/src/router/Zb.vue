@@ -63,6 +63,10 @@
     </div>
     <div style="margin: 10px 0; border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;padding: 10px 0;">
       <p>
+        bitCNY: {{bitCNYPrice}}
+      </p>
+      <div style="height: 10px"></div>
+      <p>
         usdt_bitCNY: {{usdt_bitCNY}}
       </p>
       <div style="height: 10px"></div>
