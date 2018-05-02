@@ -21,6 +21,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "cube-ui": "~1.8.0",
+    "echarts": "^4.1.0",
     "jsonp": "^0.2.1",
     "less": "^3.0.2",
     "less-loader": "^4.1.0",
