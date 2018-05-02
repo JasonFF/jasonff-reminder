@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './Home'
 import Zb from './Zb'
-import ZbTidex from './ZbTidex'
+import Tiger from './Tiger'
 
 Vue.use(Router)
 
@@ -20,9 +20,9 @@ export default new Router({
       component: Zb
     },
     {
-      path: '/zbtidex',
-      name: 'zbtidex',
-      component: ZbTidex
+      path: '/tiger',
+      name: 'tiger',
+      component: Tiger
     }
   ]
 })

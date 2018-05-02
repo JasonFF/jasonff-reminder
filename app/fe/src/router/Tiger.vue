@@ -1,11 +1,11 @@
 <template>
   <div>
-    zbTidex
+    Tiger
   </div>
 </template>
 <script>
 export default {
-  name: 'ZbTidex'
+  name: 'Tiger'
 }
 </script>
 

@@ -62,6 +62,18 @@ const hbotcapi = k2c(httpProxy({
   },
 }));
 
+const tigerapi = k2c(httpProxy({
+  target: 'https://api.cointiger.com',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/tigerapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -72,5 +84,6 @@ module.exports = app => {
   router.all('/zbtradeapi/*', zbtradeproxy)
   router.all('/hbotcapi/*', hbotcapi)
   router.all('/tidexapi/*', tidexproxy)
+  router.all('/tigerapi/*', tigerapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
