@@ -4,6 +4,7 @@ import Home from './Home'
 import Zb from './Zb'
 import Tiger from './Tiger'
 import ZbBitCNY from './ZbBitCNY'
+import BtcChart from './BtcChart'
 
 Vue.use(Router)
 
@@ -29,6 +30,11 @@ export default new Router({
       path: '/tiger',
       name: 'tiger',
       component: Tiger
+    },
+    {
+      path: '/btcchart',
+      name: 'btcchart',
+      component: BtcChart
     }
   ]
 })
