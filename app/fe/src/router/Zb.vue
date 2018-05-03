@@ -88,6 +88,32 @@
         diffExchange: {{UCDiffExchange}}
       </p>
     </div>
+    <div>
+      <table class="table-zb">
+        <thead>
+          <tr>
+            <th>coin</th>
+            <th>to qc</th>
+            <th>to usdt</th>
+            <th>price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>btc</td>
+            <td>{{btc_qc}}</td>
+            <td>{{btc_usdt}}</td>
+            <th>{{btc_qc|getRatio(btc_usdt)}}</th>
+          </tr>
+          <tr>
+            <td>eth</td>
+            <td>{{eth_qc}}</td>
+            <td>{{eth_usdt}}</td>
+            <th>{{eth_qc|getRatio(eth_usdt)}}</th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="clearBoth">
       <div style="width: 50%;float:left">
         <table class="table-zb">
@@ -153,7 +179,11 @@
         bitCNYPrice: '',
         zbPrice_s: '',
         gatePrice_b: '',
-        gatePrice_s: ''
+        gatePrice_s: '',
+        btc_qc: '',
+        btc_usdt: '',
+        eth_qc: '',
+        eth_usdt: ''
       }
     },
     filters: {
@@ -165,6 +195,9 @@
       },
       diff(to, from) {
         return getFixed(to - from)
+      },
+      getRatio(val1, val2) {
+        return getFixed(val1/val2)
       }
     },
     computed: {
@@ -212,6 +245,34 @@
         }).then(res => {
           this.zbPrice = res.data.ticker.sell
           this.zbPrice_s = res.data.ticker.buy
+        })
+        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
+          params: {
+            market: 'btc_qc',
+          }
+        }).then(res => {
+          this.btc_qc = res.data.ticker.last
+        })
+        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
+          params: {
+            market: 'btc_usdt',
+          }
+        }).then(res => {
+          this.btc_usdt = res.data.ticker.last
+        })
+        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
+          params: {
+            market: 'eth_qc',
+          }
+        }).then(res => {
+          this.eth_qc = res.data.ticker.last
+        })
+        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
+          params: {
+            market: 'eth_usdt',
+          }
+        }).then(res => {
+          this.eth_usdt = res.data.ticker.last
         })
       },
       getGateCtcData() {
