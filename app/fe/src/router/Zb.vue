@@ -18,6 +18,16 @@
         ></cube-input>
       </div>
     </div>
+    <div class="item">
+      <div class="left">
+        qcFee
+      </div>
+      <div class="right">
+        <cube-input
+          v-model="qcFee"
+        ></cube-input>
+      </div>
+    </div>
     <div>
       <table class="table-zb">
         <thead>
@@ -87,7 +97,7 @@
             <td>{{gatePrice_b}}</td>
             <td>{{zbPrice_s|diff(gatePrice_b)}}</td>
             <!-- <td>{{}}</td> -->
-            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 15)}}</td>
+            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 15, qcFee)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -169,12 +179,13 @@
         btc_qc: '',
         btc_usdt: '',
         eth_qc: '',
-        eth_usdt: ''
+        eth_usdt: '',
+        qcFee: 1
       }
     },
     filters: {
-      getProfit(to, from, money, fee) {
-        const fromusdt = money/from
+      getProfit(to, from, money, fee, qcFee = 1) {
+        const fromusdt = money/from * qcFee
         const tousdt = fromusdt-fee
         const toMoney = tousdt*to
         return getFixed(toMoney-money)
