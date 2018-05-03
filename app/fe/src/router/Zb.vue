@@ -203,41 +203,14 @@
         })
       },
       getZbData() {
-        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
-          params: {
-            market: 'usdt_qc',
-          }
-        }).then(res => {
-          this.zbPrice = res.data.ticker.sell
-          this.zbPrice_s = res.data.ticker.buy
-        })
-        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
-          params: {
-            market: 'btc_qc',
-          }
-        }).then(res => {
-          this.btc_qc = res.data.ticker.last
-        })
-        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
-          params: {
-            market: 'btc_usdt',
-          }
-        }).then(res => {
-          this.btc_usdt = res.data.ticker.last
-        })
-        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
-          params: {
-            market: 'eth_qc',
-          }
-        }).then(res => {
-          this.eth_qc = res.data.ticker.last
-        })
-        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
-          params: {
-            market: 'eth_usdt',
-          }
-        }).then(res => {
-          this.eth_usdt = res.data.ticker.last
+        axios(`${baseUrl}/zbapi/data/v1/allTicker`).then(res => {
+          console.log(res)
+          this.zbPrice = res.data.usdtqc.sell
+          this.zbPrice_s = res.data.usdtqc.buy
+          this.btc_qc = res.data.btcqc.last
+          this.btc_usdt = res.data.btcusdt.last
+          this.eth_qc = res.data.ethqc.last
+          this.eth_usdt = res.data.ethusdt.last
         })
       },
       getGateCtcData() {
