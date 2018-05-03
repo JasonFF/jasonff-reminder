@@ -1,8 +1,5 @@
 <template>
   <div class="container">
-    <router-link to="/bitcny" class="navigation">
-      
-    </router-link>
     <div class="item">
       <div class="left">
         zb
@@ -21,6 +18,34 @@
         ></cube-input>
       </div>
     </div>
+    <div>
+      <table class="table-zb">
+        <thead>
+          <tr>
+            <th>coin</th>
+            <th>to qc</th>
+            <th>to usdt</th>
+            <th>price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>btc</td>
+            <td>{{btc_qc}}</td>
+            <td>{{btc_usdt}}</td>
+            <th>{{btc_qc|getRatio(btc_usdt)}}</th>
+          </tr>
+          <tr>
+            <td>eth</td>
+            <td>{{eth_qc}}</td>
+            <td>{{eth_usdt}}</td>
+            <th>{{eth_qc|getRatio(eth_usdt)}}</th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="height: 20px;"></div>
+    <hr>
     <div class="table-box">
       <table class="table-zb">
         <thead>
@@ -73,47 +98,10 @@
           </tr>
         </thead>
       </table>
-      
     </div>
-    <div style="margin: 10px 0; border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;padding: 10px 0;">
-      <p>
-        bitCNY: {{bitCNYPrice}}
-      </p>
-      <div style="height: 10px"></div>
-      <p>
-        usdt_bitCNY: {{usdt_bitCNY}}
-      </p>
-      <div style="height: 10px"></div>
-      <p>
-        diffExchange: {{UCDiffExchange}}
-      </p>
-    </div>
-    <div>
-      <table class="table-zb">
-        <thead>
-          <tr>
-            <th>coin</th>
-            <th>to qc</th>
-            <th>to usdt</th>
-            <th>price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>btc</td>
-            <td>{{btc_qc}}</td>
-            <td>{{btc_usdt}}</td>
-            <th>{{btc_qc|getRatio(btc_usdt)}}</th>
-          </tr>
-          <tr>
-            <td>eth</td>
-            <td>{{eth_qc}}</td>
-            <td>{{eth_usdt}}</td>
-            <th>{{eth_qc|getRatio(eth_usdt)}}</th>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <div style="height: 20px;"></div>
+    <hr>
+    
     <div class="clearBoth">
       <div style="width: 50%;float:left">
         <table class="table-zb">
@@ -165,7 +153,6 @@
       this.getHbOtcData()
       this.getHL()
       this.getZbDepth()
-      this.getBitCNY()
       this.getGateCtcData()
     },
     data() {
@@ -176,7 +163,6 @@
         money: 50000,
         zbAsks: [],
         zbBids: [],
-        bitCNYPrice: '',
         zbPrice_s: '',
         gatePrice_b: '',
         gatePrice_s: '',
@@ -200,28 +186,7 @@
         return getFixed(val1/val2)
       }
     },
-    computed: {
-      usdt_bitCNY() {
-        if (this.zbPrice && this.bitCNYPrice) {
-          return getFixed(this.zbPrice/this.bitCNYPrice)
-        }
-      },
-      UCDiffExchange() {
-        if (this.usdt_bitCNY && this.hlPrice) {
-          return getFixed(this.usdt_bitCNY - this.hlPrice)
-        }
-      }
-    },
     methods: {
-      getBitCNY() {
-        axios(`${baseUrl}/zbapi/data/v1/ticker`, {
-            params: {
-              market: 'bitCNY_qc',
-            }
-          }).then(res => {
-            this.bitCNYPrice = res.data.ticker.sell
-          })
-      },
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
