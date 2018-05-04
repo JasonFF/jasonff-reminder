@@ -179,12 +179,84 @@
       </div>
       
     </div>
+    <hr>
+    <div class="clearBoth" style="font-size: 12px">
+      <div style="width: 50%;float:left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>ask</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in btcUsdtAsks">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{btc_qc|getRatio(item[0])}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div style="width: 50%; float: left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>bid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in btcUsdtBids">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{btc_qc|getRatio(item[0])}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      
+    </div>
+    <hr>
+    <div class="clearBoth" style="font-size: 12px">
+      <div style="width: 50%;float:left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>ask</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in btcQcAsks">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{item[0]|getRatioDynamic(btcUsdtAsks[index])}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div style="width: 50%; float: left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>bid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in btcQcBids">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{item[0]|getRatioDynamic(btcUsdtBids[index])}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
   </div>
 </template>
 <script>
   import axios from 'axios'
   import jsonp from 'jsonp'
   const baseUrl = 'http://www.abichi.club'
+  import _ from 'lodash'
 
   function getFixed(val) {
     return val.toFixed(3)
@@ -218,7 +290,9 @@
         zbOtcPrice_b: '',
         zbOtcPrice_s: '',
         btcQcAsks: [],
-        btcQcBids: []
+        btcQcBids: [],
+        btcUsdtAsks: [],
+        btcUsdtBids: [],
       }
     },
     filters: {
@@ -233,6 +307,10 @@
       },
       getRatio(val1, val2) {
         return getFixed(val1/val2)
+      },
+      getRatioDynamic(val1, val2) {
+        const _v2 = _.get(val2, '0')
+        return getFixed(val1/_v2)
       }
     },
     methods: {
@@ -253,6 +331,15 @@
             return it[1] >= 1.5
           })
         })
+        axios(`${baseUrl}/zbapi/data/v1/depth?market=btc_usdt&size=50`).then(res => {
+          console.log(res)
+          this.btcUsdtAsks = res.data.asks.filter(it => {
+            return it[1] >= 1
+          }).reverse()
+          this.btcUsdtBids = res.data.bids.filter(it => {
+            return it[1] >= 1
+          })
+        })
       },
       getHL() {
         jsonp("https://api.money.126.net/data/feed/FX_USDCNY", null, (err, data) => {
@@ -261,7 +348,6 @@
       },
       getZbData() {
         axios(`${baseUrl}/zbapi/data/v1/allTicker`).then(res => {
-          console.log(res)
           this.zbPrice = res.data.usdtqc.sell
           this.zbPrice_s = res.data.usdtqc.buy
           this.btc_qc = res.data.btcqc.last
