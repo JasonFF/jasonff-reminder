@@ -25,6 +25,18 @@ const zbproxy = k2c(httpProxy({
   },
 }));
 
+const zbotcapi = k2c(httpProxy({
+  target: 'https://vip.zb.com/',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/zbotcapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 const zbtradeproxy = k2c(httpProxy({
   target: 'https://trade.zb.com/',
   changeOrigin: true,
@@ -110,5 +122,6 @@ module.exports = app => {
   router.all('/tigerctcapi/*', tigerctcapi)
   router.all('/gatectcapi/*', gatectcapi)
   router.all('/gateapi/*', gateapi)
+  router.all('/zbotcapi/*', zbotcapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
