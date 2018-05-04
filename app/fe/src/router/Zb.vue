@@ -44,10 +44,10 @@
             <th>{{btc_qc|getRatio(btc_usdt)}}</th>
           </tr>
           <tr>
-            <td>eth</td>
-            <td>{{eth_qc}}</td>
-            <td>{{eth_usdt}}</td>
-            <th>{{eth_qc|getRatio(eth_usdt)}}</th>
+            <td>eos</td>
+            <td>{{eos_qc}}</td>
+            <td>{{eos_usdt}}</td>
+            <th>{{eos_qc|getRatio(eos_usdt)}}</th>
           </tr>
         </tbody>
       </table>
@@ -285,8 +285,8 @@
         gatePrice_s: '',
         btc_qc: '',
         btc_usdt: '',
-        eth_qc: '',
-        eth_usdt: '',
+        eos_qc: '',
+        eos_usdt: '',
         zbOtcPrice_b: '',
         zbOtcPrice_s: '',
         btcQcAsks: [],
@@ -332,7 +332,6 @@
           })
         })
         axios(`${baseUrl}/zbapi/data/v1/depth?market=btc_usdt&size=50`).then(res => {
-          console.log(res)
           this.btcUsdtAsks = res.data.asks.filter(it => {
             return it[1] >= 1
           }).reverse()
@@ -352,8 +351,8 @@
           this.zbPrice_s = res.data.usdtqc.buy
           this.btc_qc = res.data.btcqc.last
           this.btc_usdt = res.data.btcusdt.last
-          this.eth_qc = res.data.ethqc.last
-          this.eth_usdt = res.data.ethusdt.last
+          this.eos_qc = res.data.eosqc.last
+          this.eos_usdt = res.data.eosusdt.last
         })
       },
       getGateCtcData() {
@@ -392,7 +391,7 @@
           }
         }).then(res => {
           const str = res.data;
-          const reg = /\d\.\d{3}/g;
+          const reg = /\d\.\d{2,3}/g;
           this.zbOtcPrice_b = str.match(reg)[1]
         })
         axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
@@ -401,7 +400,7 @@
           }
         }).then(res => {
           const str = res.data;
-          const reg = /\d\.\d{3}/g;
+          const reg = /\d\.\d{2,3}/g;
           this.zbOtcPrice_s = str.match(reg)[1]
         })
       }

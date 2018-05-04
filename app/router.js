@@ -109,6 +109,18 @@ const gateapi = k2c(httpProxy({
   },
 }));
 
+const blockapi = k2c(httpProxy({
+  target: 'https://block.cc',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/blockapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -123,5 +135,6 @@ module.exports = app => {
   router.all('/gatectcapi/*', gatectcapi)
   router.all('/gateapi/*', gateapi)
   router.all('/zbotcapi/*', zbotcapi)
+  router.all('/blockapi/*', blockapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
