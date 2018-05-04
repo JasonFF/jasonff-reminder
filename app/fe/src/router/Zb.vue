@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+     <router-link to="/flow" class="navigation"></router-link>
     <div class="item">
       <div class="left">
         zb
@@ -314,6 +315,7 @@
       }
     },
     methods: {
+      
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
