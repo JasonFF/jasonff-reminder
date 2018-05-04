@@ -72,7 +72,7 @@
               price
             </th>
             <th>
-              diff
+              refer
             </th>
             <!-- <th>
               diffPercent
@@ -86,21 +86,21 @@
           <tr>
             <td>hb</td>
             <td>{{hbPrice}}</td>
-            <td>{{hbPrice|diff(zbPrice)}}</td>
+            <td>{{hbPrice|getRatio(zbOtcPrice_s)}}</td>
             <!-- <td>{{diffZbHbPercent}}</td> -->
             <td>{{hbPrice|getProfit(zbPrice, money, 20, zbOtcPrice_b)}}</td>
           </tr>
           <tr>
             <td>gate</td>
             <td>{{gatePrice_s}}</td>
-            <td>{{gatePrice_s|diff(zbPrice)}}</td>
+            <td>{{gatePrice_s|getRatio(zbOtcPrice_s)}}</td>
             <!-- <td>{{diffZbHbPercent}}</td> -->
             <td>{{gatePrice_s|getProfit(zbPrice, money, 20, zbOtcPrice_b)}}</td>
           </tr>
           <tr>
             <td>gate to zb</td>
             <td>{{gatePrice_b}}</td>
-            <td>{{zbPrice_s|diff(gatePrice_b)}}</td>
+            <td>{{gatePrice_b|getRatio(zbOtcPrice_b)}}</td>
             <!-- <td>{{}}</td> -->
             <td>{{zbPrice_s|getProfit(gatePrice_b, money, 15, zbOtcPrice_s)}}</td>
           </tr>
