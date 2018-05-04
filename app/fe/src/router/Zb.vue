@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-     <router-link to="/flow" class="navigation"></router-link>
+    <router-link to="/flow" class="navigation"></router-link>
     <div class="item">
       <div class="left">
         zb
@@ -19,12 +19,18 @@
     </div>
     <div class="item">
       <div class="left">
+        zbcny
+      </div>
+      <div class="right">
+        {{zbOtcPrice_b|getCny(zbPrice)}}/{{zbOtcPrice_s|getCny(zbPrice_s)}}
+      </div>
+    </div>
+    <div class="item">
+      <div class="left">
         money
       </div>
       <div class="right">
-        <cube-input
-          v-model="money"
-        ></cube-input>
+        <cube-input v-model="money"></cube-input>
       </div>
     </div>
     <div>
@@ -110,145 +116,145 @@
     </div>
     <div style="height: 20px;"></div>
     <hr>
-    
+
     <div class="clearBoth">
       <div style="width: 50%;float:left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>ask</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in zbAsks">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>ask</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in zbAsks">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div style="width: 50%; float: left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>bid</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in zbBids">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>bid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in zbBids">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      
+
     </div>
     <hr>
     <div class="clearBoth" style="font-size: 12px">
       <div style="width: 50%;float:left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>ask</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in btcQcAsks">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-            <td>{{item[0]|getRatio(btc_usdt)}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>ask</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in btcQcAsks">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+              <td>{{item[0]|getRatio(btc_usdt)}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div style="width: 50%; float: left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>bid</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in btcQcBids">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-            <td>{{item[0]|getRatio(btc_usdt)}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>bid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in btcQcBids">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+              <td>{{item[0]|getRatio(btc_usdt)}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      
+
     </div>
     <hr>
     <div class="clearBoth" style="font-size: 12px">
       <div style="width: 50%;float:left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>ask</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in btcUsdtAsks">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-            <td>{{btc_qc|getRatio(item[0])}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>ask</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in btcUsdtAsks">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+              <td>{{btc_qc|getRatio(item[0])}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div style="width: 50%; float: left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>bid</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in btcUsdtBids">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-            <td>{{btc_qc|getRatio(item[0])}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>bid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in btcUsdtBids">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+              <td>{{btc_qc|getRatio(item[0])}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      
+
     </div>
     <hr>
     <div class="clearBoth" style="font-size: 12px">
       <div style="width: 50%;float:left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>ask</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in btcQcAsks">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-            <td>{{item[0]|getRatioDynamic(btcUsdtAsks[index])}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>ask</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in btcQcAsks">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+              <td>{{item[0]|getRatioDynamic(btcUsdtAsks[index])}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div style="width: 50%; float: left">
         <table class="table-zb">
-        <thead>
-          <tr>
-            <th>bid</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in btcQcBids">
-            <td>{{item[0]}}</td>
-            <td>{{item[1]}}</td>
-            <td>{{item[0]|getRatioDynamic(btcUsdtBids[index])}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>bid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in btcQcBids">
+              <td>{{item[0]}}</td>
+              <td>{{item[1]}}</td>
+              <td>{{item[0]|getRatioDynamic(btcUsdtBids[index])}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -298,24 +304,27 @@
     },
     filters: {
       getProfit(to, from, money, fee, qcFee = 1) {
-        const fromusdt = money/from * qcFee
-        const tousdt = fromusdt-fee
-        const toMoney = tousdt*to
-        return getFixed(toMoney-money)
+        const fromusdt = money / from * qcFee
+        const tousdt = fromusdt - fee
+        const toMoney = tousdt * to
+        return getFixed(toMoney - money)
       },
       diff(to, from) {
         return getFixed(to - from)
       },
       getRatio(val1, val2) {
-        return getFixed(val1/val2)
+        return getFixed(val1 / val2)
       },
       getRatioDynamic(val1, val2) {
         const _v2 = _.get(val2, '0')
-        return getFixed(val1/_v2)
+        return getFixed(val1 / _v2)
+      },
+      getCny(val1, val2) {
+        return getFixed(val1 * val2)
       }
     },
     methods: {
-      
+
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
@@ -395,11 +404,11 @@
           const str = res.data;
           const reg = /\d\.\d{2,3}/g;
           if (str.match(reg)[1] < 1.5) {
-             this.zbOtcPrice_b = str.match(reg)[1]
+            this.zbOtcPrice_b = str.match(reg)[1]
           } else {
             this.zbOtcPrice_b = str.match(reg)[2]
           }
-         
+
         })
         axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
           params: {
@@ -413,7 +422,7 @@
           } else {
             this.zbOtcPrice_s = str.match(reg)[2]
           }
-          
+
         })
       }
     }
@@ -422,38 +431,42 @@
 </script>
 
 <style lang="less" scoped>
-.clearBoth {
-  &:after{
-    content: '';
-    display:block;
-    clear: both;
+  .clearBoth {
+    &:after {
+      content: '';
+      display: block;
+      clear: both;
+    }
   }
-}
-.navigation {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  width: 50px;
-  height: 50px;
-  background-color: #ddd;
-}
-.table-zb {
-  width: 100%;
-  text-align: center;
-  th {
-    padding: 10px 5px;
-    font-weight: bold
+
+  .navigation {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #ddd;
   }
-  td {
-    padding: 10px 5px
+
+  .table-zb {
+    width: 100%;
+    text-align: center;
+    th {
+      padding: 10px 5px;
+      font-weight: bold
+    }
+    td {
+      padding: 10px 5px
+    }
   }
-}
-.container {
-  padding: 20px 30px;
-  background-color: #333;
-  min-height: 100%;
-  color: #fff;
-}
+
+  .container {
+    padding: 20px 30px;
+    background-color: #333;
+    min-height: 100%;
+    color: #fff;
+  }
+
   .item {
     line-height: 40px;
     border-bottom: 1px solid #ddd;
