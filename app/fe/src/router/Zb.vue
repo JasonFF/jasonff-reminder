@@ -10,21 +10,19 @@
     </div>
     <div class="item">
       <div class="left">
+        zbotc
+      </div>
+      <div class="right">
+        {{zbOtcPrice_b}}/{{zbOtcPrice_s}}
+      </div>
+    </div>
+    <div class="item">
+      <div class="left">
         money
       </div>
       <div class="right">
         <cube-input
           v-model="money"
-        ></cube-input>
-      </div>
-    </div>
-    <div class="item">
-      <div class="left">
-        qcFee
-      </div>
-      <div class="right">
-        <cube-input
-          v-model="qcFee"
         ></cube-input>
       </div>
     </div>
@@ -83,21 +81,21 @@
             <td>{{hbPrice}}</td>
             <td>{{hbPrice|diff(zbPrice)}}</td>
             <!-- <td>{{diffZbHbPercent}}</td> -->
-            <td>{{hbPrice|getProfit(zbPrice, money, 20)}}</td>
+            <td>{{hbPrice|getProfit(zbPrice, money, 20, zbOtcPrice_b)}}</td>
           </tr>
           <tr>
             <td>gate</td>
             <td>{{gatePrice_s}}</td>
             <td>{{gatePrice_s|diff(zbPrice)}}</td>
             <!-- <td>{{diffZbHbPercent}}</td> -->
-            <td>{{gatePrice_s|getProfit(zbPrice, money, 20)}}</td>
+            <td>{{gatePrice_s|getProfit(zbPrice, money, 20, zbOtcPrice_b)}}</td>
           </tr>
           <tr>
             <td>gate to zb</td>
             <td>{{gatePrice_b}}</td>
             <td>{{zbPrice_s|diff(gatePrice_b)}}</td>
             <!-- <td>{{}}</td> -->
-            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 15, qcFee)}}</td>
+            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 15, zbOtcPrice_s)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -145,6 +143,42 @@
       </div>
       
     </div>
+    <hr>
+    <div class="clearBoth" style="font-size: 12px">
+      <div style="width: 50%;float:left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>ask</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in btcQcAsks">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{item[0]|getRatio(btc_usdt)}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div style="width: 50%; float: left">
+        <table class="table-zb">
+        <thead>
+          <tr>
+            <th>bid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in btcQcBids">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{item[0]|getRatio(btc_usdt)}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      
+    </div>
   </div>
 </template>
 <script>
@@ -164,6 +198,7 @@
       this.getHL()
       this.getZbDepth()
       this.getGateCtcData()
+      this.getZbOtcData()
     },
     data() {
       return {
@@ -180,7 +215,10 @@
         btc_usdt: '',
         eth_qc: '',
         eth_usdt: '',
-        qcFee: 1
+        zbOtcPrice_b: '',
+        zbOtcPrice_s: '',
+        btcQcAsks: [],
+        btcQcBids: []
       }
     },
     filters: {
@@ -202,9 +240,17 @@
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
             return it[1] >= 5000
-          })
+          }).reverse()
           this.zbBids = res.data.bids.filter(it => {
             return it[1] >= 5000
+          })
+        })
+        axios(`${baseUrl}/zbapi/data/v1/depth?market=btc_qc&size=50`).then(res => {
+          this.btcQcAsks = res.data.asks.filter(it => {
+            return it[1] >= 1.5
+          }).reverse()
+          this.btcQcBids = res.data.bids.filter(it => {
+            return it[1] >= 1.5
           })
         })
       },
@@ -251,6 +297,26 @@
           }
         }).then(res => {
           this.hbPrice = res.data.data[4].price
+        })
+      },
+      getZbOtcData() {
+        axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
+          params: {
+            type: 2
+          }
+        }).then(res => {
+          const str = res.data;
+          const reg = /\d\.\d{3}/g;
+          this.zbOtcPrice_b = str.match(reg)[1]
+        })
+        axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
+          params: {
+            type: 1
+          }
+        }).then(res => {
+          const str = res.data;
+          const reg = /\d\.\d{3}/g;
+          this.zbOtcPrice_s = str.match(reg)[1]
         })
       }
     }
