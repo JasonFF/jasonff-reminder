@@ -394,7 +394,12 @@
         }).then(res => {
           const str = res.data;
           const reg = /\d\.\d{2,3}/g;
-          this.zbOtcPrice_b = str.match(reg)[1]
+          if (str.match(reg)[1] < 1.5) {
+             this.zbOtcPrice_b = str.match(reg)[1]
+          } else {
+            this.zbOtcPrice_b = str.match(reg)[2]
+          }
+         
         })
         axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
           params: {
@@ -403,7 +408,12 @@
         }).then(res => {
           const str = res.data;
           const reg = /\d\.\d{2,3}/g;
-          this.zbOtcPrice_s = str.match(reg)[1]
+          if (str.match(reg)[1] < 1.5) {
+            this.zbOtcPrice_s = str.match(reg)[1]
+          } else {
+            this.zbOtcPrice_s = str.match(reg)[2]
+          }
+          
         })
       }
     }
