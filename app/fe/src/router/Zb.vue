@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <router-link to="/flow" class="navigation"></router-link>
+    <!-- <router-link to="/flow" class="navigation"></router-link> -->
     <div class="item">
       <div class="left">
         zb
@@ -33,34 +33,6 @@
         <cube-input v-model="money"></cube-input>
       </div>
     </div>
-    <div>
-      <table class="table-zb">
-        <thead>
-          <tr>
-            <th>coin</th>
-            <th>to qc</th>
-            <th>to usdt</th>
-            <th>price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>btc</td>
-            <td>{{btc_qc}}</td>
-            <td>{{btc_usdt}}</td>
-            <th>{{btc_qc|getRatio(btc_usdt)}}</th>
-          </tr>
-          <tr>
-            <td>eos</td>
-            <td>{{eos_qc}}</td>
-            <td>{{eos_usdt}}</td>
-            <th>{{eos_qc|getRatio(eos_usdt)}}</th>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="height: 20px;"></div>
-    <hr>
     <div class="table-box">
       <table class="table-zb">
         <thead>
@@ -91,6 +63,13 @@
             <td>{{hbPrice|getProfit(zbPrice, money, 20, zbOtcPrice_b)}}</td>
           </tr>
           <tr>
+            <td>hb to zb</td>
+            <td>{{hbPrice_b}}</td>
+            <td>{{hbPrice_b|getRatio(zbOtcPrice_b)}}</td>
+            <!-- <td>{{diffZbHbPercent}}</td> -->
+            <td>{{zbPrice_s|getProfit(hbPrice_b, money, 20, zbOtcPrice_s)}}</td>
+          </tr>
+          <tr>
             <td>gate</td>
             <td>{{gatePrice_s}}</td>
             <td>{{gatePrice_s|getRatio(zbOtcPrice_s)}}</td>
@@ -102,7 +81,7 @@
             <td>{{gatePrice_b}}</td>
             <td>{{gatePrice_b|getRatio(zbOtcPrice_b)}}</td>
             <!-- <td>{{}}</td> -->
-            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 15, zbOtcPrice_s)}}</td>
+            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 20, zbOtcPrice_s)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -150,113 +129,6 @@
       </div>
 
     </div>
-    <hr>
-    <div class="clearBoth" style="font-size: 12px">
-      <div style="width: 50%;float:left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>ask</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in btcQcAsks">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-              <td>{{item[0]|getRatio(btc_usdt)}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="width: 50%; float: left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>bid</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in btcQcBids">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-              <td>{{item[0]|getRatio(btc_usdt)}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-    <hr>
-    <div class="clearBoth" style="font-size: 12px">
-      <div style="width: 50%;float:left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>ask</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in btcUsdtAsks">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-              <td>{{btc_qc|getRatio(item[0])}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="width: 50%; float: left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>bid</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in btcUsdtBids">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-              <td>{{btc_qc|getRatio(item[0])}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-    <hr>
-    <div class="clearBoth" style="font-size: 12px">
-      <div style="width: 50%;float:left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>ask</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in btcQcAsks">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-              <td>{{item[0]|getRatioDynamic(btcUsdtAsks[index])}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="width: 50%; float: left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>bid</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in btcQcBids">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-              <td>{{item[0]|getRatioDynamic(btcUsdtBids[index])}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 </template>
 <script>
@@ -282,6 +154,7 @@
     data() {
       return {
         hbPrice: '',
+        hbPrice_b: '',
         zbPrice: '',
         hlPrice: '',
         money: 50000,
@@ -382,18 +255,33 @@
       getHbOtcData() {
         axios(`${baseUrl}/hbotcapi/`, {
           params: {
+            country: 0,
+            currency: 1,
+            payMethod: 0,
+            currPage: 1,
             coinId: 2,
             tradeType: 0,
-            currentPage: 1,
-            payWay: '',
-            country: '',
             merchant: 1,
             online: 1,
-            range: 0
           }
         }).then(res => {
           this.hbPrice = res.data.data[5].price
         })
+        axios(`${baseUrl}/hbotcapi/`, {
+          params: {
+            country: 0,
+            currency: 1,
+            payMethod: 0,
+            currPage: 1,
+            coinId: 2,
+            tradeType: 1,
+            merchant: 1,
+            online: 1
+          }
+        }).then(res => {
+          this.hbPrice_b = res.data.data[5].price
+        })
+
       },
       getZbOtcData() {
         axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
