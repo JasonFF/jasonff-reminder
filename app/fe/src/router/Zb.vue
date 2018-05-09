@@ -19,10 +19,13 @@
     </div>
     <div class="item">
       <div class="left">
-        zbcny
+        qc_cnc
       </div>
       <div class="right">
-        {{zbOtcPrice_b|getCny(zbPrice)}}/{{zbOtcPrice_s|getCny(zbPrice_s)}}
+        {{aexPrice|getRatio(zbPrice)}}/{{aexPrice|getRatio(zbPrice_s)}}
+        <p>
+          {{aexPrice|getRatio(zbPrice)|getQcDiff(zbOtcPrice_b)}}/{{aexPrice|getRatio(zbPrice_s)|getQcDiff(zbOtcPrice_s)}}
+        </p>
       </div>
     </div>
     <div class="item">
@@ -150,6 +153,7 @@
       this.getZbDepth()
       this.getGateCtcData()
       this.getZbOtcData()
+      this.getAexData()
     },
     data() {
       return {
@@ -173,6 +177,7 @@
         btcQcBids: [],
         btcUsdtAsks: [],
         btcUsdtBids: [],
+        aexPrice: ''
       }
     },
     filters: {
@@ -192,12 +197,16 @@
         const _v2 = _.get(val2, '0')
         return getFixed(val1 / _v2)
       },
-      getCny(val1, val2) {
-        return getFixed(val1 * val2)
+      getQcDiff(val1, val2) {
+        return getFixed(val1 - val2)
       }
     },
     methods: {
-
+      getAexData() {
+        axios(`${baseUrl}/aexapi/ticker.php?c=usdt&mk_type=cnc`).then(res => {
+          this.aexPrice = res.data.ticker.last
+        })
+      },
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
