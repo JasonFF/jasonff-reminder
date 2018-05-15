@@ -133,6 +133,18 @@ const aexapi = k2c(httpProxy({
   },
 }));
 
+const aexctcapi = k2c(httpProxy({
+  target: 'https://www.aex.com',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/aexctcapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -149,5 +161,6 @@ module.exports = app => {
   router.all('/zbotcapi/*', zbotcapi)
   router.all('/blockapi/*', blockapi)
   router.all('/aexapi/*', aexapi)
+  router.all('/aexctcapi/*', aexctcapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };

@@ -6,6 +6,7 @@ import Tiger from './Tiger'
 import ZbBitCNY from './ZbBitCNY'
 import Chart from './Chart'
 import Flow from './Flow'
+import Qt from './Qt'
 
 Vue.use(Router)
 
@@ -41,6 +42,11 @@ export default new Router({
       path: '/flow',
       name: 'flow',
       component: Flow
+    },
+    {
+      path: '/qt',
+      name: 'qt',
+      component: Qt
     }
   ]
 })
