@@ -9,18 +9,8 @@
     "start": "npm run dev",
     "build": "node build/build.js"
   },
-  "compileDependencies": [
-    "cube-ui"
-  ],
-  "transformModules": {
-    "cube-ui": {
-      "transform": "cube-ui/src/modules/${member}",
-      "kebabCase": true
-    }
-  },
   "dependencies": {
     "axios": "^0.18.0",
-    "cube-ui": "~1.8.0",
     "echarts": "^4.1.0",
     "jsonp": "^0.2.1",
     "less": "^3.0.2",

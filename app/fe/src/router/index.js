@@ -3,9 +3,11 @@ import Router from 'vue-router'
 import Home from './Home'
 import Zb from './Zb'
 import Tiger from './Tiger'
-import ZbBitCNY from './ZbBitCNY'
+import Bitcny from './Bitcny'
 import Chart from './Chart'
 import Flow from './Flow'
+import Qt from './Qt'
+import Usdt from './Usdt'
 
 Vue.use(Router)
 
@@ -18,6 +20,11 @@ export default new Router({
       component: Home
     },
     {
+      path: '/usdt',
+      name: 'Usdt',
+      component: Usdt
+    },
+    {
       path: '/zb',
       name: 'zb',
       component: Zb
@@ -25,7 +32,7 @@ export default new Router({
     {
       path: '/bitcny',
       name: 'bitcny',
-      component: ZbBitCNY
+      component: Bitcny
     },
     {
       path: '/tiger',
@@ -41,6 +48,11 @@ export default new Router({
       path: '/flow',
       name: 'flow',
       component: Flow
+    },
+    {
+      path: '/qt',
+      name: 'qt',
+      component: Qt
     }
   ]
 })

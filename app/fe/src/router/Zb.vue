@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <!-- <router-link to="/flow" class="navigation"></router-link> -->
+    <router-link to="/bitcny" class="navigation"></router-link>
     <div class="item">
       <div class="left">
         zb
@@ -33,7 +33,7 @@
         money
       </div>
       <div class="right">
-        <cube-input v-model="money"></cube-input>
+        <input type="text" v-model="money">
       </div>
     </div>
     <div class="table-box">
