@@ -9,8 +9,7 @@
     "egg-scripts": "^2.5.0",
     "egg-view-nunjucks": "^2.2.0",
     "http-proxy-middleware": "^0.18.0",
-    "koa-connect": "^2.0.1",
-    "phantomjs": "^2.1.7"
+    "koa-connect": "^2.0.1"
   },
   "devDependencies": {
     "autod": "^3.0.1",
