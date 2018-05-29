@@ -10,7 +10,8 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less">
+@import './init.less';
 html,body,#app {
   height: 100%
 }

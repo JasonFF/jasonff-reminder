@@ -7,9 +7,9 @@
 </template>
 <script>
 import axios from 'axios'
-  const baseUrl = 'http://www.abichi.club'
-  import echarts from 'echarts'
-  import moment from 'moment'
+const baseUrl = 'http://www.abichi.club'
+import echarts from 'echarts'
+import moment from 'moment'
 export default {
   name: 'Qt',
   created() {
@@ -28,6 +28,8 @@ export default {
             type: '1hour',
             since: this.time
           }
+        }).then(res => {
+          
         })
       }
   }

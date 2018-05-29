@@ -145,6 +145,18 @@ const aexctcapi = k2c(httpProxy({
   },
 }));
 
+const aexquaapi = k2c(httpProxy({
+  target: 'http://k.quintar.com',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/aexquaapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -162,5 +174,6 @@ module.exports = app => {
   router.all('/blockapi/*', blockapi)
   router.all('/aexapi/*', aexapi)
   router.all('/aexctcapi/*', aexctcapi)
+  router.all('/aexquaapi/*', aexquaapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
