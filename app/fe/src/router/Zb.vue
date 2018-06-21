@@ -19,12 +19,12 @@
     </div>
     <div class="item">
       <div class="left">
-        qc_cnc
+        usdt
       </div>
       <div class="right">
-        {{aexPrice|getRatio(zbPrice)}}/{{aexPrice|getRatio(zbPrice_s)}}
+        buy: 
         <p>
-          {{aexPrice|getRatio(zbPrice)|getQcDiff(zbOtcPrice_b)}}/{{aexPrice|getRatio(zbPrice_s)|getQcDiff(zbOtcPrice_s)}}
+          
         </p>
       </div>
     </div>
@@ -177,7 +177,6 @@
         btcQcBids: [],
         btcUsdtAsks: [],
         btcUsdtBids: [],
-        aexPrice: ''
       }
     },
     filters: {
@@ -202,11 +201,6 @@
       }
     },
     methods: {
-      getAexData() {
-        axios(`${baseUrl}/aexapi/ticker.php?c=usdt&mk_type=cnc`).then(res => {
-          this.aexPrice = res.data.ticker.last
-        })
-      },
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {

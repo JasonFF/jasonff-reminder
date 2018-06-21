@@ -8,6 +8,7 @@ import Chart from './Chart'
 import Flow from './Flow'
 import Qt from './Qt'
 import Usdt from './Usdt'
+import Aex from './Aex'
 
 Vue.use(Router)
 
@@ -18,6 +19,11 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: Home
+    },
+    {
+      path: '/aex',
+      name: 'Aex',
+      component: Aex
     },
     {
       path: '/usdt',
