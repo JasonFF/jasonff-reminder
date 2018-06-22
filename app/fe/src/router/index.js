@@ -9,6 +9,7 @@ import Flow from './Flow'
 import Qt from './Qt'
 import Usdt from './Usdt'
 import Aex from './Aex'
+import OkEo from './OkEo'
 
 Vue.use(Router)
 
@@ -59,6 +60,11 @@ export default new Router({
       path: '/qt',
       name: 'qt',
       component: Qt
+    },
+    {
+      path: '/okeo',
+      name: 'OkEo',
+      component: OkEo
     }
   ]
 })
