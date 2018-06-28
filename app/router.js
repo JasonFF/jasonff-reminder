@@ -133,6 +133,18 @@ const aexapi = k2c(httpProxy({
   },
 }));
 
+const bitccapi = k2c(httpProxy({
+  target: 'https://api.bit.cc',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/bitccapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 const aexctcapi = k2c(httpProxy({
   target: 'https://www.aex.com',
   changeOrigin: true,
@@ -169,6 +181,8 @@ const okexapi = k2c(httpProxy({
   },
 }));
 
+
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -188,5 +202,6 @@ module.exports = app => {
   router.all('/aexctcapi/*', aexctcapi)
   router.all('/aexquaapi/*', aexquaapi)
   router.all('/okexapi/*', okexapi)
+  router.all('/bitccapi/*', bitccapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
