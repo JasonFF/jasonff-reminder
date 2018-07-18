@@ -34,6 +34,7 @@ const zbotcapi = k2c(httpProxy({
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
     proxyRes.headers['Access-Control-Allow-Method'] = '*';
+    proxyRes.headers['X-Frame-Options'] = '*'
   },
 }));
 
