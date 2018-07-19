@@ -204,5 +204,8 @@ module.exports = app => {
   router.all('/aexquaapi/*', aexquaapi)
   router.all('/okexapi/*', okexapi)
   router.all('/bitccapi/*', bitccapi)
+  router.post('/api/zbotcreminder/login', controller.zbOtcReminder.login)
+  router.post('/api/zbotcreminder/logout', controller.zbOtcReminder.logout)
+  router.get('/api/zbotcreminder/getlist', controller.zbOtcReminder.getList)
   router.get(/^\/(?!public)/, controller.home.index);
 };

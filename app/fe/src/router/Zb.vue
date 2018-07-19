@@ -17,17 +17,7 @@
         {{zbOtcPrice_b}}/{{zbOtcPrice_s}}
       </div>
     </div>
-    <div class="item">
-      <div class="left">
-        usdt
-      </div>
-      <div class="right">
-        buy: 
-        <p>
-          
-        </p>
-      </div>
-    </div>
+    
     <div class="item">
       <div class="left">
         money
@@ -71,20 +61,6 @@
             <td>{{hbPrice_b|getRatio(zbOtcPrice_b)}}</td>
             <!-- <td>{{diffZbHbPercent}}</td> -->
             <td>{{zbPrice_s|getProfit(hbPrice_b, money, 20, zbOtcPrice_s)}}</td>
-          </tr>
-          <tr>
-            <td>gate</td>
-            <td>{{gatePrice_s}}</td>
-            <td>{{gatePrice_s|getRatio(zbOtcPrice_s)}}</td>
-            <!-- <td>{{diffZbHbPercent}}</td> -->
-            <td>{{gatePrice_s|getProfit(zbPrice, money, 20, zbOtcPrice_b)}}</td>
-          </tr>
-          <tr>
-            <td>gate to zb</td>
-            <td>{{gatePrice_b}}</td>
-            <td>{{gatePrice_b|getRatio(zbOtcPrice_b)}}</td>
-            <!-- <td>{{}}</td> -->
-            <td>{{zbPrice_s|getProfit(gatePrice_b, money, 20, zbOtcPrice_s)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -151,9 +127,7 @@
       this.getHbOtcData()
       this.getHL()
       this.getZbDepth()
-      this.getGateCtcData()
       this.getZbOtcData()
-      this.getAexData()
     },
     data() {
       return {
@@ -165,8 +139,6 @@
         zbAsks: [],
         zbBids: [],
         zbPrice_s: '',
-        gatePrice_b: '',
-        gatePrice_s: '',
         btc_qc: '',
         btc_usdt: '',
         eos_qc: '',
@@ -240,19 +212,6 @@
           this.btc_usdt = res.data.btcusdt.last
           this.eos_qc = res.data.eosqc.last
           this.eos_usdt = res.data.eosusdt.last
-        })
-      },
-      getGateCtcData() {
-        axios(`${baseUrl}/gatectcapi/json_svr/query_push/`, {
-          params: {
-            u: 13,
-            c: 64975,
-            type: 'push_order_list',
-            symbol: 'USDT_CNY'
-          }
-        }).then(res => {
-          this.gatePrice_b = res.data.push_order[18].rate
-          this.gatePrice_s = res.data.push_order[22].rate
         })
       },
       getHbOtcData() {
