@@ -4,7 +4,6 @@ const Controller = require('egg').Controller;
 
 class ZbOtcReminder extends Controller {
   async login(ctx) {
-    console.log(this.ctx.session)
     const body = ctx.request.body
     if (body.password == '88888888') {
       ctx.session = {
@@ -30,7 +29,10 @@ class ZbOtcReminder extends Controller {
   }
   async getList() {
     this.ctx.service.zbOtcReminder.checkLogin().then(res => {
-      this.ctx.body = res
+      return this.ctx.curl('https://vip.zb.com/otc/trade/qc_cny?type=2&pageNo=1&numSort=0').then(res => {
+        console.log(res)
+        this.ctx.body = res
+      })
     }).catch(e => {
       
     })
