@@ -182,6 +182,18 @@ const okexapi = k2c(httpProxy({
   },
 }));
 
+const binanceapi = k2c(httpProxy({
+  target: 'https://api.binance.com',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/binanceapi/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 
 
 /**
@@ -204,6 +216,7 @@ module.exports = app => {
   router.all('/aexquaapi/*', aexquaapi)
   router.all('/okexapi/*', okexapi)
   router.all('/bitccapi/*', bitccapi)
+  router.all('/binanceapi/*', binanceapi)
   router.post('/api/zbotcreminder/login', controller.zbOtcReminder.login)
   router.post('/api/zbotcreminder/logout', controller.zbOtcReminder.logout)
   router.get('/api/zbotcreminder/getlist', controller.zbOtcReminder.getList)

@@ -10,6 +10,7 @@ import Qt from './Qt'
 import Usdt from './Usdt'
 import Aex from './Aex'
 import OkEo from './OkEo'
+import AverageChart from './AverageChart'
 
 Vue.use(Router)
 
@@ -65,6 +66,11 @@ export default new Router({
       path: '/okeo',
       name: 'OkEo',
       component: OkEo
+    },
+    {
+      path: '/averagechart',
+      name: 'AverageChart',
+      component: AverageChart
     }
   ]
 })
