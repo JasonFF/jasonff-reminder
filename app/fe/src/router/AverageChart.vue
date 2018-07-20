@@ -159,6 +159,7 @@ export default {
   //   "28.46694368",      // Taker buy quote asset volume
   //   "17928899.62484339" // Ignore.
   // ]
+  this.klineData = []
       this.$http('http://www.abichi.club/binanceapi/api/v1/klines', {
         params: {
           symbol: 'BTCUSDT',
