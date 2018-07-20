@@ -1,12 +1,12 @@
 <template>
   <div style="padding: 30px">
     <Row :gutter='16'>
-      <Col style="margin-bottom: 10px" span="3" v-for="item in buttonIntervals" :key="item">
+      <Col style="margin-bottom: 10px" span="6" v-for="item in buttonIntervals" :key="item">
         <Button @click="getKline(item)" long>{{item}}</Button>
       </Col>
     </Row>
     <Row>
-      <Col span="20" offset="2">
+      <Col span="24">
         <div id="kline1" style="width: 100%; height: 500px"></div>
       </Col>
     </Row>
