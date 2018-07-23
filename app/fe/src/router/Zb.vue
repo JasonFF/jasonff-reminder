@@ -128,6 +128,7 @@
       this.getHL()
       this.getZbDepth()
       this.getZbOtcData()
+      this.testReminder()
     },
     data() {
       return {
@@ -173,6 +174,16 @@
       }
     },
     methods: {
+      testReminder() {
+        Notification.requestPermission(function(permission){
+            var config = {
+                          body:'Thanks for clicking that button. Hope you liked.',
+                          icon:'https://cdn2.iconfinder.com/data/icons/ios-7-style-metro-ui-icons/512/MetroUI_HTML5.png',
+                          dir:'auto' 
+                          };
+            var notification = new Notification("Here I am!",config);
+        });
+      },
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
