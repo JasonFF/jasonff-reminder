@@ -7,10 +7,10 @@ import Bitcny from './Bitcny'
 import Chart from './Chart'
 import Flow from './Flow'
 import Qt from './Qt'
-import Usdt from './Usdt'
 import Aex from './Aex'
 import OkEo from './OkEo'
 import AverageChart from './AverageChart'
+import BotProfit from './BotProfit'
 
 Vue.use(Router)
 
@@ -26,11 +26,6 @@ export default new Router({
       path: '/aex',
       name: 'Aex',
       component: Aex
-    },
-    {
-      path: '/usdt',
-      name: 'Usdt',
-      component: Usdt
     },
     {
       path: '/zb',
@@ -71,6 +66,11 @@ export default new Router({
       path: '/averagechart',
       name: 'AverageChart',
       component: AverageChart
+    },
+    {
+      path: '/botprofit',
+      name: 'BotProfit',
+      component: BotProfit
     }
   ]
 })

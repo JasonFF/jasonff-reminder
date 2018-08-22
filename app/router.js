@@ -14,7 +14,7 @@ const hbproxy = k2c(httpProxy({
 }));
 
 const zbapi = k2c(httpProxy({
-  target: 'http://api.zb.com/',
+  target: 'http://api.zb.cn/',
   changeOrigin: true,
   pathRewrite: {
     '^/zbapi/' : '/',     // rewrite path

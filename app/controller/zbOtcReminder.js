@@ -28,7 +28,7 @@ class ZbOtcReminder extends Controller {
     }
   }
   async getList() {
-    this.ctx.service.zbOtcReminder.checkLogin().then(res => {
+    return this.ctx.service.zbOtcReminder.checkLogin().then(res => {
       return this.ctx.curl('https://vip.zb.com/otc/trade/qc_cny?type=2&pageNo=1&numSort=0').then(res => {
         console.log(res)
         this.ctx.body = res

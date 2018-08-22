@@ -20,10 +20,28 @@
     
     <div class="item">
       <div class="left">
-        money
+        strategy
       </div>
       <div class="right">
-        <input type="text" v-model="money">
+        <div>
+          {{strategy}}
+        </div>
+        <div>
+           btc trend
+          <select v-model="btcTrend">
+            <option value="0.5">don't know</option>
+            <option value="1">up</option>
+            <option value="0">down</option>
+          </select>
+        </div>
+        <div>
+            qc trend
+            <select v-model="qcTrend">
+              <option value="0.5">don't know</option>
+              <option value="1">up</option>
+              <option value="0">down</option>
+            </select>
+          </div>
       </div>
     </div>
     <div class="table-box">
@@ -39,12 +57,6 @@
             <th>
               refer
             </th>
-            <!-- <th>
-              diffPercent
-            </th> -->
-            <th>
-              profit
-            </th>
           </tr>
         </thead>
         <thead>
@@ -52,22 +64,16 @@
             <td>hb</td>
             <td>{{hbPrice}}</td>
             <td>{{hbPrice|getRatio(zbOtcPrice_s)}}</td>
-            <!-- <td>{{diffZbHbPercent}}</td> -->
-            <td>{{hbPrice|getProfit(zbPrice, money, 20, zbOtcPrice_b)}}</td>
           </tr>
           <tr>
             <td>hb to zb</td>
             <td>{{hbPrice_b}}</td>
             <td>{{hbPrice_b|getRatio(zbOtcPrice_b)}}</td>
-            <!-- <td>{{diffZbHbPercent}}</td> -->
-            <td>{{zbPrice_s|getProfit(hbPrice_b, money, 20, zbOtcPrice_s)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
             <td>{{hlPrice}}</td>
             <td>{{zbPrice|diff(hlPrice)}}</td>
-            <!-- <td>{{diffZbHlPercent}}</td> -->
-            <td> - </td>
           </tr>
         </thead>
       </table>
@@ -128,7 +134,12 @@
       this.getHL()
       this.getZbDepth()
       this.getZbOtcData()
-      this.testReminder()
+    },
+    computed: {
+      strategy() {
+        const hldiff = this.zbPrice - this.hlPrice
+        return (1 - (this.btcTrend/1 + this.qcTrend/1 + hldiff * 5) / 3).toFixed(3)
+      }
     },
     data() {
       return {
@@ -150,6 +161,8 @@
         btcQcBids: [],
         btcUsdtAsks: [],
         btcUsdtBids: [],
+        btcTrend: '0.5',
+        qcTrend: '0.5'
       }
     },
     filters: {
@@ -174,16 +187,6 @@
       }
     },
     methods: {
-      testReminder() {
-        Notification.requestPermission(function(permission){
-            var config = {
-                          body:'Thanks for clicking that button. Hope you liked.',
-                          icon:'https://cdn2.iconfinder.com/data/icons/ios-7-style-metro-ui-icons/512/MetroUI_HTML5.png',
-                          dir:'auto' 
-                          };
-            var notification = new Notification("Here I am!",config);
-        });
-      },
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
