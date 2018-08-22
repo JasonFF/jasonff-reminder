@@ -2,7 +2,7 @@
   <div style="padding: 30px">
     <Row :gutter='16'>
       <Col style="margin-bottom: 10px" span="6" v-for="item in buttonIntervals" :key="item">
-        <Button @click="getKline(item)" long>{{item}}</Button>
+        <Button @click="initData(item)" long>{{item}}</Button>
       </Col>
     </Row>
     <Row>
@@ -16,63 +16,80 @@
 <script>
 import moment from 'moment'
 import echarts from 'echarts'
+import { resolve } from 'url';
 
-function calculateMA(dayCount, data) {
-          var result = [];
-          for (var i = 0, len = data.length; i < len; i++) {
-              if (i < dayCount) {
-                  result.push('-');
-                  continue;
-              }
-              var sum = 0;
-              for (var j = 0; j < dayCount; j++) {
-                  sum += data[i - j][1]/1;
-              }
-              result.push((sum / dayCount).toFixed(2));
-          }
-          return result;
-      }
+function getPrice(it) {
+  return it[2]/2 + it[3]/2
+}
 
 export default {
   name: 'AverageChart',
   data() {
     return {
       klineData: [],
+      btcTop: 20093,
+      ethTop: 1424,
+      eosTop: 23.28,
+      kline: {},
       buttonIntervals: [
-        '1m',
-        '3m',
-        '5m',
-        '15m',
-        '30m',
-        '1h',
-        '2h',
-        '4h',
-        '6h',
-        '8h',
-        '12h',
-        '1d',
+        '1min',
+        '3min',
+        '5min',
+        '15min',
+        '30min',
+        '1hour',
+        '4hour',
+        '6hour',
+        '1day',
       ]
     }
   },
   methods: {
-    initKline1() {
-      const data = this.klineData
-      const time = data.map(it => {
+    getProfit(targetArr, priceArr) {
+      let account = 10000
+      let usdtAccount = 0
+      let perBuy = 100
+      let operateTime = 0
+      let perBuyPrice = 100
+      targetArr.forEach((it, i) => {
+        const price = priceArr[i]
+        if (it < 0) {
+          if (account > perBuy * price) {
+            account = account - perBuy * price
+            usdtAccount = usdtAccount + perBuy
+            operateTime++
+            perBuyPrice = price
+          }
+        }
+        if (it > 0) {
+          if (usdtAccount > perBuy) {
+            if (price < perBuyPrice) {
+              return
+            }
+            account = account + perBuy * price
+            usdtAccount = usdtAccount - perBuy
+            operateTime++
+          }
+        }
+      })
+      console.log(account, usdtAccount, operateTime, account + usdtAccount * 7)
+    },
+    initKline() {
+      const {usdt_qc, btc_qc, btc_usdt, eos_qc, eos_usdt} = this.kline
+      const time = usdt_qc.map(it => {
+        // return it[0]
         return moment(it[0]).format('MM-DD HH:mm')
       })
-      
-      var dataMA5 = calculateMA(5, data);
-      var dataMA10 = calculateMA(10, data);
-      var dataMA20 = calculateMA(20, data);
-      const dataMA5_MA10 = dataMA5.map((it, index) => {
-        return (it - dataMA10[index]).toFixed(2)
+      const usdtQc = usdt_qc.map((it, index) => {
+        return getPrice(it)
       })
-      const dataMA5_MA20 = dataMA5.map((it, index) => {
-        return (it - dataMA20[index]).toFixed(2)
+      const usdtBtc = btc_qc.map((it, i) => {
+        return (usdtQc[i] - getPrice(it)/getPrice(btc_usdt[i])).toFixed(4)
       })
-      const dataMA10_MA20 = dataMA10.map((it, index) => {
-        return (it - dataMA20[index]).toFixed(2)
+      const usdtEos = eos_qc.map((it, i) => {
+        return (usdtQc[i] - getPrice(it)/getPrice(eos_usdt[i])).toFixed(4)
       })
+      this.getProfit(usdtBtc, usdtQc)
       const option = {
           title: {
               text: '均线'
@@ -81,18 +98,13 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['MA5','MA10','MA20']
+              data:['usdt','usdt(btc)', 'usdt(eos)']
           },
           grid: {
               left: '3%',
               right: '4%',
               bottom: '3%',
               containLabel: true
-          },
-          toolbox: {
-              feature: {
-                  saveAsImage: {}
-              }
           },
           dataZoom: [{
               type: 'inside',
@@ -116,61 +128,174 @@ export default {
               boundaryGap: false,
               data: time
           },
-          yAxis: {
-              type: 'value'
-          },
+          yAxis: [
+            {
+              name: 'price',
+              type: 'log',
+              max: 'dataMax',
+              min: 'dataMin'
+            },
+            {
+                name: 'diff',
+                max: 'dataMax',
+                min: 'dataMin',
+                type: 'value',
+            }
+          ],
           series: [
-            
               {
-                  name:'MA5-MA10',
+                  name:'usdt',
                   type:'line',
-                  stack: 'value',
-                  data: dataMA5_MA10
+                  data: usdtQc
               },
               {
-                  name:'MA5-MA20',
+                  name:'usdt(btc)',
                   type:'line',
-                  stack: 'value',
-                  data: dataMA5_MA20
+                  yAxisIndex:1,
+                  data: usdtBtc
               },
               {
-                  name:'MA10-MA20',
+                  name:'usdt(eos)',
+                  yAxisIndex:1,
                   type:'line',
-                  stack: 'value',
-                  data: dataMA10_MA20
-              }
+                  data: usdtEos
+              },
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
     },
-    getKline(interval) {
-  //      [
-  //   1499040000000,      // Open time
-  //   "0.01634790",       // Open
-  //   "0.80000000",       // High
-  //   "0.01575800",       // Low
-  //   "0.01577100",       // Close
-  //   "148976.11427815",  // Volume
-  //   1499644799999,      // Close time
-  //   "2434.19055334",    // Quote asset volume
-  //   308,                // Number of trades
-  //   "1756.87402397",    // Taker buy base asset volume
-  //   "28.46694368",      // Taker buy quote asset volume
-  //   "17928899.62484339" // Ignore.
-  // ]
-  this.klineData = []
-      this.$http('http://www.abichi.club/binanceapi/api/v1/klines', {
-        params: {
-          symbol: 'BTCUSDT',
-          interval: interval,
-          limit: 500
-        }
-      }).then(res => {
-        this.klineData = res.data
-        this.initKline1()
-        console.log(res)
+    initKline1() {
+      const {usdt_qc} = this.kline
+      const time = usdt_qc.map(it => {
+        // return it[0]
+        return moment(it[0]).format('MM-DD HH:mm')
       })
+      let highPrice = 0;
+      let lowPrice = 100;
+      const usdtQc = usdt_qc.map((it, index) => {
+        if (it[2] > highPrice) {
+          highPrice = it[2]
+        }
+        if (it[3] < lowPrice) {
+          lowPrice = it[3]
+        }
+        return getPrice(it)
+      })
+
+      const rsv = usdt_qc.map((it) => {
+        return (it[4] - lowPrice) / (highPrice - lowPrice) * 100
+      })
+      
+      const option = {
+          title: {
+              text: '均线'
+          },
+          tooltip: {
+              trigger: 'axis'
+          },
+          legend: {
+              data:['usdt','rsv']
+          },
+          grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+          },
+          dataZoom: [{
+              type: 'inside',
+              start: 90,
+              end: 100
+          }, {
+              start: 0,
+              end: 10,
+              handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+              handleSize: '80%',
+              handleStyle: {
+                  color: '#fff',
+                  shadowBlur: 3,
+                  shadowColor: 'rgba(0, 0, 0, 0.6)',
+                  shadowOffsetX: 2,
+                  shadowOffsetY: 2
+              }
+          }],
+          xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              data: time
+          },
+          yAxis: [
+            {
+              name: 'price',
+              type: 'log',
+              max: 'dataMax',
+              min: 'dataMin'
+            },
+            {
+                name: 'diff',
+                max: 'dataMax',
+                min: 'dataMin',
+                type: 'value',
+            }
+          ],
+          series: [
+              {
+                  name:'usdt',
+                  type:'line',
+                  data: usdtQc
+              },
+              {
+                  name:'rsv',
+                  type:'line',
+                  yAxisIndex:1,
+                  data: rsv
+              },
+          ]
+      };
+      const kline1 = echarts.init(document.getElementById('kline1'));
+      kline1.setOption(option);
+    },
+    getKline(interval, symbol) {
+//   1417536000000, 时间戳
+// 2370.16, 开
+// 2380, 高
+// 2352, 低
+// 2367.37, 收
+// 17259.83 交易量
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          this.$http('http://api.zb.cn/data/v1/kline', {
+            params: {
+              market: symbol,
+              type: interval,
+              size: 1000
+            }
+          }).then(res => {
+            this.kline[symbol] = res.data.data
+            // return res.data.data
+            resolve(res.data.data)
+          })
+        }, 1000);
+        
+      }) 
+    },
+    initData(interval) {
+        this.getKline(interval, "usdt_qc").then(() => {
+          return this.getKline(interval, "btc_qc")
+        }).then(() => {
+          return this.getKline(interval, "btc_usdt")
+        }).then(() => {
+          return this.getKline(interval, 'eos_qc')
+        }).then(() => {
+          return this.getKline(interval, 'eos_usdt')
+        }).then(res => {
+          this.initKline()
+        })
+        // this.getKline(interval, "usdt_qc").then(res => {
+        //   this.initKline1()
+        // })
+
     }
   }
 }
