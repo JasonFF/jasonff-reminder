@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <router-link to="/bitcny" class="navigation"></router-link>
+    <router-link to="/btctrending" class="navigation"></router-link>
     <div class="item">
       <div class="left">
         zb
@@ -17,7 +17,6 @@
         {{zbOtcPrice_b}}/{{zbOtcPrice_s}}
       </div>
     </div>
-    
     <div class="item">
       <div class="left">
         strategy
