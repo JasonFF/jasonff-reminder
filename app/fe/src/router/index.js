@@ -11,6 +11,7 @@ import Aex from './Aex'
 import OkEo from './OkEo'
 import AverageChart from './AverageChart'
 import BotProfit from './BotProfit'
+import BtcTrending from './BtcTrending'
 
 Vue.use(Router)
 
@@ -71,6 +72,11 @@ export default new Router({
       path: '/botprofit',
       name: 'BotProfit',
       component: BotProfit
+    },
+    {
+      path: '/btctrending',
+      name: 'BtcTrending',
+      component: BtcTrending
     }
   ]
 })
