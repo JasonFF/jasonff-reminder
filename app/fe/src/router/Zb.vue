@@ -25,22 +25,6 @@
         <div>
           {{strategy}}
         </div>
-        <div>
-           btc trend
-          <select v-model="btcTrend">
-            <option value="0.5">don't know</option>
-            <option value="1">up</option>
-            <option value="0">down</option>
-          </select>
-        </div>
-        <div>
-            qc trend
-            <select v-model="qcTrend">
-              <option value="0.5">don't know</option>
-              <option value="1">up</option>
-              <option value="0">down</option>
-            </select>
-          </div>
       </div>
     </div>
     <div class="table-box">
@@ -68,6 +52,11 @@
             <td>hb to zb</td>
             <td>{{hbPrice_b}}</td>
             <td>{{hbPrice_b|getRatio(zbOtcPrice_b)}}</td>
+          </tr>
+          <tr>
+            <td>aex</td>
+            <td>{{aexUsdtPrice}}</td>
+            <td>{{aexUsdtPrice|diff(zbPrice)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -133,11 +122,13 @@
       this.getHL()
       this.getZbDepth()
       this.getZbOtcData()
+      this.getAexData()
     },
     computed: {
       strategy() {
         const hldiff = this.zbPrice - this.hlPrice
-        return (1 - (this.btcTrend/1 + this.qcTrend/1 + hldiff * 5) / 3).toFixed(3)
+        const qcTrend = (1 - this.zbOtcPrice_b) * 10
+        return (1 - (qcTrend/1 + hldiff * 5) / 2).toFixed(3)
       }
     },
     data() {
@@ -160,8 +151,7 @@
         btcQcBids: [],
         btcUsdtAsks: [],
         btcUsdtBids: [],
-        btcTrend: '0.5',
-        qcTrend: '0.5'
+        aexUsdtPrice: ''
       }
     },
     filters: {
@@ -186,6 +176,12 @@
       }
     },
     methods: {
+      getAexData() {
+        axios( `${baseUrl}/aexctcapi/trade/getTradeList30.php?coinname=USDT&mk_type=CNC&grade=0`).then(res => {
+          console.log(res)
+          this.aexUsdtPrice = res.data.tradeStr[0][1]
+        })
+      },
       getZbDepth() {
         axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
           this.zbAsks = res.data.asks.filter(it => {
