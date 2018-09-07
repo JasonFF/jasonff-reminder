@@ -266,7 +266,7 @@
         }).then(res => {
           const str = res.data;
           const reg = /\d\.\d{2,3}/g;
-          if (str.match(reg)[1] < 1.5) {
+          if (str.match(reg)[1] < 1.5 && str.match(reg)[1] > 0.8) {
             this.zbOtcPrice_b = str.match(reg)[1]
           } else {
             this.zbOtcPrice_b = str.match(reg)[2]
@@ -280,7 +280,7 @@
         }).then(res => {
           const str = res.data;
           const reg = /\d\.\d{2,3}/g;
-          if (str.match(reg)[1] < 1.5) {
+          if (str.match(reg)[1] < 1.5 && str.match(reg)[1] > 0.8) {
             this.zbOtcPrice_s = str.match(reg)[1]
           } else {
             this.zbOtcPrice_s = str.match(reg)[2]
