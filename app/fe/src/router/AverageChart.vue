@@ -275,8 +275,8 @@ export default {
         return getPrice(it)
       })
 
-      const rsv = usdt_qc.map((it) => {
-        return (it[4] - lowPrice) / (highPrice - lowPrice) * 100
+      const diff = usdtQc.map((it, i) => {
+        return it - hlKline.c.reverse()[i]
       })
       
       const option = {
@@ -287,7 +287,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['usdt','rsv']
+              data:['usdt','exchange']
           },
           grid: {
               left: '3%',
@@ -338,10 +338,16 @@ export default {
                   data: usdtQc
               },
               {
-                  name:'rsv',
+                  name:'exchange',
                   type:'line',
                   // yAxisIndex:1,
                   data: hlKline.c.reverse()
+              },
+              {
+                  name:'diff',
+                  type:'line',
+                  yAxisIndex:1,
+                  data: diff
               },
           ]
       };
