@@ -59,6 +59,11 @@
             <td>{{aexUsdtRefer}}</td>
           </tr>
           <tr>
+            <td>aex_r</td>
+            <td>{{aexUsdtPrice}}</td>
+            <td>{{aexUsdtRefer_r}}</td>
+          </tr>
+          <tr>
             <td>exchange</td>
             <td>{{hlPrice}}</td>
             <td>{{zbPrice|diff(hlPrice)}}</td>
@@ -133,6 +138,9 @@
       },
       aexUsdtRefer() {
         return (this.aexUsdtPrice * this.aexCncBuyPrice / this.zbOtcPrice_s).toFixed(3)
+      },
+      aexUsdtRefer_r() {
+        return (this.aexUsdtPrice / this.aexCncSellPrice / this.zbOtcPrice_b).toFixed(3)
       }
     },
     data() {
@@ -149,7 +157,8 @@
         btcUsdtAsks: [],
         btcUsdtBids: [],
         aexUsdtPrice: '',
-        aexCncBuyPrice: ''
+        aexCncBuyPrice: '',
+        aexCncSellPrice: ''
       }
     },
     filters: {
@@ -184,6 +193,10 @@
         axios( `${baseUrl}/aexctcapi/trade/c2c/order_list_c2c.php?order_type=1&market=CNY&coin=CNC&page=0`).then(res => {
           
           this.aexCncBuyPrice = res.data.data.ord_list[1].pice
+        })
+        axios( `${baseUrl}/aexctcapi/trade/c2c/order_list_c2c.php?order_type=2&market=CNY&coin=CNC&page=0`).then(res => {
+          
+          this.aexCncSellPrice = res.data.data.ord_list[1].pice
         })
       },
       getZbDepth() {
