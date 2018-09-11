@@ -147,7 +147,7 @@ const bitccapi = k2c(httpProxy({
 }));
 
 const aexctcapi = k2c(httpProxy({
-  target: 'https://www.aex.com',
+  target: 'https://www.bit.cc',
   changeOrigin: true,
   pathRewrite: {
     '^/aexctcapi/' : '/',     // rewrite path

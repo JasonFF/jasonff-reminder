@@ -56,7 +56,7 @@
           <tr>
             <td>aex</td>
             <td>{{aexUsdtPrice}}</td>
-            <td>{{aexUsdtPrice|diff(zbPrice)}}</td>
+            <td>{{aexUsdtRefer}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -123,12 +123,16 @@
       this.getZbDepth()
       this.getZbOtcData()
       this.getAexData()
+      this.getAexCnc()
     },
     computed: {
       strategy() {
         const hldiff = this.zbPrice - this.hlPrice
         const qcTrend = (1 - this.zbOtcPrice_b) * 10
         return (1 - (qcTrend/1 + hldiff * 5) / 2).toFixed(3)
+      },
+      aexUsdtRefer() {
+        return (this.aexUsdtPrice * this.aexCncBuyPrice / this.zbOtcPrice_s).toFixed(3)
       }
     },
     data() {
@@ -137,21 +141,15 @@
         hbPrice_b: '',
         zbPrice: '',
         hlPrice: '',
-        money: 50000,
         zbAsks: [],
         zbBids: [],
         zbPrice_s: '',
-        btc_qc: '',
-        btc_usdt: '',
-        eos_qc: '',
-        eos_usdt: '',
         zbOtcPrice_b: '',
         zbOtcPrice_s: '',
-        btcQcAsks: [],
-        btcQcBids: [],
         btcUsdtAsks: [],
         btcUsdtBids: [],
-        aexUsdtPrice: ''
+        aexUsdtPrice: '',
+        aexCncBuyPrice: ''
       }
     },
     filters: {
@@ -178,8 +176,14 @@
     methods: {
       getAexData() {
         axios( `${baseUrl}/aexctcapi/trade/getTradeList30.php?coinname=USDT&mk_type=CNC&grade=0`).then(res => {
-          console.log(res)
+          
           this.aexUsdtPrice = res.data.tradeStr[0][1]
+        })
+      },
+      getAexCnc() {
+        axios( `${baseUrl}/aexctcapi/trade/c2c/order_list_c2c.php?order_type=1&market=CNY&coin=CNC&page=0`).then(res => {
+          
+          this.aexCncBuyPrice = res.data.data.ord_list[1].pice
         })
       },
       getZbDepth() {
@@ -189,22 +193,6 @@
           }).reverse()
           this.zbBids = res.data.bids.filter(it => {
             return it[1] >= 5000
-          })
-        })
-        axios(`${baseUrl}/zbapi/data/v1/depth?market=btc_qc&size=50`).then(res => {
-          this.btcQcAsks = res.data.asks.filter(it => {
-            return it[1] >= 1.5
-          }).reverse()
-          this.btcQcBids = res.data.bids.filter(it => {
-            return it[1] >= 1.5
-          })
-        })
-        axios(`${baseUrl}/zbapi/data/v1/depth?market=btc_usdt&size=50`).then(res => {
-          this.btcUsdtAsks = res.data.asks.filter(it => {
-            return it[1] >= 1
-          }).reverse()
-          this.btcUsdtBids = res.data.bids.filter(it => {
-            return it[1] >= 1
           })
         })
       },
@@ -217,10 +205,6 @@
         axios(`${baseUrl}/zbapi/data/v1/allTicker`).then(res => {
           this.zbPrice = res.data.usdtqc.sell
           this.zbPrice_s = res.data.usdtqc.buy
-          this.btc_qc = res.data.btcqc.last
-          this.btc_usdt = res.data.btcusdt.last
-          this.eos_qc = res.data.eosqc.last
-          this.eos_usdt = res.data.eosusdt.last
         })
       },
       getHbOtcData() {
