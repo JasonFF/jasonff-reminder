@@ -5,18 +5,11 @@
         <Button @click="getKline(item)" long>{{item}}</Button>
       </Col>
     </Row>
-    <div>
-      account: {{strategy1Data.account}}
-    </div>
-    <div>
-      usdtAccount: {{strategy1Data.usdtAccount}}
-    </div>
-    <div>
-      ta: {{strategy1Data.account + strategy1Data.usdtAccount * 6.9}}
-    </div>
+    
   </div>
 </template>
 <script>
+import {MACD} from '@/tools/indicator.js'
 export default {
   name: 'BotProfit',
   data() {
@@ -37,7 +30,8 @@ export default {
         account: 10000,
         usdtAccount: 0,
         sellItems: []
-      }
+      },
+      macd: {}
     }
   },
   methods: {
@@ -56,43 +50,115 @@ export default {
         }
       }).then(res => {
         this.kline = res.data.data
-        this.strategy1Data = {
-          account: 10000,
-          usdtAccount: 0,
-          sellItems: []
-        }
+        this.macd = MACD(this.kline.map(it => it[4]))
         this.strategy1()
       })
     },
     strategy1() {
-      let exchange = 6.84
-      let maxPriceLevel = 0.15
-      function getBuyLevel(price) {
-        return (price - exchange)/5
-      }
       let sellLevel = 0.01
+      const buyDea = -0.00132
       let perBuy = 100
+      let strategyData = {
+        account: 10000,
+        usdtAccount: 0,
+        sellItems: []
+      }
       this.kline.forEach((it, index, _arr) => {
         const price = it[4]
-        const buyLevel = getBuyLevel(price)
-        const preItem = _arr[index - 1]
-        if (!preItem) {
-          return
+        const deas = this.macd.deas
+        if (deas[index] < buyDea) {
+          if ((strategyData.account - it[4] * perBuy)>0) {
+            strategyData.account = strategyData.account - it[4] * perBuy
+            strategyData.usdtAccount = strategyData.usdtAccount + perBuy
+            strategyData.sellItems.push(it[4] + sellLevel)
+          }
         }
-        if (it[4] < preItem[4] - buyLevel) {
-          this.strategy1Data.account = this.strategy1Data.account - it[4] * perBuy
-          this.strategy1Data.usdtAccount = this.strategy1Data.usdtAccount + perBuy
-          this.strategy1Data.sellItems.push(it[4] + sellLevel)
-        }
-        this.strategy1Data.sellItems.forEach((sellItem, sellIndex) => {
-          if (sellItem < it[4]) {
-            this.strategy1Data.account = this.strategy1Data.account + it[4] * perBuy
-            this.strategy1Data.usdtAccount = this.strategy1Data.usdtAccount - perBuy
-            this.strategy1Data.sellItems[sellIndex] = 999999
+        strategyData.sellItems.forEach((sellItem, sellIndex) => {
+          if (strategyData.usdtAccount - perBuy < 0) {
+            return
+          }
+          if (sellItem == 999999) {
+            return
+          }
+          if (sellItem < price ) {
+            strategyData.account = strategyData.account + sellItem * perBuy
+            strategyData.usdtAccount = strategyData.usdtAccount - perBuy
+            strategyData.sellItems[sellIndex] = 999999
           }
         })
       })
-      // console.log(this.strategy1Data.account, this.strategy1Data.usdtAccount)
+      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.85).toFixed(2)
+      console.log(strategyData)
+    },
+    strategy2() {
+      let sellLevel = 0.0005
+      const buyDea = -0.0001
+      const sellDea = 0.0001
+      let perBuy = 100
+      let strategyData = {
+        account: 10000,
+        usdtAccount: 0,
+        sellItems: []
+      }
+      let perBuyDea = null
+      let buyFinish = false
+      let sellFinish = false
+      let perSellDea = null
+      this.kline.forEach((it, index, _arr) => {
+        const price = it[4]
+        const deas = this.macd.deas
+        const nowDea = deas[index]
+        if (nowDea < buyDea && !buyFinish) {
+          sellFinish = false
+          if (perBuyDea == null) {
+            return perBuyDea = nowDea
+          }
+          if (perBuyDea < nowDea) {
+            if ((strategyData.account - it[4] * perBuy)>0) {
+              strategyData.account = strategyData.account - it[4] * perBuy
+              strategyData.usdtAccount = strategyData.usdtAccount + perBuy
+              buyFinish = true
+              // strategyData.sellItems.push(it[4] + sellLevel)
+            }
+            
+            perBuyDea = null
+          } else {
+            perBuyDea = nowDea
+          }
+        } else {
+          perBuyDea = null
+        }
+        if (nowDea > sellDea && !sellFinish) {
+          buyFinish = false
+          if (perSellDea == null) {
+            return perSellDea = nowDea
+          }
+          if (perSellDea > nowDea) {
+            if ((strategyData.usdtAccount - perBuy) > 0) {
+              strategyData.account = strategyData.account + it[4] * perBuy
+              strategyData.usdtAccount = strategyData.usdtAccount - perBuy
+              sellFinish = true
+            }
+            perSellDea = null
+          } else {
+            perSellDea = nowDea
+          }
+        } else {
+          perSellDea = null
+        }
+        // strategyData.sellItems.forEach((sellItem, sellIndex) => {
+        //   if (strategyData.usdtAccount - perBuy < 0) {
+        //     return
+        //   }
+        //   if (deas[index] > sellDea ) {
+            // strategyData.account = strategyData.account + it[4] * perBuy
+            // strategyData.usdtAccount = strategyData.usdtAccount - perBuy
+            // strategyData.sellItems[sellIndex] = 999999
+        //   }
+        // })
+      })
+      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.85).toFixed(2)
+      console.log(strategyData)
     }
   }
 }

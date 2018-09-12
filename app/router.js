@@ -39,7 +39,7 @@ const zbotcapi = k2c(httpProxy({
 }));
 
 const zbtradeproxy = k2c(httpProxy({
-  target: 'https://trade.zb.com/',
+  target: 'https://trade.zb.cn/',
   changeOrigin: true,
   pathRewrite: {
     '^/zbtradeapi/' : '/',     // rewrite path
