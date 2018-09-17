@@ -5,11 +5,87 @@
         <Button @click="getKline(item)" long>{{item}}</Button>
       </Col>
     </Row>
-    
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>type</th>
+            <th>now</th>
+            <th>max</th>
+            <th>min</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>macd-dea</td>
+            <td>{{nowIndicator.macd.dea}}</td>
+            <td>{{perIndicator.maxMacd.dea}}</td>
+            <td>{{perIndicator.minMacd.dea}}</td>
+          </tr>
+          <tr>
+            <td>macd-diff</td>
+            <td>{{nowIndicator.macd.diff}}</td>
+            <td>{{perIndicator.maxMacd.diff}}</td>
+            <td>{{perIndicator.minMacd.diff}}</td>
+          </tr>
+          <tr>
+            <td>macd-bar</td>
+            <td>{{nowIndicator.macd.bar}}</td>
+            <td>{{perIndicator.maxMacd.bar}}</td>
+            <td>{{perIndicator.minMacd.bar}}</td>
+          </tr>
+          <tr>
+            <td>kdj-k</td>
+            <td>{{nowIndicator.kdj.k}}</td>
+            <td>{{perIndicator.maxKdj.k}}</td>
+            <td>{{perIndicator.minKdj.k}}</td>
+          </tr>
+          <tr>
+            <td>kdj-d</td>
+            <td>{{nowIndicator.kdj.d}}</td>
+            <td>{{perIndicator.maxKdj.d}}</td>
+            <td>{{perIndicator.minKdj.d}}</td>
+          </tr>
+          <tr>
+            <td>kdj-j</td>
+            <td>{{nowIndicator.kdj.j}}</td>
+            <td>{{perIndicator.maxKdj.j}}</td>
+            <td>{{perIndicator.minKdj.j}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      nowIndicator:
+    </div>
+    <Row>
+      <Col span="3">macd-dea</Col>
+      <Col span="3">{{nowIndicator.macd.dea}}</Col>
+    </Row>
+    <Row>
+      <Col span="3">macd-diff</Col>
+      <Col span="3">{{nowIndicator.macd.diff}}</Col>
+    </Row>
+    <Row>
+      <Col span="3">macd-bar</Col>
+      <Col span="3">{{nowIndicator.macd.bar}}</Col>
+    </Row>
+    <Row>
+      <Col span="3">kdj-k</Col>
+      <Col span="3">{{nowIndicator.kdj.k}}</Col>
+    </Row>
+    <Row>
+      <Col span="3">kdj-d</Col>
+      <Col span="3">{{nowIndicator.kdj.d}}</Col>
+    </Row>
+    <Row>
+      <Col span="3">kdj-j</Col>
+      <Col span="3">{{nowIndicator.kdj.j}}</Col>
+    </Row>
   </div>
 </template>
 <script>
-import {MACD} from '@/tools/indicator.js'
+import {MACD, KDJ} from '@/tools/indicator.js'
 export default {
   name: 'BotProfit',
   data() {
@@ -31,7 +107,20 @@ export default {
         usdtAccount: 0,
         sellItems: []
       },
-      macd: {}
+      macd: {},
+      kdj: {},
+      minItems: [],
+      maxItems: [],
+      perIndicator: {
+        maxMacd: {},
+        minMacd: {},
+        maxKdj: {},
+        minKdj: {}
+      },
+      nowIndicator: {
+        macd: {},
+        kdj: {}
+      }
     }
   },
   methods: {
@@ -51,7 +140,8 @@ export default {
       }).then(res => {
         this.kline = res.data.data
         this.macd = MACD(this.kline.map(it => it[4]))
-        this.strategy1()
+        this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
+        this.parseData()
       })
     },
     strategy1() {
@@ -159,6 +249,112 @@ export default {
       })
       strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.85).toFixed(2)
       console.log(strategyData)
+    },
+    parseData() {
+      const period = 20
+      let maxItems = []
+      let minItems = []
+      this.kline.forEach((it, index, _arr) => {
+        const itemPrice = it[4]
+        let maxItem = index
+        let minItem = index
+        for (let i = 0; i < period; i++) {
+          if (maxItem == null && minItem == null) {
+            break
+          }
+          const thatIndex = index - i + period / 2
+          if (index == thatIndex) {
+            continue
+          }
+          if (thatIndex < 0 || thatIndex > _arr.length-1) {
+            maxItem = null
+            minItem = null
+            continue
+          }
+          const thatPrice = _arr[thatIndex][4]
+          if (itemPrice < thatPrice) {
+            maxItem = null
+          } else {
+            minItem = null
+          }
+        }
+        if (maxItem) {
+          maxItems.push(maxItem)
+        }
+        if (minItem) {
+          minItems.push(minItem)
+        }
+      })
+      this.minItems = minItems
+      this.maxItems = maxItems
+
+      let MinMacd = {
+        diff: 0,
+        dea: 0,
+        bar: 0
+      }
+      let MinKdj = {
+        k: 0,
+        d: 0,
+        j: 0
+      }
+      let MaxMacd = {
+        diff: 0,
+        dea: 0,
+        bar: 0
+      }
+      let MaxKdj = {
+        k: 0,
+        d: 0,
+        j: 0
+      }
+      minItems.forEach(i => {
+        MinKdj.k = MinKdj.k + this.kdj.k[i]
+        MinKdj.d = MinKdj.d + this.kdj.d[i]
+        MinKdj.j = MinKdj.j + this.kdj.j[i]
+        MinMacd.diff = MinMacd.diff + this.macd.diffs[i]
+        MinMacd.dea = MinMacd.dea + this.macd.deas[i]
+        MinMacd.bar = MinMacd.bar + this.macd.bars[i]
+      })
+      maxItems.forEach(i => {
+        MaxKdj.k = MaxKdj.k + this.kdj.k[i]
+        MaxKdj.d = MaxKdj.d + this.kdj.d[i]
+        MaxKdj.j = MaxKdj.j + this.kdj.j[i]
+        MaxMacd.diff = MaxMacd.diff + this.macd.diffs[i]
+        MaxMacd.dea = MaxMacd.dea + this.macd.deas[i]
+        MaxMacd.bar = MaxMacd.bar + this.macd.bars[i]
+      })
+      const perMinKdj = {
+        k: MinKdj.k/minItems.length,
+        d: MinKdj.d/minItems.length,
+        j: MinKdj.j/minItems.length
+      }
+      const perMaxKdj = {
+        k: MaxKdj.k/maxItems.length,
+        d: MaxKdj.d/maxItems.length,
+        j: MaxKdj.j/maxItems.length
+      }
+      const perMinMacd = {
+        diff: MinMacd.diff/minItems.length,
+        dea: MinMacd.dea/minItems.length,
+        bar: MinMacd.bar/minItems.length
+      }
+      const perMaxMacd = {
+        diff: MaxMacd.diff/minItems.length,
+        dea: MaxMacd.dea/minItems.length,
+        bar: MaxMacd.bar/minItems.length
+      }
+      this.perIndicator = {
+        maxKdj: perMaxKdj,
+        minKdj: perMinKdj,
+        maxMacd: perMaxMacd,
+        minMacd: perMinMacd
+      }
+      this.nowIndicator = {
+        macd: this.macd[999],
+        kdj: this.kdj[999]
+      }
+
     }
   }
 }
