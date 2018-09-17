@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <router-link to="/btctrending" class="navigation"></router-link>
+    <router-link to="/botprofit" class="navigation"></router-link>
     <div class="item">
       <div class="left">
         zb

@@ -1,93 +1,89 @@
 <template>
-  <div>
-    <Row :gutter='16'>
-      <Col style="margin-bottom: 10px" span="6" v-for="item in buttonIntervals" :key="item">
+  <div class="container">
+    <router-link to="/zb" class="navigation"></router-link>
+    <Row :gutter='16' style="padding: 30px 20px 20px;margin-top: 50px">
+      <Col style="margin-bottom: 10px" span="8" v-for="item in buttonIntervals" :key="item">
         <Button @click="getKline(item)" long>{{item}}</Button>
       </Col>
     </Row>
     <div>
-      <table>
+      <table class="mytable">
         <thead>
           <tr>
             <th>type</th>
             <th>now</th>
             <th>max</th>
             <th>min</th>
+            <th>status</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>macd-dea</td>
-            <td>{{nowIndicator.macd.dea}}</td>
-            <td>{{perIndicator.maxMacd.dea}}</td>
-            <td>{{perIndicator.minMacd.dea}}</td>
+            <td>{{nowIndicator.macd.dea | getFixed(6)}}</td>
+            <td>{{perIndicator.maxMacd.dea | getFixed(6)}}</td>
+            <td>{{perIndicator.minMacd.dea | getFixed(6)}}</td>
+            <td>{{nowIndicator.macd.dea | getStatus(perIndicator.minMacd.dea, perIndicator.maxMacd.dea)}}</td>
           </tr>
           <tr>
             <td>macd-diff</td>
-            <td>{{nowIndicator.macd.diff}}</td>
-            <td>{{perIndicator.maxMacd.diff}}</td>
-            <td>{{perIndicator.minMacd.diff}}</td>
+            <td>{{nowIndicator.macd.diff | getFixed(6)}}</td>
+            <td>{{perIndicator.maxMacd.diff | getFixed(6)}}</td>
+            <td>{{perIndicator.minMacd.diff | getFixed(6)}}</td>
+            <td>{{nowIndicator.macd.diff | getStatus(perIndicator.minMacd.diff, perIndicator.maxMacd.diff)}}</td>
           </tr>
           <tr>
             <td>macd-bar</td>
-            <td>{{nowIndicator.macd.bar}}</td>
-            <td>{{perIndicator.maxMacd.bar}}</td>
-            <td>{{perIndicator.minMacd.bar}}</td>
+            <td>{{nowIndicator.macd.bar | getFixed(6)}}</td>
+            <td>{{perIndicator.maxMacd.bar | getFixed(6)}}</td>
+            <td>{{perIndicator.minMacd.bar | getFixed(6)}}</td>
+            <td>{{nowIndicator.macd.bar | getStatus(perIndicator.minMacd.bar, perIndicator.maxMacd.bar)}}</td>
           </tr>
           <tr>
             <td>kdj-k</td>
-            <td>{{nowIndicator.kdj.k}}</td>
-            <td>{{perIndicator.maxKdj.k}}</td>
-            <td>{{perIndicator.minKdj.k}}</td>
+            <td>{{nowIndicator.kdj.k | getFixed(2)}}</td>
+            <td>{{perIndicator.maxKdj.k | getFixed(2)}}</td>
+            <td>{{perIndicator.minKdj.k | getFixed(2)}}</td>
+            <td>{{nowIndicator.kdj.k | getStatus(perIndicator.minKdj.k, perIndicator.maxKdj.k)}}</td>
           </tr>
           <tr>
             <td>kdj-d</td>
-            <td>{{nowIndicator.kdj.d}}</td>
-            <td>{{perIndicator.maxKdj.d}}</td>
-            <td>{{perIndicator.minKdj.d}}</td>
+            <td>{{nowIndicator.kdj.d | getFixed(2)}}</td>
+            <td>{{perIndicator.maxKdj.d | getFixed(2)}}</td>
+            <td>{{perIndicator.minKdj.d | getFixed(2)}}</td>
+            <td>{{nowIndicator.kdj.d | getStatus(perIndicator.minKdj.d, perIndicator.maxKdj.d)}}</td>
           </tr>
           <tr>
             <td>kdj-j</td>
-            <td>{{nowIndicator.kdj.j}}</td>
-            <td>{{perIndicator.maxKdj.j}}</td>
-            <td>{{perIndicator.minKdj.j}}</td>
+            <td>{{nowIndicator.kdj.j | getFixed(2)}}</td>
+            <td>{{perIndicator.maxKdj.j | getFixed(2)}}</td>
+            <td>{{perIndicator.minKdj.j | getFixed(2)}}</td>
+            <td>{{nowIndicator.kdj.j | getStatus(perIndicator.minKdj.j, perIndicator.maxKdj.j)}}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div>
-      nowIndicator:
-    </div>
-    <Row>
-      <Col span="3">macd-dea</Col>
-      <Col span="3">{{nowIndicator.macd.dea}}</Col>
-    </Row>
-    <Row>
-      <Col span="3">macd-diff</Col>
-      <Col span="3">{{nowIndicator.macd.diff}}</Col>
-    </Row>
-    <Row>
-      <Col span="3">macd-bar</Col>
-      <Col span="3">{{nowIndicator.macd.bar}}</Col>
-    </Row>
-    <Row>
-      <Col span="3">kdj-k</Col>
-      <Col span="3">{{nowIndicator.kdj.k}}</Col>
-    </Row>
-    <Row>
-      <Col span="3">kdj-d</Col>
-      <Col span="3">{{nowIndicator.kdj.d}}</Col>
-    </Row>
-    <Row>
-      <Col span="3">kdj-j</Col>
-      <Col span="3">{{nowIndicator.kdj.j}}</Col>
-    </Row>
+    
   </div>
 </template>
 <script>
 import {MACD, KDJ} from '@/tools/indicator.js'
 export default {
   name: 'BotProfit',
+  filters: {
+    getFixed(val, level) {
+      return (val?val/1:0).toFixed(level)
+    },
+    getStatus(val, min, max) {
+      if (val/1 < min/1) {
+        return -1
+      }
+      if (val/1 > max/1) {
+        return 1
+      }
+      return 0
+    }
+  },
   data() {
     return {
       kline: [],
@@ -131,7 +127,7 @@ export default {
 // 2352, 低
 // 2367.37, 收
 // 17259.83 交易量
-      this.$http('http://api.zb.cn/data/v1/kline', {
+      this.$http('http://www.abichi.club/zbapi/data/v1/kline', {
         params: {
           market: 'usdt_qc',
           type: type,
@@ -350,12 +346,45 @@ export default {
         maxMacd: perMaxMacd,
         minMacd: perMinMacd
       }
+      const maxLength = this.kline.length-1
       this.nowIndicator = {
-        macd: this.macd[999],
-        kdj: this.kdj[999]
+        macd: {
+          dea: this.macd.deas[maxLength],
+          diff: this.macd.diffs[maxLength],
+          bar: this.macd.bars[maxLength]
+        },
+        kdj: {
+          k: this.kdj.k[maxLength],
+          d: this.kdj.d[maxLength],
+          j: this.kdj.j[maxLength]
+        }
       }
 
     }
   }
 }
 </script>
+<style lang="less" scoped>
+  .container {
+    padding: 20px 30px;
+    background-color: #333;
+    min-height: 100%;
+    color: #fff;
+  }
+    .navigation {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #ddd;
+  }
+
+.mytable {
+  width: 100%;
+  text-align: center;
+  td, th {
+    padding: 5px 0
+  }
+}
+</style>
