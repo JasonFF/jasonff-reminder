@@ -138,6 +138,7 @@ export default {
         this.macd = MACD(this.kline.map(it => it[4]))
         this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
         this.parseData()
+        // this.strategy4()
       })
     },
     strategy1() {
@@ -246,8 +247,73 @@ export default {
       strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.85).toFixed(2)
       console.log(strategyData)
     },
+    strategy3() {
+      let strategyData = {
+          account: 10000,
+          usdtAccount: 0,
+          sellItems: []
+        }
+      this.kline.forEach((it, index) => {
+        const price = it[4]
+        const minJ = 0
+        const maxJ = 88
+        const nowJ = this.kdj.j[index]
+        const perBuy = 1000
+        
+        if (nowJ < minJ) {
+          if ((strategyData.account - price * perBuy)>0) {
+            strategyData.account = strategyData.account - price * perBuy
+            strategyData.usdtAccount = strategyData.usdtAccount + perBuy
+          }
+        }
+        if (nowJ > maxJ) {
+          if ((strategyData.usdtAccount) > 0) {
+            strategyData.account = strategyData.account + price * strategyData.usdtAccount
+            strategyData.usdtAccount = 0
+          }
+        }
+      })
+      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.95).toFixed(2)
+        console.log(strategyData)
+    },
+    strategy4() {
+      let strategyData = {
+          account: 10000,
+          usdtAccount: 0,
+          sellItems: []
+        }
+      this.kline.forEach((it, index) => {
+        if (index == 0) {
+          return
+        }
+        const price = it[4]
+        const minDea = -0.003
+        const maxDea = 0
+        const minJ = 15
+        const maxJ = 60
+        const nowJ = this.kdj.j[index]
+        const nowDea = this.macd.deas[index]
+        const beforeDea = this.macd.deas[index-1]
+        const perBuy = parseInt(10000/price)
+        
+        if (nowDea < minDea && nowDea > beforeDea) {
+          if ((strategyData.account - price * perBuy)>0) {
+            strategyData.account = strategyData.account - price * perBuy
+            strategyData.usdtAccount = strategyData.usdtAccount + perBuy
+          }
+        }
+        if (nowDea > maxDea && nowDea < beforeDea) {
+          if ((strategyData.usdtAccount) > 0) {
+            strategyData.account = strategyData.account + price * strategyData.usdtAccount
+            strategyData.usdtAccount = 0
+          }
+        }
+      })
+      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.95).toFixed(2)
+        console.log(strategyData)
+    },
     parseData() {
-      const period = 20
+      const period = 66
       let maxItems = []
       let minItems = []
       this.kline.forEach((it, index, _arr) => {
