@@ -1,11 +1,20 @@
 <template>
   <div class="container">
+    <h1 style="text-align: center">
+      {{market}} - {{type}}
+    </h1>
     <router-link to="/zb" class="navigation"></router-link>
-    <Row :gutter='16' style="padding: 30px 20px 20px;margin-top: 50px">
-      <Col style="margin-bottom: 10px" span="8" v-for="item in buttonIntervals" :key="item">
-        <Button @click="getKline(item)" long>{{item}}</Button>
+    <Row :gutter='16' style="padding: 10px 20px 20px;margin-top: 10px">
+      <Col style="margin-bottom: 10px" span="8" v-for="item in buttonMarkets" :key="item">
+        <Button :class="{active: item == market}" @click="getKline(item, null)" long>{{item}}</Button>
       </Col>
     </Row>
+    <Row :gutter='16' style="padding: 0 20px 20px;margin-top: 0px">
+      <Col style="margin-bottom: 10px" span="8" v-for="item in buttonIntervals" :key="item">
+        <Button :class="{active: item == type}" @click="getKline(null, item)" long>{{item}}</Button>
+      </Col>
+    </Row>
+    
     <div>
       <table class="mytable">
         <thead>
@@ -70,11 +79,16 @@
         </tbody>
       </table>
     </div>
+    <div id="kline1" style="height: 500px;width: 100%;background:#fff;margin-top: 10px">
+
+    </div>
     
   </div>
 </template>
 <script>
 import {MACD, KDJ} from '@/tools/indicator.js'
+import echarts from 'echarts'
+import moment from 'moment'
 export default {
   name: 'BotProfit',
   filters: {
@@ -93,7 +107,14 @@ export default {
   },
   data() {
     return {
+      type: '',
+      market: 'usdt_qc',
       kline: [],
+      buttonMarkets: [
+        'usdt_qc',
+        'btc_usdt',
+        'eth_usdt'
+      ],
       buttonIntervals: [
         '1min',
         '3min',
@@ -130,7 +151,88 @@ export default {
     }
   },
   methods: {
-    getKline(type) {
+    initChart(data) {
+        const option = {
+          title: {
+              text: '均线'
+          },
+          tooltip: {
+              trigger: 'axis'
+          },
+          legend: {
+              data:['kline','barSum']
+          },
+          grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+          },
+          dataZoom: [{
+              type: 'inside',
+              start: 90,
+              end: 100
+          }, {
+              start: 0,
+              end: 10,
+              handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+              handleSize: '80%',
+              handleStyle: {
+                  color: '#fff',
+                  shadowBlur: 3,
+                  shadowColor: 'rgba(0, 0, 0, 0.6)',
+                  shadowOffsetX: 2,
+                  shadowOffsetY: 2
+              }
+          }],
+          xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              data: this.kline.map(it => moment(it[0]).format('MM-DD HH:mm:ss'))
+          },
+          yAxis: [
+            {
+              name: 'kline',
+              type: 'log',
+              max: 'dataMax',
+              min: 'dataMin'
+            },
+            {
+                name: 'barSum',
+                max: 'dataMax',
+                min: 'dataMin',
+                type: 'value',
+            }
+          ],
+          series: [
+              {
+                  name:'kline',
+                  type:'line',
+                  data: this.kline.map(it => it[4])
+              },
+              {
+                  name:'barSum',
+                  type:'line',
+                  yAxisIndex:1,
+                  data: data
+              },
+          ]
+      };
+      const kline1 = echarts.init(document.getElementById('kline1'));
+      kline1.setOption(option);
+    },
+    getKline(market, type) {
+      if (market) {
+        this.market = market
+      } else {
+        market = this.market
+      }
+      if (type) {
+        this.type = type
+      } else {
+        type = this.type
+      }
+
       //   1417536000000, 时间戳
 // 2370.16, 开
 // 2380, 高
@@ -139,7 +241,7 @@ export default {
 // 17259.83 交易量
       this.$http('http://www.abichi.club/zbapi/data/v1/kline', {
         params: {
-          market: 'usdt_qc',
+          market: market,
           type: type,
           size: 1000
         }
@@ -148,7 +250,7 @@ export default {
         this.macd = MACD(this.kline.map(it => it[4]))
         this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
         this.parseData()
-        // this.strategy5()
+        this.strategy6()
       })
     },
     strategy1() {
@@ -332,7 +434,6 @@ export default {
         }
         return 0
       }
-      const sellLevel = 0.01
       let strategyData = {
           account: 10000,
           usdtAccount: 0,
@@ -356,9 +457,9 @@ export default {
           const val = indicator[key]
           buyLevel = buyLevel - val
         })
-        const perBuy = buyLevel * 50
+        const perBuy = 200
 
-        if (indicator.dea == -1 && indicator.diff == -1) {
+        if (indicator.dea == -1 && indicator.diff == -1 && indicator.bar == -1) {
           if ((strategyData.account - price * perBuy)>0) {
             strategyData.account = strategyData.account - price * perBuy
             strategyData.usdtAccount = strategyData.usdtAccount + perBuy
@@ -366,12 +467,15 @@ export default {
             // strategyData.sellCounts.push(perBuy)
           }
         }
-        if (indicator.dea == 1 && indicator.diff == 1) {
+        if (indicator.dea + indicator.diff + indicator.bar > 1) {
           strategyData.account = strategyData.account + price * strategyData.usdtAccount
           strategyData.usdtAccount = 0
         } 
         
-        
+        const profit = (strategyData.account + strategyData.usdtAccount * 6.9).toFixed(2)
+        if (profit < 10000) {
+          console.log(profit)
+        }
 
         // strategyData.sellItems.forEach((sellItem, sellIndex) => {
         //   const sellCounts = strategyData.sellCounts[sellIndex]
@@ -389,8 +493,19 @@ export default {
         //   }
         // })
       })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.95).toFixed(2)
+      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.9).toFixed(2)
         console.log(strategyData)
+    },
+    // 能量对决
+    strategy6() {
+      let barsTotalList = []
+      let barsTotal = 0
+      this.macd.bars.forEach(it => {
+        barsTotal += it
+        barsTotalList.push(barsTotal.toFixed(4))
+      })
+      this.initChart(barsTotalList)
+      console.log(barsTotalList, barsTotal)
     },
     parseData() {
       const period = 66
