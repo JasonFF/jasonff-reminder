@@ -113,7 +113,8 @@ export default {
       buttonMarkets: [
         'usdt_qc',
         'btc_usdt',
-        'eth_usdt'
+        'eth_usdt',
+        'eos_usdt'
       ],
       buttonIntervals: [
         '1min',
