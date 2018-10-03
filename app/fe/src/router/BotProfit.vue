@@ -675,7 +675,7 @@ export default {
     min-height: 100%;
     color: #fff;
     button {
-      background: #999
+      background: #ccc
     }
   }
     .navigation {
