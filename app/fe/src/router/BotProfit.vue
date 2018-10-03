@@ -79,7 +79,7 @@
         </tbody>
       </table>
     </div>
-    <div id="kline1" style="height: 500px;width: 100%;background:#666;margin-top: 10px">
+    <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px">
 
     </div>
     
