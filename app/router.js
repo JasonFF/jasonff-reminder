@@ -62,54 +62,6 @@ const hbotcapi = k2c(httpProxy({
   },
 }));
 
-const tigerapi = k2c(httpProxy({
-  target: 'https://api.cointiger.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/tigerapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-const tigerctcapi = k2c(httpProxy({
-  target: 'https://www.cointiger.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/tigerctcapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-const gatectcapi = k2c(httpProxy({
-  target: 'https://gate.io',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/gatectcapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-const gateapi = k2c(httpProxy({
-  target: 'http://data.gateio.io',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/gateapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
 const blockapi = k2c(httpProxy({
   target: 'https://block.cc',
   changeOrigin: true,
@@ -205,10 +157,6 @@ module.exports = app => {
   router.all('/zbapi/*', zbapi)
   router.all('/zbtradeapi/*', zbtradeproxy)
   router.all('/hbotcapi/*', hbotcapi)
-  router.all('/tigerapi/*', tigerapi)
-  router.all('/tigerctcapi/*', tigerctcapi)
-  router.all('/gatectcapi/*', gatectcapi)
-  router.all('/gateapi/*', gateapi)
   router.all('/zbotcapi/*', zbotcapi)
   router.all('/blockapi/*', blockapi)
   router.all('/aexapi/*', aexapi)

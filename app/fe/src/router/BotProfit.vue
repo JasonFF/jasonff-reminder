@@ -79,7 +79,7 @@
         </tbody>
       </table>
     </div>
-    <div id="kline1" style="height: 500px;width: 100%;background:#fff;margin-top: 10px">
+    <div id="kline1" style="height: 500px;width: 100%;background:#666;margin-top: 10px">
 
     </div>
     
@@ -674,6 +674,9 @@ export default {
     background-color: #333;
     min-height: 100%;
     color: #fff;
+    button {
+      background: #999
+    }
   }
     .navigation {
     position: absolute;

@@ -54,16 +54,6 @@
             <td>{{hbPrice_b|getRatio(zbOtcPrice_b)}}</td>
           </tr>
           <tr>
-            <td>aex</td>
-            <td>{{aexUsdtPrice}}</td>
-            <td>{{aexUsdtRefer}}</td>
-          </tr>
-          <tr>
-            <td>aex_r</td>
-            <td>{{aexUsdtPrice}}</td>
-            <td>{{aexUsdtRefer_r}}</td>
-          </tr>
-          <tr>
             <td>exchange</td>
             <td>{{hlPrice}}</td>
             <td>{{zbPrice|diff(hlPrice)}}</td>
@@ -73,38 +63,48 @@
     </div>
     <div style="height: 20px;"></div>
     <hr>
-
-    <div class="clearBoth">
-      <div style="width: 50%;float:left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>ask</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in zbAsks">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="width: 50%; float: left">
-        <table class="table-zb">
-          <thead>
-            <tr>
-              <th>bid</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in zbBids">
-              <td>{{item[0]}}</td>
-              <td>{{item[1]}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="table-box">
+      <Row>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">buy</th>
+              </tr>
+              <tr>
+                <th>price</th>
+                <th>amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in okBuyList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">sell</th>
+              </tr>
+              <tr>
+                <th>price</th>
+                <th>amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in okSellList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+      </Row>
+      
 
     </div>
   </div>
@@ -125,10 +125,8 @@
       this.getZbData()
       this.getHbOtcData()
       this.getHL()
-      this.getZbDepth()
       this.getZbOtcData()
-      this.getAexData()
-      this.getAexCnc()
+      this.getOkexData()
     },
     computed: {
       strategy() {
@@ -136,12 +134,6 @@
         const qcTrend = (1 - this.zbOtcPrice_b) * 10
         return (1 - (qcTrend/1 + hldiff * 5) / 2).toFixed(3)
       },
-      aexUsdtRefer() {
-        return (this.aexUsdtPrice * this.aexCncBuyPrice / this.zbOtcPrice_s).toFixed(3)
-      },
-      aexUsdtRefer_r() {
-        return (this.aexUsdtPrice / this.aexCncSellPrice / this.zbOtcPrice_b).toFixed(3)
-      }
     },
     data() {
       return {
@@ -154,11 +146,8 @@
         zbPrice_s: '',
         zbOtcPrice_b: '',
         zbOtcPrice_s: '',
-        btcUsdtAsks: [],
-        btcUsdtBids: [],
-        aexUsdtPrice: '',
-        aexCncBuyPrice: '',
-        aexCncSellPrice: ''
+        okBuyList: [],
+        okSellList: []
       }
     },
     filters: {
@@ -183,30 +172,46 @@
       }
     },
     methods: {
-      getAexData() {
-        axios( `${baseUrl}/aexctcapi/trade/getTradeList30.php?coinname=USDT&mk_type=CNC&grade=0`).then(res => {
-          
-          this.aexUsdtPrice = res.data.tradeStr[0][1]
-        })
-      },
-      getAexCnc() {
-        axios( `${baseUrl}/aexctcapi/trade/c2c/order_list_c2c.php?order_type=1&market=CNY&coin=CNC&page=0`).then(res => {
-          
-          this.aexCncBuyPrice = res.data.data.ord_list[1].pice
-        })
-        axios( `${baseUrl}/aexctcapi/trade/c2c/order_list_c2c.php?order_type=2&market=CNY&coin=CNC&page=0`).then(res => {
-          
-          this.aexCncSellPrice = res.data.data.ord_list[1].pice
-        })
-      },
-      getZbDepth() {
-        axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=50`).then(res => {
-          this.zbAsks = res.data.asks.filter(it => {
-            return it[1] >= 5000
-          }).reverse()
-          this.zbBids = res.data.bids.filter(it => {
-            return it[1] >= 5000
+      getOkexData() {
+        axios(`${baseUrl}/okexapi/v3/c2c/tradingOrders/book?side=buy&baseCurrency=usdt&quoteCurrency=cny&userType=all&paymentMethod=all`).then(res => {
+          const list = res.data.data.buy
+          let resultObj = {}
+          let resultList = []
+          list.forEach(it => {
+            if (resultObj[`$${it.price}`]) {
+              resultObj[`$${it.price}`] += it.availableAmount
+            } else {
+              resultObj[`$${it.price}`] = it.availableAmount
+            }
           })
+          Object.keys(resultObj).forEach(it => {
+            resultList.push({
+              price: it.replace('$',''),
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+            })
+          })
+          this.okBuyList = resultList
+          console.log(resultList)
+        })
+        axios(`${baseUrl}/okexapi/v3/c2c/tradingOrders/book?side=sell&baseCurrency=usdt&quoteCurrency=cny&userType=all&paymentMethod=all`).then(res => {
+          const list = res.data.data.sell
+          let resultObj = {}
+          let resultList = []
+          list.forEach(it => {
+            if (resultObj[`$${it.price}`]) {
+              resultObj[`$${it.price}`] += it.availableAmount
+            } else {
+              resultObj[`$${it.price}`] = it.availableAmount
+            }
+          })
+          Object.keys(resultObj).forEach(it => {
+            resultList.push({
+              price: it.replace('$',''),
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+            })
+          })
+          this.okSellList = resultList
+          console.log(resultList)
         })
       },
       getHL() {
@@ -260,7 +265,7 @@
           const str = res.data;
           const reg = /\d\.\d{2,3}/g;
           for (let i = 1; i < 10; i++) {
-            if (str.match(reg)[i] < 1.5 && str.match(reg)[i] > 0.8) {
+            if (str.match(reg)[i] < 1.1 && str.match(reg)[i] > 0.85) {
               this.zbOtcPrice_b = str.match(reg)[i]
               break
             }
@@ -275,7 +280,7 @@
           const str = res.data;
           const reg = /\d\.\d{2,3}/g;
           for (let i = 1; i < 10; i++) {
-            if (str.match(reg)[i] < 1.5 && str.match(reg)[i] > 0.8) {
+            if (str.match(reg)[i] < 1.1 && str.match(reg)[i] > 0.85) {
               this.zbOtcPrice_s = str.match(reg)[i]
               break
             }
