@@ -5,7 +5,7 @@ import Zb from './Zb'
 import AverageChart from './AverageChart'
 import BotProfit from './BotProfit'
 import BtcTrending from './BtcTrending'
-
+import Vol from './Vol'
 Vue.use(Router)
 
 export default new Router({
@@ -35,6 +35,11 @@ export default new Router({
       path: '/btctrending',
       name: 'BtcTrending',
       component: BtcTrending
+    },
+    {
+      path: '/vol',
+      name: 'Vol',
+      component: Vol
     }
   ]
 })

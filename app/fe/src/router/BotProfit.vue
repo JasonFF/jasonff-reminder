@@ -23,7 +23,6 @@
             <th>now</th>
             <th>max</th>
             <th>min</th>
-            <th>buy</th>
             <th>status</th>
           </tr>
         </thead>
@@ -33,7 +32,6 @@
             <td>{{nowIndicator.macd.dea | getFixed(6)}}</td>
             <td>{{perIndicator.maxMacd.dea | getFixed(6)}}</td>
             <td>{{perIndicator.minMacd.dea | getFixed(6)}}</td>
-            <td>{{perIndicator.buyMacd.dea | getFixed(6)}}</td>
             <td>{{nowIndicator.macd.dea | getStatus(perIndicator.minMacd.dea, perIndicator.maxMacd.dea)}}</td>
           </tr>
           <tr>
@@ -41,7 +39,6 @@
             <td>{{nowIndicator.macd.diff | getFixed(6)}}</td>
             <td>{{perIndicator.maxMacd.diff | getFixed(6)}}</td>
             <td>{{perIndicator.minMacd.diff | getFixed(6)}}</td>
-            <td>{{perIndicator.buyMacd.diff | getFixed(6)}}</td>
             <td>{{nowIndicator.macd.diff | getStatus(perIndicator.minMacd.diff, perIndicator.maxMacd.diff)}}</td>
           </tr>
           <tr>
@@ -49,7 +46,6 @@
             <td>{{nowIndicator.macd.bar | getFixed(6)}}</td>
             <td>{{perIndicator.maxMacd.bar | getFixed(6)}}</td>
             <td>{{perIndicator.minMacd.bar | getFixed(6)}}</td>
-            <td>{{perIndicator.buyMacd.bar | getFixed(6)}}</td>
             <td>{{nowIndicator.macd.bar | getStatus(perIndicator.minMacd.bar, perIndicator.maxMacd.bar)}}</td>
           </tr>
           <tr>
@@ -57,7 +53,6 @@
             <td>{{nowIndicator.kdj.k | getFixed(2)}}</td>
             <td>{{perIndicator.maxKdj.k | getFixed(2)}}</td>
             <td>{{perIndicator.minKdj.k | getFixed(2)}}</td>
-            <td>{{perIndicator.buyKdj.k | getFixed(2)}}</td>
             <td>{{nowIndicator.kdj.k | getStatus(perIndicator.minKdj.k, perIndicator.maxKdj.k)}}</td>
           </tr>
           <tr>
@@ -65,7 +60,6 @@
             <td>{{nowIndicator.kdj.d | getFixed(2)}}</td>
             <td>{{perIndicator.maxKdj.d | getFixed(2)}}</td>
             <td>{{perIndicator.minKdj.d | getFixed(2)}}</td>
-            <td>{{perIndicator.buyKdj.d | getFixed(2)}}</td>
             <td>{{nowIndicator.kdj.d | getStatus(perIndicator.minKdj.d, perIndicator.maxKdj.d)}}</td>
           </tr>
           <tr>
@@ -73,7 +67,6 @@
             <td>{{nowIndicator.kdj.j | getFixed(2)}}</td>
             <td>{{perIndicator.maxKdj.j | getFixed(2)}}</td>
             <td>{{perIndicator.minKdj.j | getFixed(2)}}</td>
-            <td>{{perIndicator.buyKdj.j | getFixed(2)}}</td>
             <td>{{nowIndicator.kdj.j | getStatus(perIndicator.minKdj.j, perIndicator.maxKdj.j)}}</td>
           </tr>
         </tbody>
@@ -86,7 +79,7 @@
   </div>
 </template>
 <script>
-import {MACD, KDJ} from '@/tools/indicator.js'
+import {MACD, KDJ, BOLL} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
 export default {
@@ -135,6 +128,7 @@ export default {
       },
       macd: {},
       kdj: {},
+      boll: {},
       minItems: [],
       maxItems: [],
       buyItems: [],
@@ -162,7 +156,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','barSum']
+              data:['kline','barSum'] 
           },
           grid: {
               left: '3%',
@@ -204,6 +198,12 @@ export default {
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
+            },
+            {
+                name: 'perVol',
+                max: 'dataMax',
+                min: 'dataMin',
+                type: 'value',
             }
           ],
           series: [
@@ -218,6 +218,12 @@ export default {
                   yAxisIndex:1,
                   data: data
               },
+              // {
+              //   name: 'perVol',
+              //   type: 'line',
+              //   yAxisIndex:2,
+              //     data: this.kline.map(it => parseInt(it[5]/100000))
+              // }
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
@@ -251,252 +257,56 @@ export default {
         this.kline = res.data.data
         this.macd = MACD(this.kline.map(it => it[4]))
         this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
+        this.boll = BOLL(this.kline.map(it => it[4]))
         this.parseData()
         this.strategy6()
       })
     },
+    // 主力资金情况
     strategy1() {
-      let sellLevel = 0.01
-      const buyDea = -0.00132
-      let perBuy = 100
       let strategyData = {
-        account: 10000,
-        usdtAccount: 0,
-        sellItems: []
-      }
-      this.kline.forEach((it, index, _arr) => {
+          account: 10000,
+          usdtAccount: 0,
+          sellItems: []
+        }
+        let minAccount = 10000
+      this.kline.forEach((it, index) => {
         const price = it[4]
-        const deas = this.macd.deas
-        if (deas[index] < buyDea) {
-          if ((strategyData.account - it[4] * perBuy)>0) {
-            strategyData.account = strategyData.account - it[4] * perBuy
+        const perBuy = 1000
+        const lowBoll = this.boll.lower[index]
+        const upBoll = this.boll.upper[index]
+        const sellLevel = 0.04
+
+        if (price < lowBoll) {
+          if ((strategyData.account - price * perBuy)>0) {
+            strategyData.account = strategyData.account - price * perBuy
             strategyData.usdtAccount = strategyData.usdtAccount + perBuy
-            strategyData.sellItems.push(it[4] + sellLevel)
+            // strategyData.sellItems.push(it[4] + sellLevel)
+            // if (strategyData.account < minAccount) {
+            //   minAccount = strategyData.account
+            // }
           }
         }
-        strategyData.sellItems.forEach((sellItem, sellIndex) => {
-          if (strategyData.usdtAccount - perBuy < 0) {
-            return
-          }
-          if (sellItem == 999999) {
-            return
-          }
-          if (sellItem < price ) {
-            strategyData.account = strategyData.account + sellItem * perBuy
-            strategyData.usdtAccount = strategyData.usdtAccount - perBuy
-            strategyData.sellItems[sellIndex] = 999999
-          }
-        })
-      })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.85).toFixed(2)
-      console.log(strategyData)
-    },
-    strategy2() {
-      let sellLevel = 0.0005
-      const buyDea = -0.0001
-      const sellDea = 0.0001
-      let perBuy = 100
-      let strategyData = {
-        account: 10000,
-        usdtAccount: 0,
-        sellItems: []
-      }
-      let perBuyDea = null
-      let buyFinish = false
-      let sellFinish = false
-      let perSellDea = null
-      this.kline.forEach((it, index, _arr) => {
-        const price = it[4]
-        const deas = this.macd.deas
-        const nowDea = deas[index]
-        if (nowDea < buyDea && !buyFinish) {
-          sellFinish = false
-          if (perBuyDea == null) {
-            return perBuyDea = nowDea
-          }
-          if (perBuyDea < nowDea) {
-            if ((strategyData.account - it[4] * perBuy)>0) {
-              strategyData.account = strategyData.account - it[4] * perBuy
-              strategyData.usdtAccount = strategyData.usdtAccount + perBuy
-              buyFinish = true
-              // strategyData.sellItems.push(it[4] + sellLevel)
-            }
-            
-            perBuyDea = null
-          } else {
-            perBuyDea = nowDea
-          }
-        } else {
-          perBuyDea = null
-        }
-        if (nowDea > sellDea && !sellFinish) {
-          buyFinish = false
-          if (perSellDea == null) {
-            return perSellDea = nowDea
-          }
-          if (perSellDea > nowDea) {
-            if ((strategyData.usdtAccount - perBuy) > 0) {
-              strategyData.account = strategyData.account + it[4] * perBuy
-              strategyData.usdtAccount = strategyData.usdtAccount - perBuy
-              sellFinish = true
-            }
-            perSellDea = null
-          } else {
-            perSellDea = nowDea
-          }
-        } else {
-          perSellDea = null
+        if (price > upBoll) {
+          strategyData.account = strategyData.account + upBoll * strategyData.usdtAccount
+          strategyData.usdtAccount = 0
         }
         // strategyData.sellItems.forEach((sellItem, sellIndex) => {
         //   if (strategyData.usdtAccount - perBuy < 0) {
         //     return
         //   }
-        //   if (deas[index] > sellDea ) {
-            // strategyData.account = strategyData.account + it[4] * perBuy
-            // strategyData.usdtAccount = strategyData.usdtAccount - perBuy
-            // strategyData.sellItems[sellIndex] = 999999
-        //   }
-        // })
-      })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.85).toFixed(2)
-      console.log(strategyData)
-    },
-    strategy3() {
-      let strategyData = {
-          account: 10000,
-          usdtAccount: 0,
-          sellItems: []
-        }
-      this.kline.forEach((it, index) => {
-        const price = it[4]
-        const minJ = 0
-        const maxJ = 88
-        const nowJ = this.kdj.j[index]
-        const perBuy = 1000
-        
-        if (nowJ < minJ) {
-          if ((strategyData.account - price * perBuy)>0) {
-            strategyData.account = strategyData.account - price * perBuy
-            strategyData.usdtAccount = strategyData.usdtAccount + perBuy
-          }
-        }
-        if (nowJ > maxJ) {
-          if ((strategyData.usdtAccount) > 0) {
-            strategyData.account = strategyData.account + price * strategyData.usdtAccount
-            strategyData.usdtAccount = 0
-          }
-        }
-      })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.95).toFixed(2)
-        console.log(strategyData)
-    },
-    strategy4() {
-      let strategyData = {
-          account: 10000,
-          usdtAccount: 0,
-          sellItems: []
-        }
-      this.kline.forEach((it, index) => {
-        if (index == 0) {
-          return
-        }
-        const price = it[4]
-        const minDea = -0.003
-        const maxDea = 0
-        const minJ = 15
-        const maxJ = 60
-        const nowJ = this.kdj.j[index]
-        const nowDea = this.macd.deas[index]
-        const beforeDea = this.macd.deas[index-1]
-        const perBuy = parseInt(10000/price)
-        
-        if (nowDea < minDea && nowDea > beforeDea) {
-          if ((strategyData.account - price * perBuy)>0) {
-            strategyData.account = strategyData.account - price * perBuy
-            strategyData.usdtAccount = strategyData.usdtAccount + perBuy
-          }
-        }
-        if (nowDea > maxDea && nowDea < beforeDea) {
-          if ((strategyData.usdtAccount) > 0) {
-            strategyData.account = strategyData.account + price * strategyData.usdtAccount
-            strategyData.usdtAccount = 0
-          }
-        }
-      })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.95).toFixed(2)
-        console.log(strategyData)
-    },
-    strategy5() {
-      function getStatus(val, min, max) {
-        if (val > max) {
-          return 1
-        }
-        if (val < min) {
-          return -1
-        }
-        return 0
-      }
-      let strategyData = {
-          account: 10000,
-          usdtAccount: 0,
-          sellItems: [],
-          sellCounts: []
-        }
-      this.kline.forEach((it, index) => {
-        const price = it[4]
-        const indicator = {
-          dea: getStatus(this.macd.deas[index], this.perIndicator.minMacd.dea, this.perIndicator.maxMacd.dea),
-          diff: getStatus(this.macd.diffs[index], this.perIndicator.minMacd.diff, this.perIndicator.maxMacd.diff),
-          bar: getStatus(this.macd.bars[index], this.perIndicator.minMacd.bar, this.perIndicator.maxMacd.bar),
-          k: getStatus(this.kdj.k[index], this.perIndicator.minKdj.k, this.perIndicator.maxKdj.k),
-          d: getStatus(this.kdj.d[index], this.perIndicator.minKdj.d, this.perIndicator.maxKdj.d),
-          j: getStatus(this.kdj.j[index], this.perIndicator.minKdj.j, this.perIndicator.maxKdj.j),
-        }
-        
-        let buyLevel = 0
-
-        Object.keys(indicator).forEach(key => {
-          const val = indicator[key]
-          buyLevel = buyLevel - val
-        })
-        const perBuy = 200
-
-        if (indicator.dea == -1 && indicator.diff == -1 && indicator.bar == -1) {
-          if ((strategyData.account - price * perBuy)>0) {
-            strategyData.account = strategyData.account - price * perBuy
-            strategyData.usdtAccount = strategyData.usdtAccount + perBuy
-            // strategyData.sellItems.push(it[4] + sellLevel)
-            // strategyData.sellCounts.push(perBuy)
-          }
-        }
-        if (indicator.dea + indicator.diff + indicator.bar > 1) {
-          strategyData.account = strategyData.account + price * strategyData.usdtAccount
-          strategyData.usdtAccount = 0
-        } 
-        
-        const profit = (strategyData.account + strategyData.usdtAccount * 6.9).toFixed(2)
-        if (profit < 10000) {
-          console.log(profit)
-        }
-
-        // strategyData.sellItems.forEach((sellItem, sellIndex) => {
-        //   const sellCounts = strategyData.sellCounts[sellIndex]
-        //   if (strategyData.usdtAccount - sellCounts < 0) {
-        //     return
-        //   }
-        //   if (sellCounts == 0) {
+        //   if (sellItem == 999999) {
         //     return
         //   }
         //   if (sellItem < price ) {
-        //     strategyData.account = strategyData.account + sellItem * sellCounts
-        //     strategyData.usdtAccount = strategyData.usdtAccount - sellCounts
+        //     strategyData.account = strategyData.account + sellItem * perBuy
+        //     strategyData.usdtAccount = strategyData.usdtAccount - perBuy
         //     strategyData.sellItems[sellIndex] = 999999
-        //     strategyData.sellCounts[sellIndex] = 0
         //   }
         // })
       })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.9).toFixed(2)
-        console.log(strategyData)
+      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.88).toFixed(2)
+        console.log(strategyData, minAccount)
     },
     // 能量对决
     strategy6() {
@@ -507,7 +317,6 @@ export default {
         barsTotalList.push(barsTotal.toFixed(4))
       })
       this.initChart(barsTotalList)
-      console.log(barsTotalList, barsTotal)
     },
     parseData() {
       const period = 66
@@ -670,7 +479,7 @@ export default {
 </script>
 <style lang="less" scoped>
   .container {
-    padding: 20px 30px;
+    padding: 20px 5px;
     background-color: #333;
     min-height: 100%;
     color: #fff;
