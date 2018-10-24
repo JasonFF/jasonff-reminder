@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <router-link to="/botprofit" class="navigation"></router-link>
+    <router-link to="/strategy" class="navigation-second"></router-link>
     <div class="item">
       <div class="left">
         zb
@@ -217,7 +218,7 @@ import { setTimeout } from 'timers';
               amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
             })
           })
-          return resultList
+          return resultList.reverse()
       }
     },
     data() {
@@ -394,6 +395,14 @@ import { setTimeout } from 'timers';
       display: block;
       clear: both;
     }
+  }
+  .navigation-second {
+    position: absolute;
+    right: 20px;
+    top: 80px;
+    width: 50px;
+    height: 50px;
+    background-color: #ddd;
   }
 
   .navigation {

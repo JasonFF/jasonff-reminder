@@ -189,7 +189,7 @@ export default {
           yAxis: [
             {
               name: 'kline',
-              type: 'log',
+              type: 'value',
               max: 'dataMax',
               min: 'dataMin'
             },
@@ -199,12 +199,6 @@ export default {
                 min: 'dataMin',
                 type: 'value',
             },
-            {
-                name: 'perVol',
-                max: 'dataMax',
-                min: 'dataMin',
-                type: 'value',
-            }
           ],
           series: [
               {
@@ -218,12 +212,6 @@ export default {
                   yAxisIndex:1,
                   data: data
               },
-              // {
-              //   name: 'perVol',
-              //   type: 'line',
-              //   yAxisIndex:2,
-              //     data: this.kline.map(it => parseInt(it[5]/100000))
-              // }
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));

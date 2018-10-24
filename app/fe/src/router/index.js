@@ -6,6 +6,7 @@ import AverageChart from './AverageChart'
 import BotProfit from './BotProfit'
 import BtcTrending from './BtcTrending'
 import Vol from './Vol'
+import Strategy from './Strategy'
 Vue.use(Router)
 
 export default new Router({
@@ -40,6 +41,11 @@ export default new Router({
       path: '/vol',
       name: 'Vol',
       component: Vol
+    },
+    {
+      path: '/strategy',
+      name: 'Strategy',
+      component: Strategy
     }
   ]
 })
