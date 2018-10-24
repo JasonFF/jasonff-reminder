@@ -107,6 +107,52 @@
       
 
     </div>
+    <div style="height: 20px;"></div>
+    <hr>
+    <div class="table-box">
+      <Row>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">buy</th>
+              </tr>
+              <tr>
+                <th>price</th>
+                <th>amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in _hbBuyList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">sell</th>
+              </tr>
+              <tr>
+                <th>price</th>
+                <th>amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in _hbSellList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+      </Row>
+      
+
+    </div>
   </div>
 </template>
 <script>
@@ -114,6 +160,7 @@
   import jsonp from 'jsonp'
   const baseUrl = 'http://www.abichi.club'
   import _ from 'lodash'
+import { setTimeout } from 'timers';
 
   function getFixed(val) {
     return val.toFixed(3)
@@ -123,7 +170,7 @@
     name: 'Home',
     created() {
       this.getZbData()
-      this.getHbOtcData()
+      this.getAllHbOtcData()
       this.getHL()
       this.getZbOtcData()
       this.getOkexData()
@@ -134,6 +181,44 @@
         const qcTrend = (1 - this.zbOtcPrice_b) * 10
         return (1 - (qcTrend/1 + hldiff * 5) / 2).toFixed(3)
       },
+      _hbBuyList() {
+        const list = this.hbBuyList
+          let resultObj = {}
+          let resultList = []
+          list.forEach(it => {
+            if (resultObj[`$${it.price}`]) {
+              resultObj[`$${it.price}`] += it.tradeCount
+            } else {
+              resultObj[`$${it.price}`] = it.tradeCount
+            }
+          })
+          Object.keys(resultObj).forEach(it => {
+            resultList.push({
+              price: it.replace('$',''),
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+            })
+          })
+          return resultList
+      },
+      _hbSellList() {
+        const list = this.hbSellList
+          let resultObj = {}
+          let resultList = []
+          list.forEach(it => {
+            if (resultObj[`$${it.price}`]) {
+              resultObj[`$${it.price}`] += it.tradeCount
+            } else {
+              resultObj[`$${it.price}`] = it.tradeCount
+            }
+          })
+          Object.keys(resultObj).forEach(it => {
+            resultList.push({
+              price: it.replace('$',''),
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+            })
+          })
+          return resultList
+      }
     },
     data() {
       return {
@@ -147,7 +232,9 @@
         zbOtcPrice_b: '',
         zbOtcPrice_s: '',
         okBuyList: [],
-        okSellList: []
+        okSellList: [],
+        hbBuyList: [],
+        hbSellList: []
       }
     },
     filters: {
@@ -191,7 +278,6 @@
             })
           })
           this.okBuyList = resultList
-          console.log(resultList)
         })
         axios(`${baseUrl}/okexapi/v3/c2c/tradingOrders/book?side=sell&baseCurrency=usdt&quoteCurrency=cny&userType=all&paymentMethod=all`).then(res => {
           const list = res.data.data.sell
@@ -211,7 +297,6 @@
             })
           })
           this.okSellList = resultList
-          console.log(resultList)
         })
       },
       getHL() {
@@ -225,36 +310,45 @@
           this.zbPrice_s = res.data.usdtqc.buy
         })
       },
-      getHbOtcData() {
-        axios(`${baseUrl}/hbotcapi/`, {
-          params: {
-            country: 0,
-            currency: 1,
-            payMethod: 0,
-            currPage: 1,
-            coinId: 2,
-            tradeType: 0,
-            merchant: 1,
-            online: 1,
-          }
-        }).then(res => {
-          this.hbPrice = res.data.data[5].price
-        })
-        axios(`${baseUrl}/hbotcapi/`, {
-          params: {
-            country: 0,
-            currency: 1,
-            payMethod: 0,
-            currPage: 1,
-            coinId: 2,
-            tradeType: 1,
-            merchant: 1,
-            online: 1
-          }
-        }).then(res => {
-          this.hbPrice_b = res.data.data[5].price
-        })
+      getAllHbOtcData() {
+        this.hbBuyList = []
+        this.hbSellList = []
+        for (let i = 0; i < 3; i++) {
+          this.getHbOtcData(i + 1).then(res => {
+            this.hbBuyList = this.hbBuyList.concat(res[0].data.data)
+            this.hbSellList = this.hbSellList.concat(res[1].data.data)
+            this.hbPrice = this.hbBuyList[5].price
+            this.hbPrice_b = this.hbSellList[5].price
+          })
+        }
+        
+        
 
+      },
+      getHbOtcData(pageIndex) {
+           return Promise.all([axios(`${baseUrl}/hbotcapi/`, {
+            params: {
+              country: 0,
+              currency: 1,
+              payMethod: 0,
+              currPage: pageIndex || 1,
+              coinId: 2,
+              tradeType: 0,
+              merchant: 1,
+              online: 1,
+            }
+          }), axios(`${baseUrl}/hbotcapi/`, {
+            params: {
+              country: 0,
+              currency: 1,
+              payMethod: 0,
+              currPage: pageIndex || 1,
+              coinId: 2,
+              tradeType: 1,
+              merchant: 1,
+              online: 1
+            }
+          })])
       },
       getZbOtcData() {
         axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
