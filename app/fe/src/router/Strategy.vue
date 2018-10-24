@@ -26,9 +26,9 @@
           <Col span="3" class="text-right">otc:</Col>
           <Col span="9">{{item.otc}}</Col>
           <Col span="6" class="text-right">analysis:</Col>
-          <Col span="18">{{item.analysis}}</Col>
+          <Col span="18" style="line-height: 20px">{{item.analysis}}</Col>
           <Col span="6" class="text-right">conclusion:</Col>
-          <Col span="18">{{item.conclusion}}</Col>
+          <Col span="18" style="line-height: 20px">{{item.conclusion}}</Col>
         </Row>
       </div>
     </div>
@@ -141,7 +141,7 @@
         if (this.modalData.time) {
           this.tableList[this.modalData.index] = this.modalData
         } else {
-          this.tableList.push({
+          this.tableList.unshift({
             ...this.modalData,
             time: moment().format('YYYY-MM-DD HH:mm:ss')
           })
