@@ -26,9 +26,9 @@
           <Col span="3" class="text-right">otc:</Col>
           <Col span="9">{{item.otc}}</Col>
           <Col span="6" class="text-right">analysis:</Col>
-          <Col span="18" style="line-height: 20px">{{item.analysis}}</Col>
+          <Col span="18" style="line-height: 20px;padding: 5px 0;">{{item.analysis}}</Col>
           <Col span="6" class="text-right">conclusion:</Col>
-          <Col span="18" style="line-height: 20px">{{item.conclusion}}</Col>
+          <Col span="18" style="line-height: 20px;padding: 5px 0;">{{item.conclusion}}</Col>
         </Row>
       </div>
     </div>
