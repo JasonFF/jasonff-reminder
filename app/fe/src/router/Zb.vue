@@ -75,12 +75,14 @@
               <tr>
                 <th>price</th>
                 <th>amount</th>
+                <th>count</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in okBuyList">
                 <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
               </tr>
             </tbody>
           </table>
@@ -94,12 +96,14 @@
               <tr>
                 <th>price</th>
                 <th>amount</th>
+                <th>count</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in okSellList">
                 <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
               </tr>
             </tbody>
           </table>
@@ -121,12 +125,14 @@
               <tr>
                 <th>price</th>
                 <th>amount</th>
+                <th>count</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in _hbBuyList">
                 <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
               </tr>
             </tbody>
           </table>
@@ -140,12 +146,14 @@
               <tr>
                 <th>price</th>
                 <th>amount</th>
+                <th>count</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in _hbSellList">
                 <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 20px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
               </tr>
             </tbody>
           </table>
@@ -186,17 +194,21 @@ import { setTimeout } from 'timers';
         const list = this.hbBuyList
           let resultObj = {}
           let resultList = []
+          let resultCount = {}
           list.forEach(it => {
             if (resultObj[`$${it.price}`]) {
               resultObj[`$${it.price}`] += it.tradeCount
+              resultCount[`$${it.price}`] += 1
             } else {
               resultObj[`$${it.price}`] = it.tradeCount
+              resultCount[`$${it.price}`] = 1
             }
           })
           Object.keys(resultObj).forEach(it => {
             resultList.push({
               price: it.replace('$',''),
-              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString(),
+              count: resultCount[it]
             })
           })
           return resultList
@@ -205,17 +217,21 @@ import { setTimeout } from 'timers';
         const list = this.hbSellList
           let resultObj = {}
           let resultList = []
+          let resultCount = {}
           list.forEach(it => {
             if (resultObj[`$${it.price}`]) {
               resultObj[`$${it.price}`] += it.tradeCount
+              resultCount[`$${it.price}`] += 1
             } else {
               resultObj[`$${it.price}`] = it.tradeCount
+               resultCount[`$${it.price}`] = 1
             }
           })
           Object.keys(resultObj).forEach(it => {
             resultList.push({
               price: it.replace('$',''),
-              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString(),
+              count: resultCount[it]
             })
           })
           return resultList.reverse()
@@ -271,18 +287,22 @@ import { setTimeout } from 'timers';
         axios(`${baseUrl}/okexapi/v3/c2c/tradingOrders/book?side=buy&baseCurrency=usdt&quoteCurrency=cny&userType=all&paymentMethod=all`).then(res => {
           const list = res.data.data.buy
           let resultObj = {}
+          let resultCount = {}
           let resultList = []
           list.forEach(it => {
             if (resultObj[`$${it.price}`]) {
               resultObj[`$${it.price}`] += it.availableAmount
+              resultCount[`$${it.price}`] += 1
             } else {
               resultObj[`$${it.price}`] = it.availableAmount
+              resultCount[`$${it.price}`] = 1
             }
           })
           Object.keys(resultObj).forEach(it => {
             resultList.push({
               price: it.replace('$',''),
-              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString(),
+              count: resultCount[it]
             })
           })
           this.okBuyList = resultList
@@ -290,18 +310,22 @@ import { setTimeout } from 'timers';
         axios(`${baseUrl}/okexapi/v3/c2c/tradingOrders/book?side=sell&baseCurrency=usdt&quoteCurrency=cny&userType=all&paymentMethod=all`).then(res => {
           const list = res.data.data.sell
           let resultObj = {}
+          let resultCount = {}
           let resultList = []
           list.forEach(it => {
             if (resultObj[`$${it.price}`]) {
               resultObj[`$${it.price}`] += it.availableAmount
+              resultCount[`$${it.price}`] += 1
             } else {
               resultObj[`$${it.price}`] = it.availableAmount
+              resultCount[`$${it.price}`] = 1
             }
           })
           Object.keys(resultObj).forEach(it => {
             resultList.push({
               price: it.replace('$',''),
-              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString()
+              amount: ((resultObj[it]/1).toFixed(0)/1).toLocaleString(),
+              count: resultCount[it]
             })
           })
           this.okSellList = resultList
@@ -425,11 +449,11 @@ import { setTimeout } from 'timers';
     width: 100%;
     text-align: center;
     th {
-      padding: 10px 5px;
+      padding: 10px 0px;
       font-weight: bold
     }
     td {
-      padding: 10px 5px
+      padding: 10px 0px
     }
   }
 
