@@ -191,7 +191,9 @@ import { setTimeout } from 'timers';
         return (1 - (qcTrend/1 + hldiff * 5) / 2).toFixed(3)
       },
       _hbBuyList() {
-        const list = this.hbBuyList
+        const list = this.hbBuyList.sort((a, b) => {
+          return a.price - b.price
+        })
           let resultObj = {}
           let resultList = []
           let resultCount = {}
@@ -214,7 +216,9 @@ import { setTimeout } from 'timers';
           return resultList
       },
       _hbSellList() {
-        const list = this.hbSellList
+        const list = this.hbSellList.sort((a, b) => {
+          return a.price - b.price
+        })
           let resultObj = {}
           let resultList = []
           let resultCount = {}
@@ -234,7 +238,7 @@ import { setTimeout } from 'timers';
               count: resultCount[it]
             })
           })
-          return resultList.reverse()
+          return resultList
       }
     },
     data() {
