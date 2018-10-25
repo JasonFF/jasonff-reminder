@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <router-link to="/botprofit" class="navigation"></router-link>
-    <router-link to="/strategy" class="navigation-second"></router-link>
+    <router-link to="/strategy" @click.native="sendData" class="navigation-second"></router-link>
     <div class="item">
       <div class="left">
         zb
@@ -260,6 +260,13 @@ import { setTimeout } from 'timers';
       }
     },
     methods: {
+      sendData() {
+        window.localStorage.setItem('zbData', JSON.stringify({
+          zbPrice: this.zbPrice_s,
+          qc: `${this.zbOtcPrice_b} / ${this.zbOtcPrice_s}`,
+          otc: `${this.hbPrice} / ${this.hbPrice_b}`
+        }))
+      },
       getOkexData() {
         axios(`${baseUrl}/okexapi/v3/c2c/tradingOrders/book?side=buy&baseCurrency=usdt&quoteCurrency=cny&userType=all&paymentMethod=all`).then(res => {
           const list = res.data.data.buy
@@ -309,7 +316,6 @@ import { setTimeout } from 'timers';
         axios(`${baseUrl}/zbapi/data/v1/allTicker`).then(res => {
           this.zbPrice = res.data.usdtqc.sell
           this.zbPrice_s = res.data.usdtqc.buy
-          window.localStorage.setItem('zbPrice', this.zbPrice_s)
         })
       },
       getAllHbOtcData() {

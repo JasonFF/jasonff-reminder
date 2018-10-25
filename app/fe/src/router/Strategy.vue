@@ -108,12 +108,13 @@
     },
     methods: {
       add() {
+        const zbData = JSON.parse(window.localStorage.getItem('zbData')||'{}')
         this.modalData = {
-          qc: '',
-          otc: '',
+          qc: zbData.qc || '',
+          otc: zbData.otc || '',
           analysis: '',
           conclusion: '',
-          zbPrice: window.localStorage.getItem('zbPrice')
+          zbPrice: zbData.zbPrice || ''
         }
         this.modalStatus = true
       },
