@@ -309,6 +309,7 @@ import { setTimeout } from 'timers';
         axios(`${baseUrl}/zbapi/data/v1/allTicker`).then(res => {
           this.zbPrice = res.data.usdtqc.sell
           this.zbPrice_s = res.data.usdtqc.buy
+          window.localStorage.setItem('zbPrice', this.zbPrice_s)
         })
       },
       getAllHbOtcData() {

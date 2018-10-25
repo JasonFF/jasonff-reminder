@@ -21,10 +21,12 @@
           <Col span="4"><Button @click="delItem(item, index)" size="small" type="error">D</Button></Col>
           <Col span="16" style="text-align: center">{{item.time}}</Col>
           <Col span="4" class="text-right"><Button @click="editItem(item, index)" size="small" type="info">E</Button></Col>
-          <Col span="3" class="text-right">qc:</Col>
-          <Col span="9">{{item.qc}}</Col>
-          <Col span="3" class="text-right">otc:</Col>
-          <Col span="9">{{item.otc}}</Col>
+          <Col span="2" class="text-right">qc:</Col>
+          <Col span="6">{{item.qc || '-'}}</Col>
+          <Col span="2" class="text-right">otc:</Col>
+          <Col span="6">{{item.otc || '-'}}</Col>
+          <Col span="2" class="text-right">usdt:</Col>
+          <Col span="6">{{item.zbPrice || '-'}}</Col>
           <Col span="6" class="text-right">analysis:</Col>
           <Col span="18" style="line-height: 20px;padding: 5px 0;">{{item.analysis}}</Col>
           <Col span="6" class="text-right">conclusion:</Col>
@@ -34,6 +36,11 @@
     </div>
     <Modal v-model="modalStatus" :title="modalData.time?'edit':'add'" :mask-closable="false" :closable="false">
       <div>
+        <Row>
+          <Col class="formTitle" span="5">usdt</Col>
+          <Col span="17"><Input v-model="modalData.zbPrice"></Input></Col>
+        </Row>
+        <div style="height: 10px"></div>
         <Row>
           <Col class="formTitle" span="5">qc</Col>
           <Col span="17"><Input v-model="modalData.qc"></Input></Col>
@@ -91,7 +98,8 @@
           qc: '',
           otc: '',
           analysis: '',
-          conclusion: ''
+          conclusion: '',
+          zbPrice: ''
         }
       }
     },
@@ -104,7 +112,8 @@
           qc: '',
           otc: '',
           analysis: '',
-          conclusion: ''
+          conclusion: '',
+          zbPrice: window.localStorage.getItem('zbPrice')
         }
         this.modalStatus = true
       },
