@@ -192,7 +192,7 @@ import { setTimeout } from 'timers';
       },
       _hbBuyList() {
         const list = this.hbBuyList.sort((a, b) => {
-          return a.price - b.price
+          return  b.price - a.price
         })
           let resultObj = {}
           let resultList = []
