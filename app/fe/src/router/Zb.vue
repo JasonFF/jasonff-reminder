@@ -28,6 +28,16 @@
         </div>
       </div>
     </div>
+    <div class="item">
+      <div class="left">
+        usdt_usd
+      </div>
+      <div class="right">
+        <div>
+          {{USDTUSD}} | {{(zbPrice_s/USDTUSD).toFixed(4)}}
+        </div>
+      </div>
+    </div>
     <div class="table-box">
       <table class="table-zb">
         <thead>
@@ -183,6 +193,7 @@ import { setTimeout } from 'timers';
       this.getHL()
       this.getZbOtcData()
       this.getOkexData()
+      this.getUSDTUSD()
     },
     computed: {
       strategy() {
@@ -255,7 +266,8 @@ import { setTimeout } from 'timers';
         okBuyList: [],
         okSellList: [],
         hbBuyList: [],
-        hbSellList: []
+        hbSellList: [],
+        USDTUSD: ''
       }
     },
     filters: {
@@ -280,6 +292,11 @@ import { setTimeout } from 'timers';
       }
     },
     methods: {
+      getUSDTUSD() {
+        axios('https://api.coinmarketcap.com/v2/ticker/825/').then(res => {
+          this.USDTUSD = (res.data.data.quotes.USD.price/1).toFixed(4)
+        })
+      },
       sendData() {
         window.localStorage.setItem('zbData', JSON.stringify({
           zbPrice: this.zbPrice_s,
