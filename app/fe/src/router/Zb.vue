@@ -55,14 +55,14 @@
         </thead>
         <thead>
           <tr>
-            <td>hb</td>
+            <td>zb -> hb</td>
             <td>{{hbPrice}}</td>
-            <td>{{hbPrice|getRatio(zbOtcPrice_s)}}</td>
+            <td>{{hbPrice|getRatio(zbOtcPrice_b)}}</td>
           </tr>
           <tr>
-            <td>hb to zb</td>
+            <td>hb -> zb</td>
             <td>{{hbPrice_b}}</td>
-            <td>{{hbPrice_b|getRatio(zbOtcPrice_b)}}</td>
+            <td>{{hbPrice_b|getRatio(zbOtcPrice_s)}}</td>
           </tr>
           <tr>
             <td>exchange</td>
@@ -179,11 +179,43 @@
   import jsonp from 'jsonp'
   const baseUrl = 'http://www.abichi.club'
   import _ from 'lodash'
-import { setTimeout } from 'timers';
+  import cheerio from 'cheerio'
 
   function getFixed(val) {
     return val.toFixed(3)
   }
+
+  function _getZbOtc(type) {
+  return axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
+    params: {
+      type
+    }
+  })
+}
+
+function parseContent(content) {
+  const $ = cheerio.load(content)
+  const numberList = $('.c2c-table tbody tr td.num').map((i, el) => {
+    return $(el).text().replace(/QC/ig, '') / 1
+  }).get()
+  const priceList = $('.c2c-table tbody tr td.price').map((i, el) => {
+    return $(el).text().split('CNY')[0] / 1
+  }).get()
+  let totalPrice = 0;
+  let totalNum = 0
+  priceList.forEach((price, i) => {
+    totalPrice += price * numberList[i]
+    totalNum += numberList[i]
+  })
+  return (totalPrice / totalNum).toFixed(4)
+}
+
+function getZbOtc() {
+  return Promise.all([_getZbOtc(1), _getZbOtc(2)]).then(res => {
+    return [parseContent(res[0].data), parseContent(res[1].data)]
+  })
+}
+
 
   export default {
     name: 'Home',
@@ -374,9 +406,6 @@ import { setTimeout } from 'timers';
             this.hbPrice_b = this.hbSellList[5].price
           })
         }
-        
-        
-
       },
       getHbOtcData(pageIndex) {
            return Promise.all([axios(`${baseUrl}/hbotcapi/`, {
@@ -404,35 +433,9 @@ import { setTimeout } from 'timers';
           })])
       },
       getZbOtcData() {
-        axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
-          params: {
-            type: 2
-          }
-        }).then(res => {
-          const str = res.data;
-          const reg = /\d\.\d{2,3}/g;
-          for (let i = 1; i < 10; i++) {
-            if (str.match(reg)[i] < 1.1 && str.match(reg)[i] > 0.85) {
-              this.zbOtcPrice_b = str.match(reg)[i]
-              break
-            }
-          }
-
-        })
-        axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
-          params: {
-            type: 1
-          }
-        }).then(res => {
-          const str = res.data;
-          const reg = /\d\.\d{2,3}/g;
-          for (let i = 1; i < 10; i++) {
-            if (str.match(reg)[i] < 1.1 && str.match(reg)[i] > 0.85) {
-              this.zbOtcPrice_s = str.match(reg)[i]
-              break
-            }
-          }
-
+        getZbOtc().then(prices => {
+          this.zbOtcPrice_b = prices[1]
+          this.zbOtcPrice_s = prices[0]
         })
       }
     }
