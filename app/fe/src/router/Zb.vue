@@ -7,7 +7,7 @@
         zb
       </div>
       <div class="right">
-        {{zbPrice}}/{{zbPrice_s}}
+        {{zbPrice[0]}}/{{zbPrice[1]}}
       </div>
     </div>
     <div class="item">
@@ -15,7 +15,15 @@
         zbotc
       </div>
       <div class="right">
-        {{zbOtcPrice_b}}/{{zbOtcPrice_s}}
+        {{zbOtcPrice[0]}}/{{zbOtcPrice[1]}}
+      </div>
+    </div>
+    <div class="item">
+      <div class="left">
+        husd
+      </div>
+      <div class="right">
+        {{husdPrice[0]}} || {{zbHusdPrice}} || {{zbHusdPrice|diff(hlPrice)}} 
       </div>
     </div>
     <div class="table-box">
@@ -36,21 +44,65 @@
         <thead>
           <tr>
             <td>zb -> hb</td>
-            <td>{{hbPrice}}</td>
-            <td>{{hbPrice|getRatio(zbOtcPrice_b)}}</td>
+            <td>{{hbPrice[0]}}</td>
+            <td>{{hbPrice[0]|getRatio(zbOtcPrice[0]/1+0.001)}}</td>
           </tr>
           <tr>
             <td>hb -> zb</td>
-            <td>{{hbPrice_b}}</td>
-            <td>{{hbPrice_b|getRatio(zbOtcPrice_s)}}</td>
+            <td>{{hbPrice[1]}}</td>
+            <td>{{hbPrice[1]|getRatio(zbOtcPrice[0])}}</td>
           </tr>
           <tr>
             <td>exchange</td>
             <td>{{hlPrice}}</td>
-            <td>{{zbPrice|diff(hlPrice)}}</td>
+            <td>{{zbPrice[0]|diff(hlPrice)}}</td>
           </tr>
         </thead>
       </table>
+    </div>
+    <div style="height: 20px;"></div>
+    <hr>
+    <div class="table-box">
+      <Row>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">asks</th>
+              </tr>
+              <tr>
+                <th>price</th>
+                <th>amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in zbAsks">
+                <td>{{item[0]}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item[1]}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">bids</th>
+              </tr>
+              <tr>
+                <th>price</th>
+                <th>amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in zbBids">
+                <td>{{item[0]}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item[1]}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+      </Row>
     </div>
     <div style="height: 20px;"></div>
     <hr>
@@ -149,9 +201,9 @@
           </table>
         </Col>
       </Row>
-      
-
     </div>
+
+    
   </div>
 </template>
 <script>
@@ -160,6 +212,7 @@
   const baseUrl = 'http://www.abichi.club'
   import _ from 'lodash'
   import cheerio from 'cheerio'
+import { randomBytes } from 'crypto';
 
   function getFixed(val) {
     return val.toFixed(3)
@@ -205,8 +258,12 @@ function getZbOtc() {
       this.getHL()
       this.getZbOtcData()
       this.getOkexData()
+      this.getHusdData()
     },
     computed: {
+      zbHusdPrice() {
+        return (this.zbPrice[1]/this.zbOtcPrice[0]/this.husdPrice[0]).toFixed(4)
+      },
       _hbBuyList() {
         const list = this.hbBuyList.sort((a, b) => {
           return  b.price - a.price
@@ -260,19 +317,17 @@ function getZbOtc() {
     },
     data() {
       return {
-        hbPrice: '',
-        hbPrice_b: '',
-        zbPrice: '',
+        hbPrice: [],
+        zbPrice: [],
         hlPrice: '',
         zbAsks: [],
         zbBids: [],
-        zbPrice_s: '',
-        zbOtcPrice_b: '',
-        zbOtcPrice_s: '',
+        zbOtcPrice: [],
         okBuyList: [],
         okSellList: [],
         hbBuyList: [],
         hbSellList: [],
+        husdPrice: []
       }
     },
     filters: {
@@ -286,14 +341,14 @@ function getZbOtc() {
     methods: {
       getHusdData() {
         axios(`${baseUrl}/hbapi/market/detail/merged?symbol=usdthusd`).then(res => {
-          console.log(res)
+          this.husdPrice = [res.data.tick.bid[0], res.data.tick.ask[0]]
         })
       },
       sendData() {
         window.localStorage.setItem('zbData', JSON.stringify({
-          zbPrice: this.zbPrice_s,
-          qc: `${this.zbOtcPrice_b} / ${this.zbOtcPrice_s}`,
-          otc: `${this.hbPrice} / ${this.hbPrice_b}`
+          zbPrice: `${this.zbPrice[0]} / ${this.zbPrice[1]}`,
+          qc: `${this.zbOtcPrice[0]} / ${this.zbOtcPrice[1]}`,
+          otc: `${this.hbPrice[0]} / ${this.hbPrice[1]}`
         }))
       },
       getOkexData() {
@@ -350,9 +405,10 @@ function getZbOtc() {
         })
       },
       getZbData() {
-        axios(`${baseUrl}/zbapi/data/v1/allTicker`).then(res => {
-          this.zbPrice = res.data.usdtqc.sell
-          this.zbPrice_s = res.data.usdtqc.buy
+        axios(`${baseUrl}/zbapi/data/v1/depth?market=usdt_qc&size=100`).then(res => {
+          this.zbAsks = res.data.asks.reverse().filter(it => it[1] > 5000)
+          this.zbBids = res.data.bids.filter(it => it[1] > 5000)
+          this.zbPrice = [res.data.bids[0][0], res.data.asks[0][0]]
         })
       },
       getAllHbOtcData() {
@@ -362,8 +418,7 @@ function getZbOtc() {
           this.getHbOtcData(i + 1).then(res => {
             this.hbBuyList = this.hbBuyList.concat(res[0].data.data)
             this.hbSellList = this.hbSellList.concat(res[1].data.data)
-            this.hbPrice = this.hbBuyList[5].price
-            this.hbPrice_b = this.hbSellList[5].price
+            this.hbPrice = [this.hbBuyList[5].price, this.hbSellList[5].price]
           })
         }
       },
@@ -394,8 +449,7 @@ function getZbOtc() {
       },
       getZbOtcData() {
         getZbOtc().then(prices => {
-          this.zbOtcPrice_b = prices[1]
-          this.zbOtcPrice_s = prices[0]
+          this.zbOtcPrice = prices
         })
       }
     }
