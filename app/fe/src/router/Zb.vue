@@ -18,26 +18,6 @@
         {{zbOtcPrice_b}}/{{zbOtcPrice_s}}
       </div>
     </div>
-    <div class="item">
-      <div class="left">
-        strategy
-      </div>
-      <div class="right">
-        <div>
-          {{strategy}}
-        </div>
-      </div>
-    </div>
-    <div class="item">
-      <div class="left">
-        usdt_usd
-      </div>
-      <div class="right">
-        <div>
-          {{USDTUSD}} | {{(zbPrice_s/USDTUSD).toFixed(4)}}
-        </div>
-      </div>
-    </div>
     <div class="table-box">
       <table class="table-zb">
         <thead>
@@ -225,14 +205,8 @@ function getZbOtc() {
       this.getHL()
       this.getZbOtcData()
       this.getOkexData()
-      this.getUSDTUSD()
     },
     computed: {
-      strategy() {
-        const hldiff = this.zbPrice - this.hlPrice
-        const qcTrend = (1 - this.zbOtcPrice_b) * 10
-        return (1 - (qcTrend/1 + hldiff * 5) / 2).toFixed(3)
-      },
       _hbBuyList() {
         const list = this.hbBuyList.sort((a, b) => {
           return  b.price - a.price
@@ -299,34 +273,20 @@ function getZbOtc() {
         okSellList: [],
         hbBuyList: [],
         hbSellList: [],
-        USDTUSD: ''
       }
     },
     filters: {
-      getProfit(to, from, money, fee, qcFee = 1) {
-        const fromusdt = money / from * qcFee
-        const tousdt = fromusdt - fee
-        const toMoney = tousdt * to
-        return getFixed(toMoney - money)
-      },
       diff(to, from) {
         return getFixed(to - from)
       },
       getRatio(val1, val2) {
         return getFixed(val1 / val2)
       },
-      getRatioDynamic(val1, val2) {
-        const _v2 = _.get(val2, '0')
-        return getFixed(val1 / _v2)
-      },
-      getQcDiff(val1, val2) {
-        return getFixed(val1 - val2)
-      }
     },
     methods: {
-      getUSDTUSD() {
-        axios('https://api.coinmarketcap.com/v2/ticker/825/').then(res => {
-          this.USDTUSD = (res.data.data.quotes.USD.price/1).toFixed(4)
+      getHusdData() {
+        axios(`${baseUrl}/hbapi/market/detail/merged?symbol=usdthusd`).then(res => {
+          console.log(res)
         })
       },
       sendData() {

@@ -247,7 +247,7 @@ export default {
         this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
         this.boll = BOLL(this.kline.map(it => it[4]))
         this.parseData()
-        this.strategy6()
+        this.strategy1()
       })
     },
     // 主力资金情况
@@ -258,14 +258,16 @@ export default {
           sellItems: []
         }
         let minAccount = 10000
+        const deas = this.macd.deas
       this.kline.forEach((it, index) => {
         const price = it[4]
         const perBuy = 1000
-        const lowBoll = this.boll.lower[index]
-        const upBoll = this.boll.upper[index]
-        const sellLevel = 0.04
-
-        if (price < lowBoll) {
+        if (index == 0) {
+          return
+        }
+        const preDea = deas[index - 1]
+        const nowDea = deas[index]
+        if (preDea < nowDea) {
           if ((strategyData.account - price * perBuy)>0) {
             strategyData.account = strategyData.account - price * perBuy
             strategyData.usdtAccount = strategyData.usdtAccount + perBuy
@@ -274,9 +276,8 @@ export default {
             //   minAccount = strategyData.account
             // }
           }
-        }
-        if (price > upBoll) {
-          strategyData.account = strategyData.account + upBoll * strategyData.usdtAccount
+        } else {
+          strategyData.account = strategyData.account + price * strategyData.usdtAccount
           strategyData.usdtAccount = 0
         }
         // strategyData.sellItems.forEach((sellItem, sellIndex) => {
@@ -293,7 +294,7 @@ export default {
         //   }
         // })
       })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.88).toFixed(2)
+      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.905).toFixed(2)
         console.log(strategyData, minAccount)
     },
     // 能量对决

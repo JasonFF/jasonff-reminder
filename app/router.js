@@ -2,7 +2,7 @@
 const httpProxy = require('http-proxy-middleware');
 const k2c = require('koa-connect');
 const hbproxy = k2c(httpProxy({
-  target: 'https://api.huobipro.com',
+  target: 'https://api.huobi.pro/',
   changeOrigin: true,
   pathRewrite: {
     '^/hbapi/' : '/',     // rewrite path
@@ -62,66 +62,6 @@ const hbotcapi = k2c(httpProxy({
   },
 }));
 
-const blockapi = k2c(httpProxy({
-  target: 'https://block.cc',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/blockapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-const aexapi = k2c(httpProxy({
-  target: 'https://api.aex.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/aexapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-const bitccapi = k2c(httpProxy({
-  target: 'https://api.bit.cc',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/bitccapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-const aexctcapi = k2c(httpProxy({
-  target: 'https://www.bit.cc',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/aexctcapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-const aexquaapi = k2c(httpProxy({
-  target: 'http://k.quintar.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/aexquaapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
 const okexapi = k2c(httpProxy({
   target: 'https://www.okex.com',
   changeOrigin: true,
@@ -134,20 +74,6 @@ const okexapi = k2c(httpProxy({
   },
 }));
 
-const binanceapi = k2c(httpProxy({
-  target: 'https://api.binance.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/binanceapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
-
-
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -158,15 +84,6 @@ module.exports = app => {
   router.all('/zbtradeapi/*', zbtradeproxy)
   router.all('/hbotcapi/*', hbotcapi)
   router.all('/zbotcapi/*', zbotcapi)
-  router.all('/blockapi/*', blockapi)
-  router.all('/aexapi/*', aexapi)
-  router.all('/aexctcapi/*', aexctcapi)
-  router.all('/aexquaapi/*', aexquaapi)
   router.all('/okexapi/*', okexapi)
-  router.all('/bitccapi/*', bitccapi)
-  router.all('/binanceapi/*', binanceapi)
-  router.post('/api/zbotcreminder/login', controller.zbOtcReminder.login)
-  router.post('/api/zbotcreminder/logout', controller.zbOtcReminder.logout)
-  router.get('/api/zbotcreminder/getlist', controller.zbOtcReminder.getList)
   router.get(/^\/(?!public)/, controller.home.index);
 };
