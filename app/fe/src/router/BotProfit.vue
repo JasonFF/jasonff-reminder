@@ -247,7 +247,7 @@ export default {
         this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
         this.boll = BOLL(this.kline.map(it => it[4]))
         this.parseData()
-        this.strategy1()
+        this.strategy6()
       })
     },
     // 主力资金情况
