@@ -14,7 +14,6 @@
         <Button :class="{active: item == type}" @click="getKline(null, item)" long>{{item}}</Button>
       </Col>
     </Row>
-    
     <div>
       <table class="mytable">
         <thead>
@@ -72,6 +71,77 @@
         </tbody>
       </table>
     </div>
+    <!-- <div>
+      <h3 style="text-align: center">{{strategy1Data.totalProfit.toFixed(2)}}</h3>
+      <table class="mytable">
+        <thead>
+          <tr>
+            <th colspan="5">buy</th>
+          </tr>
+          <tr>
+            <th>index</th>
+            <th>time</th>
+            <th>closeTime</th>
+            <th>open</th>
+            <th>close</th>
+            <th>amount</th>
+            <th>finish</th>
+            <th>profit</th>
+            <th>nowDea</th>
+            <th>minDea</th>
+            <th>maxDea</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in strategy1Data.toSellItems">
+            <td>{{index + 1}}</td>
+            <td>{{item.time|getTime}}</td>
+            <td>{{item.closeTime|getTime}}</td>
+            <td>{{item.open}}</td>
+            <td>{{item.close}}</td>
+            <td>{{item.amount}}</td>
+            <td>{{item.finish}}</td>
+            <td>{{item.profit}}</td>
+            <td>{{item.nowDea}}</td>
+            <td>{{item.minDea}}</td>
+            <td>{{item.maxDea}}</td>
+          </tr>
+        </tbody>
+         <thead>
+          <tr>
+            <th colspan="5">sell</th>
+          </tr>
+          <tr>
+            <th>index</th>
+            <th>time</th>
+            <th>closeTime</th>
+            <th>open</th>
+            <th>close</th>
+            <th>amount</th>
+            <th>finish</th>
+            <th>profit</th>
+            <th>nowDea</th>
+            <th>minDea</th>
+            <th>maxDea</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in strategy1Data.toBuyItems">
+            <td>{{index + 1}}</td>
+            <td>{{item.time|getTime}}</td>
+            <td>{{item.closeTime|getTime}}</td>
+            <td>{{item.open}}</td>
+            <td>{{item.close}}</td>
+            <td>{{item.amount}}</td>
+            <td>{{item.finish}}</td>
+            <td>{{item.profit}}</td>
+            <td>{{item.nowDea}}</td>
+            <td>{{item.minDea}}</td>
+            <td>{{item.maxDea}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div> -->
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px">
 
     </div>
@@ -82,9 +152,19 @@
 import {MACD, KDJ, BOLL} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
+function getProfit(item, direct, kline) {
+      if (item.finish) {
+        return (direct * (item.close - item.open) * item.amount).toFixed(2)
+      } else {
+        return (direct * (kline[kline.length-1][4] - item.open) * item.amount).toFixed(2)
+      }
+    }
 export default {
   name: 'BotProfit',
   filters: {
+    getTime(val) {
+      return val?moment(val).format('MM-DD HH:mm:ss'):''
+    },
     getFixed(val, level) {
       return (val?val/1:0).toFixed(level)
     },
@@ -122,9 +202,9 @@ export default {
         '1day',
       ],
       strategy1Data: {
-        account: 10000,
-        usdtAccount: 0,
-        sellItems: []
+        toSellItems: [],
+        toBuyItems: [],
+        totalProfit: 0
       },
       macd: {},
       kdj: {},
@@ -247,55 +327,112 @@ export default {
         this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
         this.boll = BOLL(this.kline.map(it => it[4]))
         this.parseData()
+        // this.strategy1()
         this.strategy6()
       })
     },
-    // 主力资金情况
+    // 差值策略
     strategy1() {
       let strategyData = {
-          account: 10000,
-          usdtAccount: 0,
-          sellItems: []
-        }
-        let minAccount = 10000
-        const deas = this.macd.deas
+        toSellItems: [],
+        toBuyItems: []
+      }
+      
       this.kline.forEach((it, index) => {
-        const price = it[4]
-        const perBuy = 1000
         if (index == 0) {
           return
         }
-        const preDea = deas[index - 1]
-        const nowDea = deas[index]
-        if (preDea < nowDea) {
-          if ((strategyData.account - price * perBuy)>0) {
-            strategyData.account = strategyData.account - price * perBuy
-            strategyData.usdtAccount = strategyData.usdtAccount + perBuy
-            // strategyData.sellItems.push(it[4] + sellLevel)
-            // if (strategyData.account < minAccount) {
-            //   minAccount = strategyData.account
-            // }
-          }
-        } else {
-          strategyData.account = strategyData.account + price * strategyData.usdtAccount
-          strategyData.usdtAccount = 0
+        const price = it[4]
+        const prePrice = this.kline[index-1][4]
+        const perBuy = 100
+        const perSell = 100
+        let buyDiff = 0.000
+        let sellDiff = 0.000
+        const toSellLevel = 0.01
+        const toBuyLevel = 0.01
+
+        const nowDea = this.macd.deas[index]
+        const minDea = -0.0005
+        const maxDea = 0.0005
+        const nowK = this.kdj.k[index]
+        const minK = 15
+        const maxK = 85
+
+        if (nowDea < minDea && nowK < minK && price < prePrice - buyDiff) {
+          strategyData.toSellItems.push({
+            time: it[0],
+            open: price,
+            close:  (price + toSellLevel).toFixed(4),
+            finish: false,
+            profit: 0,
+            amount: perBuy,
+            nowDea: nowDea,
+            minDea: minDea,
+            maxDea: maxDea,
+            nowK: nowK,
+            minK: minK,
+            maxK: maxK
+          })
         }
-        // strategyData.sellItems.forEach((sellItem, sellIndex) => {
-        //   if (strategyData.usdtAccount - perBuy < 0) {
-        //     return
-        //   }
-        //   if (sellItem == 999999) {
-        //     return
-        //   }
-        //   if (sellItem < price ) {
-        //     strategyData.account = strategyData.account + sellItem * perBuy
-        //     strategyData.usdtAccount = strategyData.usdtAccount - perBuy
-        //     strategyData.sellItems[sellIndex] = 999999
-        //   }
-        // })
+
+        strategyData.toSellItems.forEach((sellItem, sellIndex) => {
+          if (sellItem.finish) {
+            return
+          }
+          if (sellItem.close < price) {
+            strategyData.toSellItems[sellIndex].finish = true
+            strategyData.toSellItems[sellIndex].closeTime = it[0]
+          }
+        })
+
+        if (nowDea > maxDea && nowK > maxK && price > prePrice + sellDiff) {
+          strategyData.toBuyItems.push({
+            time: it[0],
+            open: price,
+            close: (price - toBuyLevel).toFixed(4),
+            finish: false,
+            profit: 0,
+            amount: perSell,
+            nowDea: nowDea,
+            minDea: minDea,
+            maxDea: maxDea,
+            nowK: nowK,
+            minK: minK,
+            maxK: maxK
+          })
+        }
+
+        strategyData.toBuyItems.forEach((buyItem, buyIndex) => {
+          if (buyItem.finish) {
+            return
+          }
+          if (buyItem.close > price) {
+            strategyData.toBuyItems[buyIndex].finish = true
+            strategyData.toBuyItems[buyIndex].closeTime = it[0]
+          }
+        })
       })
-      strategyData.profit = (strategyData.account + strategyData.usdtAccount * 6.905).toFixed(2)
-        console.log(strategyData, minAccount)
+      let totalProfit = 0
+      this.strategy1Data = {
+        toBuyItems: strategyData.toBuyItems.map(it => {
+          const profit = getProfit(it, -1, this.kline)
+          totalProfit += profit/1
+          return {
+            ...it,
+            profit
+          }
+        }),
+        toSellItems: strategyData.toSellItems.map(it => {
+          const profit = getProfit(it, 1, this.kline)
+          totalProfit += profit/1
+          return {
+            ...it,
+            profit
+          }
+        }),
+        totalProfit
+      }
+      console.log(strategyData)
     },
     // 能量对决
     strategy6() {
@@ -308,7 +445,7 @@ export default {
       this.initChart(barsTotalList)
     },
     parseData() {
-      const period = 66
+      const period = 40
       let maxItems = []
       let minItems = []
       let buyItems = []

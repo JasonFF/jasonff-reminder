@@ -10,6 +10,7 @@
         {{zbPrice[0]}}/{{zbPrice[1]}}
       </div>
     </div>
+    
     <div class="item">
       <div class="left">
         zbotc
@@ -18,6 +19,7 @@
         {{zbOtcPrice[0]}}/{{zbOtcPrice[1]}}
       </div>
     </div>
+    
     <div class="item">
       <div class="left">
         husd
@@ -327,7 +329,7 @@ function getZbOtc() {
         okSellList: [],
         hbBuyList: [],
         hbSellList: [],
-        husdPrice: []
+        husdPrice: [],
       }
     },
     filters: {
