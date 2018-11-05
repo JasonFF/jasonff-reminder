@@ -48,25 +48,25 @@
             <td>{{nowIndicator.macd.bar | getStatus(perIndicator.minMacd.bar, perIndicator.maxMacd.bar)}}</td>
           </tr>
           <tr>
-            <td>kdj-k</td>
-            <td>{{nowIndicator.kdj.k | getFixed(2)}}</td>
-            <td>{{perIndicator.maxKdj.k | getFixed(2)}}</td>
-            <td>{{perIndicator.minKdj.k | getFixed(2)}}</td>
-            <td>{{nowIndicator.kdj.k | getStatus(perIndicator.minKdj.k, perIndicator.maxKdj.k)}}</td>
+            <td>rsi-r6</td>
+            <td>{{nowIndicator.rsi.r6 | getFixed(2)}}</td>
+            <td>{{perIndicator.maxRsi.r6 | getFixed(2)}}</td>
+            <td>{{perIndicator.minRsi.r6 | getFixed(2)}}</td>
+            <td>{{nowIndicator.rsi.r6 | getStatus(perIndicator.minRsi.r6, perIndicator.maxRsi.r6)}}</td>
           </tr>
           <tr>
-            <td>kdj-d</td>
-            <td>{{nowIndicator.kdj.d | getFixed(2)}}</td>
-            <td>{{perIndicator.maxKdj.d | getFixed(2)}}</td>
-            <td>{{perIndicator.minKdj.d | getFixed(2)}}</td>
-            <td>{{nowIndicator.kdj.d | getStatus(perIndicator.minKdj.d, perIndicator.maxKdj.d)}}</td>
+            <td>rsi-r12</td>
+            <td>{{nowIndicator.rsi.r12 | getFixed(2)}}</td>
+            <td>{{perIndicator.maxRsi.r12 | getFixed(2)}}</td>
+            <td>{{perIndicator.minRsi.r12 | getFixed(2)}}</td>
+            <td>{{nowIndicator.rsi.r12 | getStatus(perIndicator.minRsi.r12, perIndicator.maxRsi.r12)}}</td>
           </tr>
           <tr>
-            <td>kdj-j</td>
-            <td>{{nowIndicator.kdj.j | getFixed(2)}}</td>
-            <td>{{perIndicator.maxKdj.j | getFixed(2)}}</td>
-            <td>{{perIndicator.minKdj.j | getFixed(2)}}</td>
-            <td>{{nowIndicator.kdj.j | getStatus(perIndicator.minKdj.j, perIndicator.maxKdj.j)}}</td>
+            <td>rsi-r24</td>
+            <td>{{nowIndicator.rsi.r24 | getFixed(2)}}</td>
+            <td>{{perIndicator.maxRsi.r24 | getFixed(2)}}</td>
+            <td>{{perIndicator.minRsi.r24 | getFixed(2)}}</td>
+            <td>{{nowIndicator.rsi.r24 | getStatus(perIndicator.minRsi.r24, perIndicator.maxRsi.r24)}}</td>
           </tr>
         </tbody>
       </table>
@@ -149,7 +149,7 @@
   </div>
 </template>
 <script>
-import {MACD, KDJ, BOLL} from '@/tools/indicator.js'
+import {MACD, KDJ, BOLL, RSI} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
 function getProfit(item, direct, kline) {
@@ -209,20 +209,21 @@ export default {
       macd: {},
       kdj: {},
       boll: {},
+      rsi: {},
       minItems: [],
       maxItems: [],
-      buyItems: [],
       perIndicator: {
         maxMacd: {},
         minMacd: {},
         maxKdj: {},
         minKdj: {},
-        buyMacd: {},
-        buyKdj: {}
+        maxRsi: {},
+        minRsi: {}
       },
       nowIndicator: {
         macd: {},
-        kdj: {}
+        kdj: {},
+        rsi: {}
       },
     }
   },
@@ -326,6 +327,7 @@ export default {
         this.macd = MACD(this.kline.map(it => it[4]))
         this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
         this.boll = BOLL(this.kline.map(it => it[4]))
+        this.rsi = RSI(this.kline.map(it => it[4]))
         this.parseData()
         // this.strategy1()
         this.strategy6()
@@ -448,13 +450,11 @@ export default {
       const period = 40
       let maxItems = []
       let minItems = []
-      let buyItems = []
       let preHighIndex = 0
       this.kline.forEach((it, index, _arr) => {
         const itemPrice = it[4]
         let maxItem = index
         let minItem = index
-        let buyItem = null
         
         for (let i = 0; i < period; i++) {
           if (maxItem == null && minItem == null) {
@@ -476,7 +476,6 @@ export default {
             minItem = null
           }
           if (itemPrice < thatPrice - 0.01 && thatIndex > index && index > preHighIndex) {
-            buyItem = index
             preHighIndex = thatIndex
           }
         }
@@ -486,13 +485,9 @@ export default {
         if (minItem) {
           minItems.push(minItem)
         }
-        if (buyItem) {
-          buyItems.push(buyItem)
-        }
       })
       this.minItems = minItems
       this.maxItems = maxItems
-      this.buyItems = buyItems
       let MinMacd = {
         diff: 0,
         dea: 0,
@@ -502,6 +497,11 @@ export default {
         k: 0,
         d: 0,
         j: 0
+      }
+      let MinRsi = {
+        r6: 0,
+        r12: 0,
+        r24: 0
       }
       let MaxMacd = {
         diff: 0,
@@ -513,39 +513,32 @@ export default {
         d: 0,
         j: 0
       }
-      let BuyKdj = {
-        k: 0,
-        d: 0,
-        j: 0
-      }
-      let BuyMacd = {
-        diff: 0,
-        dea: 0,
-        bar: 0
+      let MaxRsi = {
+        r6: 0,
+        r12: 0,
+        r24: 0
       }
       minItems.forEach(i => {
-        MinKdj.k = MinKdj.k + this.kdj.k[i]
-        MinKdj.d = MinKdj.d + this.kdj.d[i]
-        MinKdj.j = MinKdj.j + this.kdj.j[i]
-        MinMacd.diff = MinMacd.diff + this.macd.diffs[i]
-        MinMacd.dea = MinMacd.dea + this.macd.deas[i]
-        MinMacd.bar = MinMacd.bar + this.macd.bars[i]
+        MinKdj.k += this.kdj.k[i]
+        MinKdj.d += this.kdj.d[i]
+        MinKdj.j += this.kdj.j[i]
+        MinMacd.diff += this.macd.diffs[i]
+        MinMacd.dea += this.macd.deas[i]
+        MinMacd.bar += this.macd.bars[i]
+        MinRsi.r6 += this.rsi.rsi6[i]
+        MinRsi.r12 += this.rsi.rsi12[i]
+        MinRsi.r24 += this.rsi.rsi24[i]
       })
       maxItems.forEach(i => {
-        MaxKdj.k = MaxKdj.k + this.kdj.k[i]
-        MaxKdj.d = MaxKdj.d + this.kdj.d[i]
-        MaxKdj.j = MaxKdj.j + this.kdj.j[i]
-        MaxMacd.diff = MaxMacd.diff + this.macd.diffs[i]
-        MaxMacd.dea = MaxMacd.dea + this.macd.deas[i]
-        MaxMacd.bar = MaxMacd.bar + this.macd.bars[i]
-      })
-      buyItems.forEach(i => {
-        BuyKdj.k = BuyKdj.k + this.kdj.k[i]
-        BuyKdj.d = BuyKdj.d + this.kdj.d[i]
-        BuyKdj.j = BuyKdj.j + this.kdj.j[i]
-        BuyMacd.diff = BuyMacd.diff + this.macd.diffs[i]
-        BuyMacd.dea = BuyMacd.dea + this.macd.deas[i]
-        BuyMacd.bar = BuyMacd.bar + this.macd.bars[i]
+        MaxKdj.k += this.kdj.k[i]
+        MaxKdj.d += this.kdj.d[i]
+        MaxKdj.j += this.kdj.j[i]
+        MaxMacd.diff += this.macd.diffs[i]
+        MaxMacd.dea += this.macd.deas[i]
+        MaxMacd.bar += this.macd.bars[i]
+        MaxRsi.r6 += this.rsi.rsi6[i]
+        MaxRsi.r12 += this.rsi.rsi12[i]
+        MaxRsi.r24 += this.rsi.rsi24[i]
       })
       const perMinKdj = {
         k: MinKdj.k/minItems.length,
@@ -563,27 +556,27 @@ export default {
         bar: MinMacd.bar/minItems.length
       }
       const perMaxMacd = {
-        diff: MaxMacd.diff/minItems.length,
-        dea: MaxMacd.dea/minItems.length,
-        bar: MaxMacd.bar/minItems.length
+        diff: MaxMacd.diff/maxItems.length,
+        dea: MaxMacd.dea/maxItems.length,
+        bar: MaxMacd.bar/maxItems.length
       }
-      const perBuyMacd = {
-        diff: BuyMacd.diff/buyItems.length,
-        dea: BuyMacd.dea/buyItems.length,
-        bar: BuyMacd.bar/buyItems.length
+      const perMinRsi = {
+        r6: MinRsi.r6/minItems.length,
+        r12: MinRsi.r12/minItems.length,
+        r24: MinRsi.r24/minItems.length,
       }
-      const perBuyKdj = {
-        k: BuyKdj.k/buyItems.length,
-        d: BuyKdj.d/buyItems.length,
-        j: BuyKdj.j/buyItems.length
+      const perMaxRsi = {
+        r6: MaxRsi.r6/maxItems.length,
+        r12: MaxRsi.r12/maxItems.length,
+        r24: MaxRsi.r24/maxItems.length,
       }
       this.perIndicator = {
         maxKdj: perMaxKdj,
         minKdj: perMinKdj,
         maxMacd: perMaxMacd,
         minMacd: perMinMacd,
-        buyKdj: perBuyKdj,
-        buyMacd: perBuyMacd
+        maxRsi: perMaxRsi,
+        minRsi: perMinRsi
       }
       const maxLength = this.kline.length-1
       this.nowIndicator = {
@@ -596,6 +589,11 @@ export default {
           k: this.kdj.k[maxLength],
           d: this.kdj.d[maxLength],
           j: this.kdj.j[maxLength]
+        },
+        rsi: {
+          r6: this.rsi.rsi6[maxLength],
+          r12: this.rsi.rsi12[maxLength],
+          r24: this.rsi.rsi24[maxLength]
         }
       }
 
