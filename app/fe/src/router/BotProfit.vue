@@ -22,29 +22,33 @@
             <th>now</th>
             <th>max</th>
             <th>min</th>
+            <th>-0.02/+0.02</th>
             <th>status</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>macd-dea</td>
-            <td>{{nowIndicator.macd.dea | getFixed(6)}}</td>
-            <td>{{perIndicator.maxMacd.dea | getFixed(6)}}</td>
-            <td>{{perIndicator.minMacd.dea | getFixed(6)}}</td>
+            <td>{{nowIndicator.macd.dea | parseMacd}}</td>
+            <td>{{perIndicator.maxMacd.dea | parseMacd}}</td>
+            <td>{{perIndicator.minMacd.dea | parseMacd}}</td>
+            <td>{{macdB.dea | parseMacd}} / {{macdT.dea| parseMacd}}</td>
             <td>{{nowIndicator.macd.dea | getStatus(perIndicator.minMacd.dea, perIndicator.maxMacd.dea)}}</td>
           </tr>
           <tr>
             <td>macd-diff</td>
-            <td>{{nowIndicator.macd.diff | getFixed(6)}}</td>
-            <td>{{perIndicator.maxMacd.diff | getFixed(6)}}</td>
-            <td>{{perIndicator.minMacd.diff | getFixed(6)}}</td>
+            <td>{{nowIndicator.macd.diff | parseMacd}}</td>
+            <td>{{perIndicator.maxMacd.diff | parseMacd}}</td>
+            <td>{{perIndicator.minMacd.diff | parseMacd}}</td>
+            <td>{{macdB.diff | parseMacd}} / {{macdT.diff| parseMacd}}</td>
             <td>{{nowIndicator.macd.diff | getStatus(perIndicator.minMacd.diff, perIndicator.maxMacd.diff)}}</td>
           </tr>
           <tr>
             <td>macd-bar</td>
-            <td>{{nowIndicator.macd.bar | getFixed(6)}}</td>
-            <td>{{perIndicator.maxMacd.bar | getFixed(6)}}</td>
-            <td>{{perIndicator.minMacd.bar | getFixed(6)}}</td>
+            <td>{{nowIndicator.macd.bar | parseMacd}}</td>
+            <td>{{perIndicator.maxMacd.bar | parseMacd}}</td>
+            <td>{{perIndicator.minMacd.bar | parseMacd}}</td>
+            <td>{{macdB.bar | parseMacd}} / {{macdT.bar| parseMacd}}</td>
             <td>{{nowIndicator.macd.bar | getStatus(perIndicator.minMacd.bar, perIndicator.maxMacd.bar)}}</td>
           </tr>
           <tr>
@@ -52,6 +56,7 @@
             <td>{{nowIndicator.rsi.r6 | getFixed(2)}}</td>
             <td>{{perIndicator.maxRsi.r6 | getFixed(2)}}</td>
             <td>{{perIndicator.minRsi.r6 | getFixed(2)}}</td>
+            <td>{{`${rsiB.r6} / ${rsiT.r6}`}}</td>
             <td>{{nowIndicator.rsi.r6 | getStatus(perIndicator.minRsi.r6, perIndicator.maxRsi.r6)}}</td>
           </tr>
           <tr>
@@ -59,6 +64,7 @@
             <td>{{nowIndicator.rsi.r12 | getFixed(2)}}</td>
             <td>{{perIndicator.maxRsi.r12 | getFixed(2)}}</td>
             <td>{{perIndicator.minRsi.r12 | getFixed(2)}}</td>
+            <td>{{`${rsiB.r12} / ${rsiT.r12}`}}</td>
             <td>{{nowIndicator.rsi.r12 | getStatus(perIndicator.minRsi.r12, perIndicator.maxRsi.r12)}}</td>
           </tr>
           <tr>
@@ -66,6 +72,7 @@
             <td>{{nowIndicator.rsi.r24 | getFixed(2)}}</td>
             <td>{{perIndicator.maxRsi.r24 | getFixed(2)}}</td>
             <td>{{perIndicator.minRsi.r24 | getFixed(2)}}</td>
+            <td>{{`${rsiB.r24} / ${rsiT.r24}`}}</td>
             <td>{{nowIndicator.rsi.r24 | getStatus(perIndicator.minRsi.r24, perIndicator.maxRsi.r24)}}</td>
           </tr>
         </tbody>
@@ -87,9 +94,7 @@
             <th>amount</th>
             <th>finish</th>
             <th>profit</th>
-            <th>nowDea</th>
-            <th>minDea</th>
-            <th>maxDea</th>
+            <th>indicator</th>
           </tr>
         </thead>
         <tbody>
@@ -102,9 +107,7 @@
             <td>{{item.amount}}</td>
             <td>{{item.finish}}</td>
             <td>{{item.profit}}</td>
-            <td>{{item.nowDea}}</td>
-            <td>{{item.minDea}}</td>
-            <td>{{item.maxDea}}</td>
+            <td>{{item.nowRsi6}}</td>
           </tr>
         </tbody>
          <thead>
@@ -120,9 +123,7 @@
             <th>amount</th>
             <th>finish</th>
             <th>profit</th>
-            <th>nowDea</th>
-            <th>minDea</th>
-            <th>maxDea</th>
+            <th>indicator</th>
           </tr>
         </thead>
         <tbody>
@@ -135,9 +136,7 @@
             <td>{{item.amount}}</td>
             <td>{{item.finish}}</td>
             <td>{{item.profit}}</td>
-            <td>{{item.nowDea}}</td>
-            <td>{{item.minDea}}</td>
-            <td>{{item.maxDea}}</td>
+            <td>{{item.nowRsi6}}</td>
           </tr>
         </tbody>
       </table>
@@ -164,6 +163,9 @@ export default {
   filters: {
     getTime(val) {
       return val?moment(val).format('MM-DD HH:mm:ss'):''
+    },
+    parseMacd(val) {
+      return val?(val*1000000).toFixed(0):''
     },
     getFixed(val, level) {
       return (val?val/1:0).toFixed(level)
@@ -206,10 +208,10 @@ export default {
         toBuyItems: [],
         totalProfit: 0
       },
-      macd: {},
-      kdj: {},
-      boll: {},
-      rsi: {},
+      // macd: {},
+      // kdj: {},
+      // boll: {},
+      // rsi: {},
       minItems: [],
       maxItems: [],
       perIndicator: {
@@ -225,6 +227,104 @@ export default {
         kdj: {},
         rsi: {}
       },
+    }
+  },
+  mounted() {
+    window.$$vue = this
+  },
+  computed: {
+    macd() {
+      return MACD(this.kline.map(it => it[4]))
+    },
+    macdT() {
+      const macd = MACD(this.kline.map((it, index, __arr) => {
+        if (index == __arr.length-1) {
+          return it[4] + 0.02
+        }
+        return it[4]
+      }))
+      if (macd.deas.length) {
+        return {
+          dea: (macd.deas[this.kline.length-1]).toFixed(6),
+          diff: (macd.diffs[this.kline.length-1]).toFixed(6),
+          bar: (macd.bars[this.kline.length-1]).toFixed(6),
+        }
+      }
+      return {
+        dea: '',
+        diff: '',
+        bar: '',
+      }
+    },
+    macdB() {
+      const macd = MACD(this.kline.map((it, index, __arr) => {
+        if (index == __arr.length-1) {
+          return it[4] - 0.02
+        }
+        return it[4]
+      }))
+      if (macd.deas.length) {
+        return {
+          dea: (macd.deas[this.kline.length-1]).toFixed(6),
+          diff: (macd.diffs[this.kline.length-1]).toFixed(6),
+          bar: (macd.bars[this.kline.length-1]).toFixed(6),
+        }
+      }
+      return {
+        dea: '',
+        diff: '',
+        bar: '',
+      }
+    },
+    kdj() {
+      return KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
+    },
+    boll() {
+      return BOLL(this.kline.map(it => it[4]))
+    },
+    rsi() {
+      return RSI(this.kline.map(it => it[4]))
+    },
+    rsiT() {
+      const rsi = RSI(this.kline.map((it, index, __arr) => {
+        if (index == __arr.length-1) {
+          return it[4] + 0.02
+        }
+        return it[4]
+      }))
+      if (rsi.rsi6) {
+        return {
+          r6: (rsi.rsi6[this.kline.length -1]/1).toFixed(2),
+          r12: (rsi.rsi12[this.kline.length -1]).toFixed(2),
+          r24: (rsi.rsi24[this.kline.length -1]).toFixed(2)
+        }
+      }
+      return {
+        r6: '',
+        r12: '',
+        r24: ''
+      }
+      
+    },
+    rsiB() {
+      const rsi = RSI(this.kline.map((it, index, __arr) => {
+        if (index == __arr.length-1) {
+          return it[4] - 0.02
+        }
+        return it[4]
+      }))
+      if (rsi.rsi6) {
+        return {
+          r6: (rsi.rsi6[this.kline.length -1]/1).toFixed(2),
+          r12: (rsi.rsi12[this.kline.length -1]).toFixed(2),
+          r24: (rsi.rsi24[this.kline.length -1]).toFixed(2)
+        }
+      }
+      return {
+        r6: '',
+        r12: '',
+        r24: ''
+      }
     }
   },
   methods: {
@@ -324,12 +424,10 @@ export default {
         }
       }).then(res => {
         this.kline = res.data.data
-        this.macd = MACD(this.kline.map(it => it[4]))
-        this.kdj = KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
-        this.boll = BOLL(this.kline.map(it => it[4]))
-        this.rsi = RSI(this.kline.map(it => it[4]))
+      }).then(res => {
+        
         this.parseData()
-        // this.strategy1()
+        // this.strategy2()
         this.strategy6()
       })
     },
@@ -401,6 +499,103 @@ export default {
             nowK: nowK,
             minK: minK,
             maxK: maxK
+          })
+        }
+
+        strategyData.toBuyItems.forEach((buyItem, buyIndex) => {
+          if (buyItem.finish) {
+            return
+          }
+          if (buyItem.close > price) {
+            strategyData.toBuyItems[buyIndex].finish = true
+            strategyData.toBuyItems[buyIndex].closeTime = it[0]
+          }
+        })
+      })
+      let totalProfit = 0
+      this.strategy1Data = {
+        toBuyItems: strategyData.toBuyItems.map(it => {
+          const profit = getProfit(it, -1, this.kline)
+          totalProfit += profit/1
+          return {
+            ...it,
+            profit
+          }
+        }),
+        toSellItems: strategyData.toSellItems.map(it => {
+          const profit = getProfit(it, 1, this.kline)
+          totalProfit += profit/1
+          return {
+            ...it,
+            profit
+          }
+        }),
+        totalProfit
+      }
+      console.log(strategyData)
+    },
+    // RSI策略
+    strategy2() {
+      let strategyData = {
+        toSellItems: [],
+        toBuyItems: []
+      }
+      
+      this.kline.forEach((it, index) => {
+        if (index == 0) {
+          return
+        }
+        const price = it[4]
+        const prePrice = this.kline[index-1][4]
+        const perBuy = 100
+        const perSell = 100
+        let buyDiff = 0.000
+        let sellDiff = 0.000
+        const toSellLevel = 0.01
+        const toBuyLevel = 0.01
+
+        // const nowDea = this.macd.deas[index]
+        // const minDea = -0.0005
+        // const maxDea = 0.0005
+        // const nowK = this.kdj.k[index]
+        // const minK = 15
+        // const maxK = 85
+
+        const nowRsi6 = this.rsi.rsi6[index]
+        const minRsi6 = 20
+        const maxRsi6 = 80
+
+        if (nowRsi6 < minRsi6 && price < prePrice - buyDiff) {
+          strategyData.toSellItems.push({
+            time: it[0],
+            open: price,
+            close:  (price + toSellLevel).toFixed(4),
+            finish: false,
+            profit: 0,
+            amount: perBuy,
+            nowRsi6
+          })
+        }
+
+        strategyData.toSellItems.forEach((sellItem, sellIndex) => {
+          if (sellItem.finish) {
+            return
+          }
+          if (sellItem.close < price) {
+            strategyData.toSellItems[sellIndex].finish = true
+            strategyData.toSellItems[sellIndex].closeTime = it[0]
+          }
+        })
+
+        if (nowRsi6 > maxRsi6 && price > prePrice + sellDiff) {
+          strategyData.toBuyItems.push({
+            time: it[0],
+            open: price,
+            close: (price - toBuyLevel).toFixed(4),
+            finish: false,
+            profit: 0,
+            amount: perSell,
+            nowRsi6
           })
         }
 
