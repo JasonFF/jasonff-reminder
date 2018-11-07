@@ -22,7 +22,7 @@
             <th>now</th>
             <th>max</th>
             <th>min</th>
-            <th>-0.02/+0.02</th>
+            <th>-0.02/-0.01|+0.01/+0.02</th>
             <th>status</th>
           </tr>
         </thead>
@@ -56,7 +56,7 @@
             <td>{{nowIndicator.rsi.r6 | getFixed(2)}}</td>
             <td>{{perIndicator.maxRsi.r6 | getFixed(2)}}</td>
             <td>{{perIndicator.minRsi.r6 | getFixed(2)}}</td>
-            <td>{{`${rsiB.r6} / ${rsiT.r6}`}}</td>
+            <td>{{`${rsiB.r6} | ${rsiT.r6}`}}</td>
             <td>{{nowIndicator.rsi.r6 | getStatus(perIndicator.minRsi.r6, perIndicator.maxRsi.r6)}}</td>
           </tr>
           <tr>
@@ -64,7 +64,7 @@
             <td>{{nowIndicator.rsi.r12 | getFixed(2)}}</td>
             <td>{{perIndicator.maxRsi.r12 | getFixed(2)}}</td>
             <td>{{perIndicator.minRsi.r12 | getFixed(2)}}</td>
-            <td>{{`${rsiB.r12} / ${rsiT.r12}`}}</td>
+            <td>{{`${rsiB.r12} | ${rsiT.r12}`}}</td>
             <td>{{nowIndicator.rsi.r12 | getStatus(perIndicator.minRsi.r12, perIndicator.maxRsi.r12)}}</td>
           </tr>
           <tr>
@@ -72,7 +72,7 @@
             <td>{{nowIndicator.rsi.r24 | getFixed(2)}}</td>
             <td>{{perIndicator.maxRsi.r24 | getFixed(2)}}</td>
             <td>{{perIndicator.minRsi.r24 | getFixed(2)}}</td>
-            <td>{{`${rsiB.r24} / ${rsiT.r24}`}}</td>
+            <td>{{`${rsiB.r24} | ${rsiT.r24}`}}</td>
             <td>{{nowIndicator.rsi.r24 | getStatus(perIndicator.minRsi.r24, perIndicator.maxRsi.r24)}}</td>
           </tr>
         </tbody>
@@ -286,17 +286,23 @@ export default {
       return RSI(this.kline.map(it => it[4]))
     },
     rsiT() {
-      const rsi = RSI(this.kline.map((it, index, __arr) => {
+      const rsi2 = RSI(this.kline.map((it, index, __arr) => {
         if (index == __arr.length-1) {
           return it[4] + 0.02
         }
         return it[4]
       }))
-      if (rsi.rsi6) {
+      const rsi1 = RSI(this.kline.map((it, index, __arr) => {
+        if (index == __arr.length-1) {
+          return it[4] + 0.01
+        }
+        return it[4]
+      }))
+      if (rsi1.rsi6) {
         return {
-          r6: (rsi.rsi6[this.kline.length -1]/1).toFixed(2),
-          r12: (rsi.rsi12[this.kline.length -1]).toFixed(2),
-          r24: (rsi.rsi24[this.kline.length -1]).toFixed(2)
+          r6: `${(rsi1.rsi6[this.kline.length -1]/1).toFixed(2)}/${(rsi2.rsi6[this.kline.length -1]/1).toFixed(2)}`,
+          r12: `${(rsi1.rsi12[this.kline.length -1]/1).toFixed(2)}/${(rsi2.rsi12[this.kline.length -1]/1).toFixed(2)}`,
+          r24: `${(rsi1.rsi24[this.kline.length -1]/1).toFixed(2)}/${(rsi2.rsi24[this.kline.length -1]/1).toFixed(2)}`,
         }
       }
       return {
@@ -307,17 +313,23 @@ export default {
       
     },
     rsiB() {
-      const rsi = RSI(this.kline.map((it, index, __arr) => {
+      const rsi2 = RSI(this.kline.map((it, index, __arr) => {
         if (index == __arr.length-1) {
           return it[4] - 0.02
         }
         return it[4]
       }))
-      if (rsi.rsi6) {
+      const rsi1 = RSI(this.kline.map((it, index, __arr) => {
+        if (index == __arr.length-1) {
+          return it[4] - 0.01
+        }
+        return it[4]
+      }))
+      if (rsi1.rsi6) {
         return {
-          r6: (rsi.rsi6[this.kline.length -1]/1).toFixed(2),
-          r12: (rsi.rsi12[this.kline.length -1]).toFixed(2),
-          r24: (rsi.rsi24[this.kline.length -1]).toFixed(2)
+           r6: `${(rsi2.rsi6[this.kline.length -1]/1).toFixed(2)}/${(rsi1.rsi6[this.kline.length -1]/1).toFixed(2)}`,
+          r12: `${(rsi2.rsi12[this.kline.length -1]/1).toFixed(2)}/${(rsi1.rsi12[this.kline.length -1]/1).toFixed(2)}`,
+          r24: `${(rsi2.rsi24[this.kline.length -1]/1).toFixed(2)}/${(rsi1.rsi24[this.kline.length -1]/1).toFixed(2)}`,
         }
       }
       return {
