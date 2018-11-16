@@ -6,6 +6,8 @@ import BotProfit from './BotProfit'
 import Strategy from './Strategy'
 import ZbOtcPrice from './ZbOtcPrice'
 import OtherPriceParse from './OtherPriceParse'
+import MyAccount from './MyAccount/MyAccount'
+import MAIndex from './MyAccount/Index'
 
 Vue.use(Router)
 
@@ -16,6 +18,18 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: Home
+    },
+    {
+      path: '/myaccount',
+      name: 'MyAccount',
+      component: MyAccount,
+      children: [
+        {
+          path: 'index',
+          name: 'MAIndex',
+          component: MAIndex
+        }
+      ]
     },
     {
       path: '/zb',

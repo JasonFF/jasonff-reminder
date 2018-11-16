@@ -78,7 +78,7 @@
         </tbody>
       </table>
     </div>
-    <!-- <div>
+    <div>
       <h3 style="text-align: center">{{strategy1Data.totalProfit.toFixed(2)}}</h3>
       <table class="mytable">
         <thead>
@@ -140,7 +140,7 @@
           </tr>
         </tbody>
       </table>
-    </div> -->
+    </div>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px">
 
     </div>
@@ -439,7 +439,7 @@ export default {
       }).then(res => {
         
         this.parseData()
-        // this.strategy2()
+        this.strategy2()
         this.strategy6()
       })
     },
@@ -552,6 +552,9 @@ export default {
         toSellItems: [],
         toBuyItems: []
       }
+      let qcAmount = [0]
+      let usdtAmount = [0]
+      let profitAmount = [0]
       
       this.kline.forEach((it, index) => {
         if (index == 0) {
@@ -576,50 +579,62 @@ export default {
         const nowRsi6 = this.rsi.rsi6[index]
         const minRsi6 = 20
         const maxRsi6 = 80
-
-        if (nowRsi6 < minRsi6 && price < prePrice - buyDiff) {
+        if (!nowRsi6 || nowRsi6==100) {
+          return
+        }
+        if (nowRsi6 < minRsi6) {
+          const amount = 50 - nowRsi6
           strategyData.toSellItems.push({
             time: it[0],
             open: price,
             close:  (price + toSellLevel).toFixed(4),
             finish: false,
             profit: 0,
-            amount: perBuy,
+            amount: amount,
             nowRsi6
           })
+          let preQc = qcAmount[qcAmount.length-1]
+          qcAmount.push(preQc-price*amount)
+          let preUsdt = usdtAmount[usdtAmount.length-1]
+          usdtAmount.push(preUsdt+amount)
         }
 
-        strategyData.toSellItems.forEach((sellItem, sellIndex) => {
-          if (sellItem.finish) {
-            return
-          }
-          if (sellItem.close < price) {
-            strategyData.toSellItems[sellIndex].finish = true
-            strategyData.toSellItems[sellIndex].closeTime = it[0]
-          }
-        })
+        // strategyData.toSellItems.forEach((sellItem, sellIndex) => {
+        //   if (sellItem.finish) {
+        //     return
+        //   }
+        //   if (sellItem.close < price) {
+        //     strategyData.toSellItems[sellIndex].finish = true
+        //     strategyData.toSellItems[sellIndex].closeTime = it[0]
+        //   }
+        // })
 
-        if (nowRsi6 > maxRsi6 && price > prePrice + sellDiff) {
+        if (nowRsi6 > maxRsi6) {
+          const amount = nowRsi6 - 50
           strategyData.toBuyItems.push({
             time: it[0],
             open: price,
             close: (price - toBuyLevel).toFixed(4),
             finish: false,
             profit: 0,
-            amount: perSell,
+            amount: amount,
             nowRsi6
           })
+          let preQc = qcAmount[qcAmount.length-1]
+          qcAmount.push(preQc+price*amount)
+          let preUsdt = usdtAmount[usdtAmount.length-1]
+          usdtAmount.push(preUsdt-amount)
         }
 
-        strategyData.toBuyItems.forEach((buyItem, buyIndex) => {
-          if (buyItem.finish) {
-            return
-          }
-          if (buyItem.close > price) {
-            strategyData.toBuyItems[buyIndex].finish = true
-            strategyData.toBuyItems[buyIndex].closeTime = it[0]
-          }
-        })
+        // strategyData.toBuyItems.forEach((buyItem, buyIndex) => {
+        //   if (buyItem.finish) {
+        //     return
+        //   }
+        //   if (buyItem.close > price) {
+        //     strategyData.toBuyItems[buyIndex].finish = true
+        //     strategyData.toBuyItems[buyIndex].closeTime = it[0]
+        //   }
+        // })
       })
       let totalProfit = 0
       this.strategy1Data = {
@@ -641,7 +656,7 @@ export default {
         }),
         totalProfit
       }
-      console.log(strategyData)
+      console.log(strategyData,qcAmount,usdtAmount)
     },
     // 能量对决
     strategy6() {
