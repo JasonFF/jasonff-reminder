@@ -439,7 +439,7 @@ export default {
       }).then(res => {
         
         this.parseData()
-        this.strategy2()
+        // this.strategy2()
         this.strategy6()
       })
     },

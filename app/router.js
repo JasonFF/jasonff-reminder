@@ -97,6 +97,6 @@ module.exports = app => {
   router.all('/hbotcapi/*', hbotcapi)
   router.all('/zbotcapi/*', zbotcapi)
   router.all('/okexapi/*', okexapi)
-  router.all('/orderapi/*', orderapi)
+  // router.all('/orderapi/*', orderapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
