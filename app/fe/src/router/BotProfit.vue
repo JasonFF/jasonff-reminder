@@ -577,12 +577,15 @@ export default {
         // const maxK = 85
 
         const nowRsi6 = this.rsi.rsi6[index]
+        const nowRsi12 = this.rsi.rsi12[index]
         const minRsi6 = 20
         const maxRsi6 = 80
+        const minRsi12 = 30
+        const maxRsi12 = 70
         if (!nowRsi6 || nowRsi6==100) {
           return
         }
-        if (nowRsi6 < minRsi6) {
+        if (nowRsi6 < minRsi6 || nowRsi12 < minRsi12) {
           const amount = 50 - nowRsi6
           strategyData.toSellItems.push({
             time: it[0],
@@ -609,7 +612,7 @@ export default {
         //   }
         // })
 
-        if (nowRsi6 > maxRsi6) {
+        if (nowRsi6 > maxRsi6 || nowRsi12 > maxRsi12) {
           const amount = nowRsi6 - 50
           strategyData.toBuyItems.push({
             time: it[0],

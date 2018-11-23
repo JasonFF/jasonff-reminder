@@ -26,6 +26,7 @@
   },
   "scripts": {
     "start": "egg-scripts start --port=80 --daemon --title=egg-server-jasonff-reminder",
+    "https": "egg-scripts start --daemon --port=443 --https.key='www.abichi.club.key' --https.cert='www.abichi.club.crt'",
     "stop": "egg-scripts stop --title=egg-server-jasonff-reminder",
     "dev": "egg-bin dev",
     "debug": "egg-bin debug",
