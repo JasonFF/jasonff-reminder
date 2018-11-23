@@ -75,7 +75,7 @@ const okexapi = k2c(httpProxy({
 }));
 
 const orderapi = k2c(httpProxy({
-  target: 'https://order.scm.nbmedicalsystem.com/sjapi',
+  target: 'https://picture.scm.nbmedicalsystem.com',
   changeOrigin: true,
   pathRewrite: {
     '^/orderapi/' : '/',     // rewrite path
