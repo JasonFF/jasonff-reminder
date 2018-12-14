@@ -220,15 +220,20 @@ import { randomBytes } from 'crypto';
     return val.toFixed(3)
   }
 
-  function _getZbOtc(type) {
-  return axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
-    params: {
-      type
-    }
+function _getZbOtc(type) {
+  return new Promise((resovle, reject) => {
+    setTimeout(() => {
+      resovle(axios(`${baseUrl}/zbotcapistr/otc/trade/qc_cny`, {
+        params: {
+          type
+        }
+      }))
+    }, 1000);
   })
 }
 
 function parseContent(content) {
+  console.log('parseContent')
   const $ = cheerio.load(content)
   const numberList = $('.c2c-table tbody tr td.num').map((i, el) => {
     return $(el).text().replace(/QC/ig, '') / 1
@@ -247,7 +252,7 @@ function parseContent(content) {
 
 function getZbOtc() {
   return Promise.all([_getZbOtc(1), _getZbOtc(2)]).then(res => {
-    return [parseContent(res[0].data), parseContent(res[1].data)]
+    return [parseContent(res[0].data.data), parseContent(res[1].data.data)]
   })
 }
 
