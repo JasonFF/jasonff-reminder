@@ -26,7 +26,7 @@ const zbapi = k2c(httpProxy({
 }));
 
 const zbotcapi = k2c(httpProxy({
-  target: 'https://vip.zb.com/',
+  target: 'https://vip.zb.cn/',
   changeOrigin: true,
   pathRewrite: {
     '^/zbotcapi/' : '/',     // rewrite path
@@ -85,6 +85,7 @@ module.exports = app => {
   router.all('/zbtradeapi/*', zbtradeproxy)
   router.all('/hbotcapi/*', hbotcapi)
   router.all('/zbotcapi/*', zbotcapi)
+  router.all('/zbotcapistr/*', controller.zbotcapistr.index)
   router.all('/okexapi/*', okexapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
