@@ -228,7 +228,7 @@ function _getZbOtc(type) {
           type
         }
       }))
-    }, 1000);
+    }, 300);
   })
 }
 
