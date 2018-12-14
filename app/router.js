@@ -34,6 +34,7 @@ const zbotcapi = k2c(httpProxy({
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
     proxyRes.headers['Access-Control-Allow-Method'] = '*';
+    proxyRes.headers['Access-Control-Allow-Credentials'] = false;
     proxyRes.headers['X-Frame-Options'] = '*'
   },
 }));
@@ -74,18 +75,6 @@ const okexapi = k2c(httpProxy({
   },
 }));
 
-const orderapi = k2c(httpProxy({
-  target: 'https://picture.scm.nbmedicalsystem.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/orderapi/' : '/',     // rewrite path
-  },
-  onProxyRes (proxyRes, req, res) {
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Method'] = '*';
-  },
-}));
-
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -97,6 +86,5 @@ module.exports = app => {
   router.all('/hbotcapi/*', hbotcapi)
   router.all('/zbotcapi/*', zbotcapi)
   router.all('/okexapi/*', okexapi)
-  // router.all('/orderapi/*', orderapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
