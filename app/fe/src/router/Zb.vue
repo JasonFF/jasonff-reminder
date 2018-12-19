@@ -214,7 +214,6 @@
   const baseUrl = 'http://www.abichi.club'
   import _ from 'lodash'
   import cheerio from 'cheerio'
-import { randomBytes } from 'crypto';
 
   function getFixed(val) {
     return val.toFixed(3)

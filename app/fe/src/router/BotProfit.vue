@@ -29,26 +29,26 @@
         <tbody>
           <tr>
             <td>macd-dea</td>
-            <td>{{nowIndicator.macd.dea | parseMacd}}</td>
-            <td>{{perIndicator.maxMacd.dea | parseMacd}}</td>
-            <td>{{perIndicator.minMacd.dea | parseMacd}}</td>
-            <td>{{macdB.dea | parseMacd}} / {{macdT.dea| parseMacd}}</td>
+            <td>{{nowIndicator.macd.dea | getScienceNum}}</td>
+            <td>{{perIndicator.maxMacd.dea | getScienceNum}}</td>
+            <td>{{perIndicator.minMacd.dea | getScienceNum}}</td>
+            <td>{{macdB.dea | getScienceNum}} / {{macdT.dea| getScienceNum}}</td>
             <td>{{nowIndicator.macd.dea | getStatus(perIndicator.minMacd.dea, perIndicator.maxMacd.dea)}}</td>
           </tr>
           <tr>
             <td>macd-diff</td>
-            <td>{{nowIndicator.macd.diff | parseMacd}}</td>
-            <td>{{perIndicator.maxMacd.diff | parseMacd}}</td>
-            <td>{{perIndicator.minMacd.diff | parseMacd}}</td>
-            <td>{{macdB.diff | parseMacd}} / {{macdT.diff| parseMacd}}</td>
+            <td>{{nowIndicator.macd.diff | getScienceNum}}</td>
+            <td>{{perIndicator.maxMacd.diff | getScienceNum}}</td>
+            <td>{{perIndicator.minMacd.diff | getScienceNum}}</td>
+            <td>{{macdB.diff | getScienceNum}} / {{macdT.diff| getScienceNum}}</td>
             <td>{{nowIndicator.macd.diff | getStatus(perIndicator.minMacd.diff, perIndicator.maxMacd.diff)}}</td>
           </tr>
           <tr>
             <td>macd-bar</td>
-            <td>{{nowIndicator.macd.bar | parseMacd}}</td>
-            <td>{{perIndicator.maxMacd.bar | parseMacd}}</td>
-            <td>{{perIndicator.minMacd.bar | parseMacd}}</td>
-            <td>{{macdB.bar | parseMacd}} / {{macdT.bar| parseMacd}}</td>
+            <td>{{nowIndicator.macd.bar | getScienceNum}}</td>
+            <td>{{perIndicator.maxMacd.bar | getScienceNum}}</td>
+            <td>{{perIndicator.minMacd.bar | getScienceNum}}</td>
+            <td>{{macdB.bar | getScienceNum}} / {{macdT.bar| getScienceNum}}</td>
             <td>{{nowIndicator.macd.bar | getStatus(perIndicator.minMacd.bar, perIndicator.maxMacd.bar)}}</td>
           </tr>
           <tr>
@@ -78,7 +78,7 @@
         </tbody>
       </table>
     </div>
-    <div>
+    <!-- <div>
       <h3 style="text-align: center">{{strategy1Data.totalProfit.toFixed(2)}}</h3>
       <table class="mytable">
         <thead>
@@ -140,7 +140,7 @@
           </tr>
         </tbody>
       </table>
-    </div>
+    </div> -->
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px">
 
     </div>
@@ -161,6 +161,28 @@ function getProfit(item, direct, kline) {
 export default {
   name: 'BotProfit',
   filters: {
+    getScienceNum(val) {
+      if (!val) {
+        return val
+      }
+      const num = val/1
+      const numstr = num.toString()
+      if (numstr === 'NaN') {
+        return ''
+      }
+      let zLength = (numstr.split('.')[0].replace('-','')).length
+      if (Math.abs(num) < 1) {
+        let xStr = numstr.split('.')[1]
+        let xLength = xStr.length
+        let xStrNumLength = (xStr/1).toString().length
+        return ((num * Math.pow(10, xLength-xStrNumLength + 1))).toFixed(2) + '<-' + (xLength-xStrNumLength + 1) +'>'
+      } 
+      if (!zLength || zLength < 3) {
+        return num.toFixed(2)
+      }
+      
+      return (num/Math.pow(10, zLength-1)).toFixed(2) + '<' + (zLength-1)+'>'
+    },
     getTime(val) {
       return val?moment(val).format('MM-DD HH:mm:ss'):''
     },
@@ -440,7 +462,7 @@ export default {
         
         this.parseData()
         // this.strategy2()
-        this.strategy6()
+        // this.strategy6()
       })
     },
     // 差值策略
@@ -663,13 +685,13 @@ export default {
     },
     // 能量对决
     strategy6() {
-      let barsTotalList = []
-      let barsTotal = 0
-      this.macd.bars.forEach(it => {
-        barsTotal += it
-        barsTotalList.push(barsTotal.toFixed(4))
+      let risTotal = []
+      let risTotalVal = 0
+      this.rsi.rsi6.forEach((it, index) => {
+        risTotalVal = (this.kline[index][4]-this.kline[index][1]) / (this.kline[index][4]-this.kline[index][1] > 0 ? it : (100 - it))
+        risTotal.push(risTotalVal.toFixed(4))
       })
-      this.initChart(barsTotalList)
+      this.initChart(risTotal)
     },
     parseData() {
       const period = 40
