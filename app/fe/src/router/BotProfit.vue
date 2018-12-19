@@ -78,69 +78,21 @@
         </tbody>
       </table>
     </div>
-    <!-- <div>
-      <h3 style="text-align: center">{{strategy1Data.totalProfit.toFixed(2)}}</h3>
-      <table class="mytable">
-        <thead>
-          <tr>
-            <th colspan="5">buy</th>
-          </tr>
-          <tr>
-            <th>index</th>
-            <th>time</th>
-            <th>closeTime</th>
-            <th>open</th>
-            <th>close</th>
-            <th>amount</th>
-            <th>finish</th>
-            <th>profit</th>
-            <th>indicator</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in strategy1Data.toSellItems">
-            <td>{{index + 1}}</td>
-            <td>{{item.time|getTime}}</td>
-            <td>{{item.closeTime|getTime}}</td>
-            <td>{{item.open}}</td>
-            <td>{{item.close}}</td>
-            <td>{{item.amount}}</td>
-            <td>{{item.finish}}</td>
-            <td>{{item.profit}}</td>
-            <td>{{item.nowRsi6}}</td>
-          </tr>
-        </tbody>
-         <thead>
-          <tr>
-            <th colspan="5">sell</th>
-          </tr>
-          <tr>
-            <th>index</th>
-            <th>time</th>
-            <th>closeTime</th>
-            <th>open</th>
-            <th>close</th>
-            <th>amount</th>
-            <th>finish</th>
-            <th>profit</th>
-            <th>indicator</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in strategy1Data.toBuyItems">
-            <td>{{index + 1}}</td>
-            <td>{{item.time|getTime}}</td>
-            <td>{{item.closeTime|getTime}}</td>
-            <td>{{item.open}}</td>
-            <td>{{item.close}}</td>
-            <td>{{item.amount}}</td>
-            <td>{{item.finish}}</td>
-            <td>{{item.profit}}</td>
-            <td>{{item.nowRsi6}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div> -->
+    <div>
+      <Row :gutter="16" style="margin: 20px">
+        <Col span="4" style="text-align:right;line-height: 30px">min</Col>
+        <Col span="16" ><Input v-model="stress.min"></Input></Col>
+      </Row>
+      <Row :gutter="16" style="margin: 20px">
+        <Col span="4" style="text-align:right;line-height: 30px">max</Col>
+        <Col span="16"><Input v-model="stress.max"></Input></Col>
+      </Row>
+      <Row :gutter="16" style="margin: 20px">
+        <Col span="8" offset="16">
+          <Button @click="getStress()" long>计算</Button>
+        </Col>
+      </Row>
+    </div>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px">
 
     </div>
@@ -157,6 +109,18 @@ function getProfit(item, direct, kline) {
       } else {
         return (direct * (kline[kline.length-1][4] - item.open) * item.amount).toFixed(2)
       }
+    }
+    function getExact(val) {
+      if (!val) {
+        return 0
+      }
+      if ((val/1).toString() === 'NaN') {
+        return 0
+      }
+      if (val.toString().split('.')[1]&&val.toString().split('.')[1].length > 8) {
+        return val.toFixed(7)/1
+      }
+      return val
     }
 export default {
   name: 'BotProfit',
@@ -207,6 +171,10 @@ export default {
       type: '',
       market: 'usdt_qc',
       kline: [],
+      stress: {
+        min: '',
+        max: ''
+      },
       buttonMarkets: [
         'usdt_qc',
         'btc_usdt',
@@ -844,6 +812,83 @@ export default {
         }
       }
 
+    },
+    getStress() {
+      let kline = this.kline
+      let minPrice = 999999999999
+      let maxPrice = 0
+      kline.forEach(it => {
+        let price = it[4]/1
+        if (price > maxPrice) {
+          maxPrice = price
+        }
+        if (price < minPrice) {
+          minPrice = price
+        }
+      })
+
+      let maxMinStep = getExact((maxPrice - minPrice)/10)
+      let stepObj = {}
+      for (let i = 0; i < 11; i++) {
+        if (i) {
+          stepObj[`$${i}`] = {
+            price: `${getExact(minPrice + maxMinStep * i)}`,
+            totalVol: 0
+          }
+        }
+      }
+      
+      kline.forEach(it => {
+        let price = it[4]/1
+        let direct = (it[4] - it[1]) > 0 ? 1 : -1
+        let stepCount = parseInt((price - minPrice) / maxMinStep) + 1
+        if (stepObj[`$${stepCount}`] == undefined) {
+          stepCount = stepCount - 1
+        }
+        stepObj[`$${stepCount}`].totalVol = getExact(stepObj[`$${stepCount}`].totalVol + it[5]/1 * direct)
+      })
+      this.getBarChart(stepObj)
+    },
+    getBarChart(stepObj) {
+      let xAxisData = Object.values(stepObj).map(item => {
+        return item.price
+      })
+      let barData = Object.values(stepObj).map(item => {
+        return item.totalVol
+      })
+      const option = {
+        title: {
+            text: '压力位测试'
+        },
+        legend: {
+            data: ['bar'],
+            align: 'left'
+        },
+        tooltip: {},
+        xAxis: {
+            data: xAxisData,
+            silent: false,
+            splitLine: {
+                show: false
+            }
+        },
+        yAxis: {
+        },
+        series: [{
+            name: 'bar',
+            type: 'bar',
+            data: barData,
+            animationDelay: function (idx) {
+                return idx * 10;
+            }
+        }],
+        animationEasing: 'elasticOut',
+        animationDelayUpdate: function (idx) {
+            return idx * 5;
+        }
+    };
+    const kline1 = echarts.init(document.getElementById('kline1'));
+      kline1.setOption(option);
     }
   }
 }
