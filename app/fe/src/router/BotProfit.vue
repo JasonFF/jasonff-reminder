@@ -848,7 +848,7 @@ export default {
         stepObj[`$${stepCount}`].totalVol = getExact(stepObj[`$${stepCount}`].totalVol + it[5]/1 * direct)
         stepObj[`$${stepCount}`].totalVolNoDir = getExact(stepObj[`$${stepCount}`].totalVolNoDir + it[5]/1)
         stepObj[`$${stepCount}`].totalVal = getExact(stepObj[`$${stepCount}`].totalVal + (it[5]/1 * price))
-        stepObj[`$${stepCount}`].perPrice = getExact(stepObj[`$${stepCount}`].totalVal / stepObj[`$${stepCount}`].totalVolNoDir).toFixed(0)
+        stepObj[`$${stepCount}`].perPrice = getExact(stepObj[`$${stepCount}`].totalVal / stepObj[`$${stepCount}`].totalVolNoDir).toFixed(4)/1
       })
       console.log(stepObj)
       this.getBarChart(stepObj)
