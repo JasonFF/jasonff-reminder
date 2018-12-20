@@ -846,12 +846,17 @@ export default {
           stepCount = stepCount - 1
         }
         stepObj[`$${stepCount}`].totalVol = getExact(stepObj[`$${stepCount}`].totalVol + it[5]/1 * direct)
+        stepObj[`$${stepCount}`].totalVolNoDir = getExact(stepObj[`$${stepCount}`].totalVolNoDir + it[5]/1)
+        stepObj[`$${stepCount}`].totalVal = getExact(stepObj[`$${stepCount}`].totalVal + (it[5]/1 * price))
+        stepObj[`$${stepCount}`].perPrice = getExact(stepObj[`$${stepCount}`].totalVal / stepObj[`$${stepCount}`].totalVolNoDir).toFixed(0)
       })
+      console.log(stepObj)
       this.getBarChart(stepObj)
     },
     getBarChart(stepObj) {
+      let nowPrice = this.kline[this.kline.length -1][4]
       let xAxisData = Object.values(stepObj).map(item => {
-        return item.price
+        return item.perPrice
       })
       let barData = Object.values(stepObj).map(item => {
         return item.totalVol
@@ -864,7 +869,13 @@ export default {
             data: ['bar'],
             align: 'left'
         },
-        tooltip: {},
+        tooltip: {
+          position: 'top',
+          formatter(val) {
+            return `${stepObj[`$${val.dataIndex+1}`].perPrice}(${val.value})(${getExact((nowPrice - stepObj[`$${val.dataIndex+1}`].perPrice )/nowPrice*100).toFixed(2)}%)`
+            console.log(val)
+          }
+        },
         xAxis: {
             data: xAxisData,
             silent: false,
