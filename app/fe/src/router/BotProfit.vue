@@ -872,7 +872,7 @@ export default {
         tooltip: {
           position: 'top',
           formatter(val) {
-            return `${stepObj[`$${val.dataIndex+1}`].perPrice}(${val.value})(${getExact((nowPrice - stepObj[`$${val.dataIndex+1}`].perPrice )/nowPrice*100).toFixed(2)}%)`
+            return `${stepObj[`$${val.dataIndex+1}`].perPrice}<br/>(${val.value})<br/>(${getExact((nowPrice - stepObj[`$${val.dataIndex+1}`].perPrice )/nowPrice*100).toFixed(2)}%)`
             console.log(val)
           }
         },
