@@ -75,6 +75,20 @@ const okexapi = k2c(httpProxy({
   },
 }));
 
+const aicoin = k2c(httpProxy({
+  target: 'https://www.aicoin.net.cn',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/aicoin/' : '/',     // rewrite path
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
+
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -87,5 +101,6 @@ module.exports = app => {
   router.all('/zbotcapi/*', zbotcapi)
   router.all('/zbotcapistr/*', controller.zbotcapistr.index)
   router.all('/okexapi/*', okexapi)
+  router.all('/aicoin/*', aicoin)
   router.get(/^\/(?!public)/, controller.home.index);
 };
