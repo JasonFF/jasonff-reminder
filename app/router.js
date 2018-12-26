@@ -97,6 +97,7 @@ const bitmexapi = k2c(httpProxy({
   },
   onProxyReq (proxyReq) {
     proxyReq.setHeader("Referer", 'https://static.bitmex.com/')
+    proxyReq.setHeader("origin", 'https://static.bitmex.com')
   },
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
