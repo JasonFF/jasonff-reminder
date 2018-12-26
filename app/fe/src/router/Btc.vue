@@ -25,7 +25,7 @@ export default {
         this.kline = res
         const rsi = RSI(res.c)
         const macd = MACD(res.c)
-        console.log(rsi)
+        // console.log(rsi)
         let totalResult = 0
         let rsiIndicator = rsi.rsi6
         let totalList = rsiIndicator.map((it, index) => {
@@ -52,7 +52,7 @@ export default {
         params: {
           symbol: 'XBTUSD',
           resolution: 5,
-          from: moment().subtract(14, 'days').unix(),
+          from: moment().subtract(7, 'days').unix(),
           to: moment().unix()
         }
       }).then(res => res.data).then(res => {
