@@ -48,7 +48,7 @@ export default {
       //   return Promise.resolve(JSON.parse(storeKline))
       // }
       return this.$http({
-        url: 'http://www.abichi.club/bitmexapi/api/udf/history', 
+        url: 'https://www.bitmex.com/api/udf/history', 
         params: {
           symbol: 'XBTUSD',
           resolution: 5,

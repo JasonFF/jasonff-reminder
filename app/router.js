@@ -95,6 +95,9 @@ const bitmexapi = k2c(httpProxy({
   pathRewrite: {
     '^/bitmexapi/' : '/',     // rewrite path
   },
+  onProxyReq (proxyReq) {
+    proxyReq.setHeader("Referer", 'https://static.bitmex.com/')
+  },
   onProxyRes (proxyRes, req, res) {
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
     proxyRes.headers['Access-Control-Allow-Method'] = '*';
