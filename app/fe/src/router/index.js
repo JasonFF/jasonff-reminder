@@ -8,6 +8,7 @@ import ZbOtcPrice from './ZbOtcPrice'
 import OtherPriceParse from './OtherPriceParse'
 import MyAccount from './MyAccount/MyAccount'
 import MAIndex from './MyAccount/Index'
+import Btc from './Btc'
 
 Vue.use(Router)
 
@@ -18,6 +19,11 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: Home
+    },
+    {
+      path: '/btc',
+      name: 'Btc',
+      component: Btc
     },
     {
       path: '/myaccount',
