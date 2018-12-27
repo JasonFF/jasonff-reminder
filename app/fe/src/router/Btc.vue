@@ -52,12 +52,18 @@ export default {
         params: {
           symbol: 'XBTUSD',
           resolution: 5,
-          from: moment().subtract(7, 'days').unix(),
-          to: moment().unix()
+          from: moment().subtract(14, 'days').unix(),
+          to: moment().subtract(0, 'days').unix()
         }
       }).then(res => res.data).then(res => {
         // window.localStorage.setItem('kline', JSON.stringify(res))
         return res
+      })
+    },
+    getPercent(list, index = 0) {
+      let firstVal = list[index]
+      return list.map(it => {
+        return ((it - firstVal) / firstVal * 100).toFixed(2)
       })
     },
     initChart(data) {
@@ -123,7 +129,7 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: data
+                  data: this.getPercent(data, data.length - 1)
               },
           ]
       };
