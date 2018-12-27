@@ -1,6 +1,26 @@
 <template>
-  <div>
-    
+  <div class="container">
+    <Row :gutter='16' style="padding: 10px 20px 20px;margin-top: 10px">
+      <Col style="margin-bottom: 10px" span="8" v-for="item in buttonMarkets" :key="item">
+        <Button :class="{active: item == market}" @click="chooseBtn(item)" long>{{item}}</Button>
+      </Col>
+    </Row>
+    <Row :gutter="16" style="text-align: center;margin-bottom: 10px">
+
+      <Col span="6" >
+        <i-switch v-model="isMonth">
+          <span slot="close">周</span>
+          <span slot="open">月</span>
+        </i-switch>
+      </Col>
+
+      <Col span="6">
+        <i-switch :true-value="60" :false-value="5" v-model="type">
+          <span  slot="close">5</span>
+          <span slot="open">60</span>
+        </i-switch>
+      </Col>
+    </Row>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
   </div>
 </template>
@@ -13,36 +33,74 @@ import _ from 'lodash'
 export default {
   data() {
     return {
-      kline: {}
+      kline: {},
+      market: '',
+      isMonth: false,
+      type: 5,
+      buttonMarkets: [
+        'XBTUSD', "ETHUSD"
+      ],
     }
   },
   mounted() {
-    this.parseData()
+    // this.parseData()
   },
   methods: {
+    chooseBtn(item) {
+      this.market = item
+      if (this.isMonth) {
+        this.getKlineByTime()
+      } else {
+        this.parseData()
+      }
+    },
     parseData() {
       return this.getKline().then(res => {
         this.kline = res
-        const rsi = RSI(res.c)
-        const macd = MACD(res.c)
         // console.log(rsi)
         let totalResult = 0
-        let rsiIndicator = rsi.rsi6
-        let totalList = rsiIndicator.map((it, index) => {
-          let inIt = it > 50 ? it : (100 - it)
+        let totalList = this.kline.c.map((it, index) => {
           let vol = res.v[index]
           totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) > 0?1:-1)) 
           return totalResult
         })
-        let minTotal = _.min(totalList)
-        let resultData = totalList.map((it, index) => {
-          return it
-        })
-        
+        let resultData = totalList
         this.initChart(resultData)
       })
     },
-    getKline() {
+    getKlineByTime() {
+      return Promise.all([4,3,2,1].map(it => {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve(this.getKline([(it - 1) * 7, it * 7]))
+          }, 1000);
+        })
+      })).then(res => {
+        let result = res[0]
+        console.log(res)
+        res.forEach(it => {
+          result.c = result.c.concat(it.c)
+          result.h = result.h.concat(it.h)
+          result.l = result.l.concat(it.l)
+          result.o = result.o.concat(it.o)
+          result.t = result.t.concat(it.t)
+          result.v = result.v.concat(it.v)
+        })
+        return result
+      }).then(res => {
+         this.kline = res
+        // console.log(rsi)
+        let totalResult = 0
+        let totalList = this.kline.c.map((it, index) => {
+          let vol = res.v[index]
+          totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) > 0?1:-1)) 
+          return totalResult
+        })
+        let resultData = totalList
+        this.initChart(resultData)
+      })
+    },
+    getKline(timearr=[0, 7]) {
       // const storeKline = window.localStorage.getItem('kline')
       // if (storeKline) {
       //   return Promise.resolve(JSON.parse(storeKline))
@@ -50,10 +108,10 @@ export default {
       return this.$http({
         url: 'http://www.abichi.club/bitmexapi/api/udf/history', 
         params: {
-          symbol: 'XBTUSD',
-          resolution: 5,
-          from: moment().subtract(14, 'days').unix(),
-          to: moment().subtract(0, 'days').unix()
+          symbol: this.market,
+          resolution: this.type,
+          from: moment().subtract(timearr[1], 'days').unix(),
+          to: moment().subtract(timearr[0], 'days').unix()
         }
       }).then(res => res.data).then(res => {
         // window.localStorage.setItem('kline', JSON.stringify(res))
@@ -63,7 +121,7 @@ export default {
     getPercent(list, index = 0) {
       let firstVal = list[index]
       return list.map(it => {
-        return ((it - firstVal) / firstVal * 100).toFixed(2)
+        return ((it - firstVal) / Math.abs(firstVal) * 100).toFixed(2)
       })
     },
     initChart(data) {
@@ -129,6 +187,7 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
+                  // data
                   data: this.getPercent(data, data.length - 1)
               },
           ]
@@ -140,6 +199,16 @@ export default {
 }
 </script>
 
-<style>
+<style scoped lang="less">
+  .container {
+    overflow: hidden;
+    padding: 20px 5px;
+    background-color: #333;
+    min-height: 100%;
+    color: #fff;
+    button {
+      background: #ccc
+    }
+  }
 
 </style>

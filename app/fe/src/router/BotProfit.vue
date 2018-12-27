@@ -14,85 +14,6 @@
         <Button :class="{active: item == type}" @click="getKline(null, item)" long>{{item}}</Button>
       </Col>
     </Row>
-    <div>
-      <table class="mytable">
-        <thead>
-          <tr>
-            <th>type</th>
-            <th>now</th>
-            <th>max</th>
-            <th>min</th>
-            <th>-0.02/-0.01|+0.01/+0.02</th>
-            <th>status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>macd-dea</td>
-            <td>{{nowIndicator.macd.dea | getScienceNum}}</td>
-            <td>{{perIndicator.maxMacd.dea | getScienceNum}}</td>
-            <td>{{perIndicator.minMacd.dea | getScienceNum}}</td>
-            <td>{{macdB.dea | getScienceNum}} / {{macdT.dea| getScienceNum}}</td>
-            <td>{{nowIndicator.macd.dea | getStatus(perIndicator.minMacd.dea, perIndicator.maxMacd.dea)}}</td>
-          </tr>
-          <tr>
-            <td>macd-diff</td>
-            <td>{{nowIndicator.macd.diff | getScienceNum}}</td>
-            <td>{{perIndicator.maxMacd.diff | getScienceNum}}</td>
-            <td>{{perIndicator.minMacd.diff | getScienceNum}}</td>
-            <td>{{macdB.diff | getScienceNum}} / {{macdT.diff| getScienceNum}}</td>
-            <td>{{nowIndicator.macd.diff | getStatus(perIndicator.minMacd.diff, perIndicator.maxMacd.diff)}}</td>
-          </tr>
-          <tr>
-            <td>macd-bar</td>
-            <td>{{nowIndicator.macd.bar | getScienceNum}}</td>
-            <td>{{perIndicator.maxMacd.bar | getScienceNum}}</td>
-            <td>{{perIndicator.minMacd.bar | getScienceNum}}</td>
-            <td>{{macdB.bar | getScienceNum}} / {{macdT.bar| getScienceNum}}</td>
-            <td>{{nowIndicator.macd.bar | getStatus(perIndicator.minMacd.bar, perIndicator.maxMacd.bar)}}</td>
-          </tr>
-          <tr>
-            <td>rsi-r6</td>
-            <td>{{nowIndicator.rsi.r6 | getFixed(2)}}</td>
-            <td>{{perIndicator.maxRsi.r6 | getFixed(2)}}</td>
-            <td>{{perIndicator.minRsi.r6 | getFixed(2)}}</td>
-            <td>{{`${rsiB.r6} | ${rsiT.r6}`}}</td>
-            <td>{{nowIndicator.rsi.r6 | getStatus(perIndicator.minRsi.r6, perIndicator.maxRsi.r6)}}</td>
-          </tr>
-          <tr>
-            <td>rsi-r12</td>
-            <td>{{nowIndicator.rsi.r12 | getFixed(2)}}</td>
-            <td>{{perIndicator.maxRsi.r12 | getFixed(2)}}</td>
-            <td>{{perIndicator.minRsi.r12 | getFixed(2)}}</td>
-            <td>{{`${rsiB.r12} | ${rsiT.r12}`}}</td>
-            <td>{{nowIndicator.rsi.r12 | getStatus(perIndicator.minRsi.r12, perIndicator.maxRsi.r12)}}</td>
-          </tr>
-          <tr>
-            <td>rsi-r24</td>
-            <td>{{nowIndicator.rsi.r24 | getFixed(2)}}</td>
-            <td>{{perIndicator.maxRsi.r24 | getFixed(2)}}</td>
-            <td>{{perIndicator.minRsi.r24 | getFixed(2)}}</td>
-            <td>{{`${rsiB.r24} | ${rsiT.r24}`}}</td>
-            <td>{{nowIndicator.rsi.r24 | getStatus(perIndicator.minRsi.r24, perIndicator.maxRsi.r24)}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <Row :gutter="16" style="margin: 20px">
-        <Col span="4" style="text-align:right;line-height: 30px">min</Col>
-        <Col span="16" ><Input v-model="stress.min"></Input></Col>
-      </Row>
-      <Row :gutter="16" style="margin: 20px">
-        <Col span="4" style="text-align:right;line-height: 30px">max</Col>
-        <Col span="16"><Input v-model="stress.max"></Input></Col>
-      </Row>
-      <Row :gutter="16" style="margin: 20px">
-        <Col span="8" offset="16">
-          <Button @click="getStress()" long>计算</Button>
-        </Col>
-      </Row>
-    </div>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px">
 
     </div>
@@ -103,13 +24,6 @@
 import {MACD, KDJ, BOLL, RSI} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
-function getProfit(item, direct, kline) {
-      if (item.finish) {
-        return (direct * (item.close - item.open) * item.amount).toFixed(2)
-      } else {
-        return (direct * (kline[kline.length-1][4] - item.open) * item.amount).toFixed(2)
-      }
-    }
     function getExact(val) {
       if (!val) {
         return 0
@@ -144,26 +58,10 @@ export default {
       if (!zLength || zLength < 3) {
         return num.toFixed(2)
       }
-      
       return (num/Math.pow(10, zLength-1)).toFixed(2) + '<' + (zLength-1)+'>'
     },
     getTime(val) {
       return val?moment(val).format('MM-DD HH:mm:ss'):''
-    },
-    parseMacd(val) {
-      return val?(val*1000000).toFixed(0):''
-    },
-    getFixed(val, level) {
-      return (val?val/1:0).toFixed(level)
-    },
-    getStatus(val, min, max) {
-      if (val/1 < min/1) {
-        return -1
-      }
-      if (val/1 > max/1) {
-        return 1
-      }
-      return 0
     }
   },
   data() {
@@ -171,10 +69,6 @@ export default {
       type: '',
       market: 'usdt_qc',
       kline: [],
-      stress: {
-        min: '',
-        max: ''
-      },
       buttonMarkets: [
         'usdt_qc',
         'btc_usdt',
@@ -193,141 +87,10 @@ export default {
         '6hour',
         '1day',
       ],
-      strategy1Data: {
-        toSellItems: [],
-        toBuyItems: [],
-        totalProfit: 0
-      },
-      // macd: {},
-      // kdj: {},
-      // boll: {},
-      // rsi: {},
-      minItems: [],
-      maxItems: [],
-      perIndicator: {
-        maxMacd: {},
-        minMacd: {},
-        maxKdj: {},
-        minKdj: {},
-        maxRsi: {},
-        minRsi: {}
-      },
-      nowIndicator: {
-        macd: {},
-        kdj: {},
-        rsi: {}
-      },
     }
   },
   mounted() {
     window.$$vue = this
-  },
-  computed: {
-    macd() {
-      return MACD(this.kline.map(it => it[4]))
-    },
-    macdT() {
-      const macd = MACD(this.kline.map((it, index, __arr) => {
-        if (index == __arr.length-1) {
-          return it[4] + 0.02
-        }
-        return it[4]
-      }))
-      if (macd.deas.length) {
-        return {
-          dea: (macd.deas[this.kline.length-1]).toFixed(6),
-          diff: (macd.diffs[this.kline.length-1]).toFixed(6),
-          bar: (macd.bars[this.kline.length-1]).toFixed(6),
-        }
-      }
-      return {
-        dea: '',
-        diff: '',
-        bar: '',
-      }
-    },
-    macdB() {
-      const macd = MACD(this.kline.map((it, index, __arr) => {
-        if (index == __arr.length-1) {
-          return it[4] - 0.02
-        }
-        return it[4]
-      }))
-      if (macd.deas.length) {
-        return {
-          dea: (macd.deas[this.kline.length-1]).toFixed(6),
-          diff: (macd.diffs[this.kline.length-1]).toFixed(6),
-          bar: (macd.bars[this.kline.length-1]).toFixed(6),
-        }
-      }
-      return {
-        dea: '',
-        diff: '',
-        bar: '',
-      }
-    },
-    kdj() {
-      return KDJ(this.kline.map(it => [it[2], it[3], it[4]]))
-    },
-    boll() {
-      return BOLL(this.kline.map(it => it[4]))
-    },
-    rsi() {
-      return RSI(this.kline.map(it => it[4]))
-    },
-    rsiT() {
-      const rsi2 = RSI(this.kline.map((it, index, __arr) => {
-        if (index == __arr.length-1) {
-          return it[4] + 0.02
-        }
-        return it[4]
-      }))
-      const rsi1 = RSI(this.kline.map((it, index, __arr) => {
-        if (index == __arr.length-1) {
-          return it[4] + 0.01
-        }
-        return it[4]
-      }))
-      if (rsi1.rsi6) {
-        return {
-          r6: `${(rsi1.rsi6[this.kline.length -1]/1).toFixed(2)}/${(rsi2.rsi6[this.kline.length -1]/1).toFixed(2)}`,
-          r12: `${(rsi1.rsi12[this.kline.length -1]/1).toFixed(2)}/${(rsi2.rsi12[this.kline.length -1]/1).toFixed(2)}`,
-          r24: `${(rsi1.rsi24[this.kline.length -1]/1).toFixed(2)}/${(rsi2.rsi24[this.kline.length -1]/1).toFixed(2)}`,
-        }
-      }
-      return {
-        r6: '',
-        r12: '',
-        r24: ''
-      }
-      
-    },
-    rsiB() {
-      const rsi2 = RSI(this.kline.map((it, index, __arr) => {
-        if (index == __arr.length-1) {
-          return it[4] - 0.02
-        }
-        return it[4]
-      }))
-      const rsi1 = RSI(this.kline.map((it, index, __arr) => {
-        if (index == __arr.length-1) {
-          return it[4] - 0.01
-        }
-        return it[4]
-      }))
-      if (rsi1.rsi6) {
-        return {
-           r6: `${(rsi2.rsi6[this.kline.length -1]/1).toFixed(2)}/${(rsi1.rsi6[this.kline.length -1]/1).toFixed(2)}`,
-          r12: `${(rsi2.rsi12[this.kline.length -1]/1).toFixed(2)}/${(rsi1.rsi12[this.kline.length -1]/1).toFixed(2)}`,
-          r24: `${(rsi2.rsi24[this.kline.length -1]/1).toFixed(2)}/${(rsi1.rsi24[this.kline.length -1]/1).toFixed(2)}`,
-        }
-      }
-      return {
-        r6: '',
-        r12: '',
-        r24: ''
-      }
-    }
   },
   methods: {
     initChart(data) {
@@ -339,7 +102,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','barSum'] 
+              data:['kline','indicator'] 
           },
           grid: {
               left: '3%',
@@ -367,7 +130,7 @@ export default {
           xAxis: {
               type: 'category',
               boundaryGap: false,
-              data: this.kline.map(it => moment(it[0]).format('MM-DD HH:mm:ss'))
+              data: this.kline.map(it => moment(it[0]*1000).format('MM-DD HH:mm:ss'))
           },
           yAxis: [
             {
@@ -377,7 +140,7 @@ export default {
               min: 'dataMin'
             },
             {
-                name: 'barSum',
+                name: 'indicator',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
@@ -387,18 +150,24 @@ export default {
               {
                   name:'kline',
                   type:'line',
-                  data: this.kline.map(it => it[4])
+                  data: this.kline.map(it=> it[4])
               },
               {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: data
+                  data: this.getPercent(data, data.length - 1)
               },
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
+    },
+    getPercent(list, index = 0) {
+      let firstVal = list[index]
+      return list.map(it => {
+        return ((it - firstVal) / Math.abs(firstVal) * 100).toFixed(2)
+      })
     },
     getKline(market, type) {
       if (market) {
@@ -427,480 +196,22 @@ export default {
       }).then(res => {
         this.kline = res.data.data
       }).then(res => {
-        
-        this.parseData()
-        // this.strategy2()
-        // this.strategy6()
+        this.parseData(res)
       })
     },
-    // 差值策略
-    strategy1() {
-      let strategyData = {
-        toSellItems: [],
-        toBuyItems: []
-      }
-      
-      this.kline.forEach((it, index) => {
-        if (index == 0) {
-          return
-        }
-        const price = it[4]
-        const prePrice = this.kline[index-1][4]
-        const perBuy = 100
-        const perSell = 100
-        let buyDiff = 0.000
-        let sellDiff = 0.000
-        const toSellLevel = 0.01
-        const toBuyLevel = 0.01
-
-        const nowDea = this.macd.deas[index]
-        const minDea = -0.0005
-        const maxDea = 0.0005
-        const nowK = this.kdj.k[index]
-        const minK = 15
-        const maxK = 85
-
-        if (nowDea < minDea && nowK < minK && price < prePrice - buyDiff) {
-          strategyData.toSellItems.push({
-            time: it[0],
-            open: price,
-            close:  (price + toSellLevel).toFixed(4),
-            finish: false,
-            profit: 0,
-            amount: perBuy,
-            nowDea: nowDea,
-            minDea: minDea,
-            maxDea: maxDea,
-            nowK: nowK,
-            minK: minK,
-            maxK: maxK
-          })
-        }
-
-        strategyData.toSellItems.forEach((sellItem, sellIndex) => {
-          if (sellItem.finish) {
-            return
-          }
-          if (sellItem.close < price) {
-            strategyData.toSellItems[sellIndex].finish = true
-            strategyData.toSellItems[sellIndex].closeTime = it[0]
-          }
-        })
-
-        if (nowDea > maxDea && nowK > maxK && price > prePrice + sellDiff) {
-          strategyData.toBuyItems.push({
-            time: it[0],
-            open: price,
-            close: (price - toBuyLevel).toFixed(4),
-            finish: false,
-            profit: 0,
-            amount: perSell,
-            nowDea: nowDea,
-            minDea: minDea,
-            maxDea: maxDea,
-            nowK: nowK,
-            minK: minK,
-            maxK: maxK
-          })
-        }
-
-        strategyData.toBuyItems.forEach((buyItem, buyIndex) => {
-          if (buyItem.finish) {
-            return
-          }
-          if (buyItem.close > price) {
-            strategyData.toBuyItems[buyIndex].finish = true
-            strategyData.toBuyItems[buyIndex].closeTime = it[0]
-          }
-        })
-      })
-      let totalProfit = 0
-      this.strategy1Data = {
-        toBuyItems: strategyData.toBuyItems.map(it => {
-          const profit = getProfit(it, -1, this.kline)
-          totalProfit += profit/1
-          return {
-            ...it,
-            profit
-          }
-        }),
-        toSellItems: strategyData.toSellItems.map(it => {
-          const profit = getProfit(it, 1, this.kline)
-          totalProfit += profit/1
-          return {
-            ...it,
-            profit
-          }
-        }),
-        totalProfit
-      }
-      console.log(strategyData)
-    },
-    // RSI策略
-    strategy2() {
-      let strategyData = {
-        toSellItems: [],
-        toBuyItems: []
-      }
-      let qcAmount = [0]
-      let usdtAmount = [0]
-      let profitAmount = [0]
-      
-      this.kline.forEach((it, index) => {
-        if (index == 0) {
-          return
-        }
-        const price = it[4]
-        const prePrice = this.kline[index-1][4]
-        const perBuy = 100
-        const perSell = 100
-        let buyDiff = 0.000
-        let sellDiff = 0.000
-        const toSellLevel = 0.01
-        const toBuyLevel = 0.01
-
-        // const nowDea = this.macd.deas[index]
-        // const minDea = -0.0005
-        // const maxDea = 0.0005
-        // const nowK = this.kdj.k[index]
-        // const minK = 15
-        // const maxK = 85
-
-        const nowRsi6 = this.rsi.rsi6[index]
-        const nowRsi12 = this.rsi.rsi12[index]
-        const minRsi6 = 20
-        const maxRsi6 = 80
-        const minRsi12 = 30
-        const maxRsi12 = 70
-        if (!nowRsi6 || nowRsi6==100) {
-          return
-        }
-        if (nowRsi6 < minRsi6 || nowRsi12 < minRsi12) {
-          const amount = 50 - nowRsi6
-          strategyData.toSellItems.push({
-            time: it[0],
-            open: price,
-            close:  (price + toSellLevel).toFixed(4),
-            finish: false,
-            profit: 0,
-            amount: amount,
-            nowRsi6
-          })
-          let preQc = qcAmount[qcAmount.length-1]
-          qcAmount.push(preQc-price*amount)
-          let preUsdt = usdtAmount[usdtAmount.length-1]
-          usdtAmount.push(preUsdt+amount)
-        }
-
-        // strategyData.toSellItems.forEach((sellItem, sellIndex) => {
-        //   if (sellItem.finish) {
-        //     return
-        //   }
-        //   if (sellItem.close < price) {
-        //     strategyData.toSellItems[sellIndex].finish = true
-        //     strategyData.toSellItems[sellIndex].closeTime = it[0]
-        //   }
-        // })
-
-        if (nowRsi6 > maxRsi6 || nowRsi12 > maxRsi12) {
-          const amount = nowRsi6 - 50
-          strategyData.toBuyItems.push({
-            time: it[0],
-            open: price,
-            close: (price - toBuyLevel).toFixed(4),
-            finish: false,
-            profit: 0,
-            amount: amount,
-            nowRsi6
-          })
-          let preQc = qcAmount[qcAmount.length-1]
-          qcAmount.push(preQc+price*amount)
-          let preUsdt = usdtAmount[usdtAmount.length-1]
-          usdtAmount.push(preUsdt-amount)
-        }
-
-        // strategyData.toBuyItems.forEach((buyItem, buyIndex) => {
-        //   if (buyItem.finish) {
-        //     return
-        //   }
-        //   if (buyItem.close > price) {
-        //     strategyData.toBuyItems[buyIndex].finish = true
-        //     strategyData.toBuyItems[buyIndex].closeTime = it[0]
-        //   }
-        // })
-      })
-      let totalProfit = 0
-      this.strategy1Data = {
-        toBuyItems: strategyData.toBuyItems.map(it => {
-          const profit = getProfit(it, -1, this.kline)
-          totalProfit += profit/1
-          return {
-            ...it,
-            profit
-          }
-        }),
-        toSellItems: strategyData.toSellItems.map(it => {
-          const profit = getProfit(it, 1, this.kline)
-          totalProfit += profit/1
-          return {
-            ...it,
-            profit
-          }
-        }),
-        totalProfit
-      }
-      console.log(strategyData,qcAmount,usdtAmount)
-    },
-    // 能量对决
-    strategy6() {
-      let risTotal = []
-      let risTotalVal = 0
-      this.rsi.rsi6.forEach((it, index) => {
-        risTotalVal = (this.kline[index][4]-this.kline[index][1]) / (this.kline[index][4]-this.kline[index][1] > 0 ? it : (100 - it))
-        risTotal.push(risTotalVal.toFixed(4))
-      })
-      this.initChart(risTotal)
-    },
+    
     parseData() {
-      const period = 40
-      let maxItems = []
-      let minItems = []
-      let preHighIndex = 0
-      this.kline.forEach((it, index, _arr) => {
-        const itemPrice = it[4]
-        let maxItem = index
-        let minItem = index
+      const kline = this.kline
+        let totalResult = 0
+        let totalList = kline.map((it, index) => {
+          let vol = it[5]
+          totalResult += ( vol * it[4] *((it[4] - it[1]) > 0?1:-1)) 
+          return totalResult
+        })
+        let resultData = totalList
         
-        for (let i = 0; i < period; i++) {
-          if (maxItem == null && minItem == null) {
-            break
-          }
-          const thatIndex = index - i + period / 2
-          if (index == thatIndex) {
-            continue
-          }
-          if (thatIndex < 0 || thatIndex > _arr.length-1) {
-            maxItem = null
-            minItem = null
-            continue
-          }
-          const thatPrice = _arr[thatIndex][4]
-          if (itemPrice < thatPrice) {
-            maxItem = null
-          } else {
-            minItem = null
-          }
-          if (itemPrice < thatPrice - 0.01 && thatIndex > index && index > preHighIndex) {
-            preHighIndex = thatIndex
-          }
-        }
-        if (maxItem) {
-          maxItems.push(maxItem)
-        }
-        if (minItem) {
-          minItems.push(minItem)
-        }
-      })
-      this.minItems = minItems
-      this.maxItems = maxItems
-      let MinMacd = {
-        diff: 0,
-        dea: 0,
-        bar: 0
-      }
-      let MinKdj = {
-        k: 0,
-        d: 0,
-        j: 0
-      }
-      let MinRsi = {
-        r6: 0,
-        r12: 0,
-        r24: 0
-      }
-      let MaxMacd = {
-        diff: 0,
-        dea: 0,
-        bar: 0
-      }
-      let MaxKdj = {
-        k: 0,
-        d: 0,
-        j: 0
-      }
-      let MaxRsi = {
-        r6: 0,
-        r12: 0,
-        r24: 0
-      }
-      minItems.forEach(i => {
-        MinKdj.k += this.kdj.k[i]
-        MinKdj.d += this.kdj.d[i]
-        MinKdj.j += this.kdj.j[i]
-        MinMacd.diff += this.macd.diffs[i]
-        MinMacd.dea += this.macd.deas[i]
-        MinMacd.bar += this.macd.bars[i]
-        MinRsi.r6 += this.rsi.rsi6[i]
-        MinRsi.r12 += this.rsi.rsi12[i]
-        MinRsi.r24 += this.rsi.rsi24[i]
-      })
-      maxItems.forEach(i => {
-        MaxKdj.k += this.kdj.k[i]
-        MaxKdj.d += this.kdj.d[i]
-        MaxKdj.j += this.kdj.j[i]
-        MaxMacd.diff += this.macd.diffs[i]
-        MaxMacd.dea += this.macd.deas[i]
-        MaxMacd.bar += this.macd.bars[i]
-        MaxRsi.r6 += this.rsi.rsi6[i]
-        MaxRsi.r12 += this.rsi.rsi12[i]
-        MaxRsi.r24 += this.rsi.rsi24[i]
-      })
-      const perMinKdj = {
-        k: MinKdj.k/minItems.length,
-        d: MinKdj.d/minItems.length,
-        j: MinKdj.j/minItems.length
-      }
-      const perMaxKdj = {
-        k: MaxKdj.k/maxItems.length,
-        d: MaxKdj.d/maxItems.length,
-        j: MaxKdj.j/maxItems.length
-      }
-      const perMinMacd = {
-        diff: MinMacd.diff/minItems.length,
-        dea: MinMacd.dea/minItems.length,
-        bar: MinMacd.bar/minItems.length
-      }
-      const perMaxMacd = {
-        diff: MaxMacd.diff/maxItems.length,
-        dea: MaxMacd.dea/maxItems.length,
-        bar: MaxMacd.bar/maxItems.length
-      }
-      const perMinRsi = {
-        r6: MinRsi.r6/minItems.length,
-        r12: MinRsi.r12/minItems.length,
-        r24: MinRsi.r24/minItems.length,
-      }
-      const perMaxRsi = {
-        r6: MaxRsi.r6/maxItems.length,
-        r12: MaxRsi.r12/maxItems.length,
-        r24: MaxRsi.r24/maxItems.length,
-      }
-      this.perIndicator = {
-        maxKdj: perMaxKdj,
-        minKdj: perMinKdj,
-        maxMacd: perMaxMacd,
-        minMacd: perMinMacd,
-        maxRsi: perMaxRsi,
-        minRsi: perMinRsi
-      }
-      const maxLength = this.kline.length-1
-      this.nowIndicator = {
-        macd: {
-          dea: this.macd.deas[maxLength],
-          diff: this.macd.diffs[maxLength],
-          bar: this.macd.bars[maxLength]
-        },
-        kdj: {
-          k: this.kdj.k[maxLength],
-          d: this.kdj.d[maxLength],
-          j: this.kdj.j[maxLength]
-        },
-        rsi: {
-          r6: this.rsi.rsi6[maxLength],
-          r12: this.rsi.rsi12[maxLength],
-          r24: this.rsi.rsi24[maxLength]
-        }
-      }
-
+        this.initChart(resultData)
     },
-    getStress() {
-      let kline = this.kline
-      let minPrice = 999999999999
-      let maxPrice = 0
-      kline.forEach(it => {
-        let price = it[4]/1
-        if (price > maxPrice) {
-          maxPrice = price
-        }
-        if (price < minPrice) {
-          minPrice = price
-        }
-      })
-
-      let maxMinStep = getExact((maxPrice - minPrice)/10)
-      let stepObj = {}
-      for (let i = 0; i < 11; i++) {
-        if (i) {
-          stepObj[`$${i}`] = {
-            price: `${getExact(minPrice + maxMinStep * i)}`,
-            totalVol: 0
-          }
-        }
-      }
-      
-      kline.forEach(it => {
-        let price = it[4]/1
-        let direct = (it[4] - it[1]) > 0 ? 1 : -1
-        let stepCount = parseInt((price - minPrice) / maxMinStep) + 1
-        if (stepObj[`$${stepCount}`] == undefined) {
-          stepCount = stepCount - 1
-        }
-        stepObj[`$${stepCount}`].totalVol = getExact(stepObj[`$${stepCount}`].totalVol + it[5]/1 * direct)
-        stepObj[`$${stepCount}`].totalVolNoDir = getExact(stepObj[`$${stepCount}`].totalVolNoDir + it[5]/1)
-        stepObj[`$${stepCount}`].totalVal = getExact(stepObj[`$${stepCount}`].totalVal + (it[5]/1 * price))
-        stepObj[`$${stepCount}`].perPrice = getExact(stepObj[`$${stepCount}`].totalVal / stepObj[`$${stepCount}`].totalVolNoDir).toFixed(4)/1
-      })
-      console.log(stepObj)
-      this.getBarChart(stepObj)
-    },
-    getBarChart(stepObj) {
-      let nowPrice = this.kline[this.kline.length -1][4]
-      let xAxisData = Object.values(stepObj).map(item => {
-        return item.perPrice
-      })
-      let barData = Object.values(stepObj).map(item => {
-        return item.totalVol
-      })
-      const option = {
-        title: {
-            text: '压力位测试'
-        },
-        legend: {
-            data: ['bar'],
-            align: 'left'
-        },
-        tooltip: {
-          position: 'top',
-          formatter(val) {
-            return `${stepObj[`$${val.dataIndex+1}`].perPrice}<br/>(${val.value})<br/>(${getExact((nowPrice - stepObj[`$${val.dataIndex+1}`].perPrice )/nowPrice*100).toFixed(2)}%)`
-            console.log(val)
-          }
-        },
-        xAxis: {
-            data: xAxisData,
-            silent: false,
-            splitLine: {
-                show: false
-            }
-        },
-        yAxis: {
-        },
-        series: [{
-            name: 'bar',
-            type: 'bar',
-            data: barData,
-            animationDelay: function (idx) {
-                return idx * 10;
-            }
-        }],
-        animationEasing: 'elasticOut',
-        animationDelayUpdate: function (idx) {
-            return idx * 5;
-        }
-    };
-    const kline1 = echarts.init(document.getElementById('kline1'));
-      kline1.setOption(option);
-    }
   }
 }
 </script>
@@ -910,6 +221,7 @@ export default {
     background-color: #333;
     min-height: 100%;
     color: #fff;
+    overflow: hidden;
     button {
       background: #ccc
     }
