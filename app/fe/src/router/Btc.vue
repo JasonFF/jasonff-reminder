@@ -176,10 +176,10 @@ export default {
             {
               name: 'kline',
               type: 'value',
-              // max: 'dataMax',
-              // min: 'dataMin',
-              max: _.max(this.kline.c),
-              min: _.min(this.kline.c),
+              max: 'dataMax',
+              min: 'dataMin',
+              // max: _.max(this.kline.c),
+              // min: _.min(this.kline.c),
             },
             {
                 name: 'indicator',
