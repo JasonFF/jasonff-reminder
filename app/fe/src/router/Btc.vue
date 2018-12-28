@@ -200,7 +200,7 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: data
+                  data: this.getPercent(data, data.length - 1)
                   // data: this.getPercent(data, data.length - 1).map((it, index) => {
                   //   let basePrice = this.kline.c[data.length - 1]
                   //   return basePrice * (1 + it) / 100
