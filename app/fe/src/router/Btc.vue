@@ -176,14 +176,18 @@ export default {
             {
               name: 'kline',
               type: 'value',
-              max: 'dataMax',
-              min: 'dataMin'
+              // max: 'dataMax',
+              // min: 'dataMin',
+              max: _.max(this.kline.c),
+              min: _.min(this.kline.c),
             },
             {
                 name: 'indicator',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
+                // max: _.max(data),
+                // min: _.min(data),
             },
           ],
           series: [
@@ -196,8 +200,11 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  // data
-                  data: this.getPercent(data, data.length - 1)
+                  data: data
+                  // data: this.getPercent(data, data.length - 1).map((it, index) => {
+                  //   let basePrice = this.kline.c[data.length - 1]
+                  //   return basePrice * (1 + it) / 100
+                  // })
               },
           ]
       };
