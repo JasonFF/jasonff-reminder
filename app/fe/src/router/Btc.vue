@@ -7,18 +7,20 @@
     </Row>
     <Row :gutter="16" style="text-align: center;margin-bottom: 10px">
 
-      <Col span="6" >
-        <i-switch v-model="isMonth">
-          <span slot="close">周</span>
-          <span slot="open">月</span>
-        </i-switch>
+      <Col span="12" >
+        <RadioGroup v-model="time" type="button">
+          <Radio label="日">日</Radio>
+          <Radio label="周">周</Radio>
+          <Radio label="月">月</Radio>
+        </RadioGroup>
       </Col>
 
-      <Col span="6">
-        <i-switch :true-value="60" :false-value="5" v-model="type">
-          <span  slot="close">5</span>
-          <span slot="open">60</span>
-        </i-switch>
+      <Col span="12">
+        <RadioGroup v-model="type" type="button">
+          <Radio label="1">1</Radio>
+          <Radio label="5">5</Radio>
+          <Radio label="60">60</Radio>
+        </RadioGroup>
       </Col>
     </Row>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
@@ -35,8 +37,8 @@ export default {
     return {
       kline: {},
       market: '',
-      isMonth: false,
-      type: 5,
+      time: '日',
+      type: '1',
       buttonMarkets: [
         'XBTUSD', "ETHUSD"
       ],
@@ -48,14 +50,21 @@ export default {
   methods: {
     chooseBtn(item) {
       this.market = item
-      if (this.isMonth) {
+      let time = this.time
+      if (time == '日') {
+        this.parseData([0, 1])
+        return
+      }
+      if (time == '周') {
+        this.parseData([0, 7])
+        return
+      }
+      if (time == '月') {
         this.getKlineByTime()
-      } else {
-        this.parseData()
       }
     },
-    parseData() {
-      return this.getKline().then(res => {
+    parseData(timearr) {
+      return this.getKline(timearr).then(res => {
         this.kline = res
         // console.log(rsi)
         let totalResult = 0
@@ -69,11 +78,11 @@ export default {
       })
     },
     getKlineByTime() {
-      return Promise.all([4,3,2,1].map(it => {
+      return Promise.all([4,3,2,1].map((it, index) => {
         return new Promise(resolve => {
           setTimeout(() => {
             resolve(this.getKline([(it - 1) * 7, it * 7]))
-          }, 1000);
+          }, (1000 * index));
         })
       })).then(res => {
         let result = res[0]
