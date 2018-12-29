@@ -37,8 +37,8 @@ export default {
     return {
       kline: {},
       market: '',
-      time: '日',
-      type: '1',
+      time: '周',
+      type: '5',
       buttonMarkets: [
         'XBTUSD', "ETHUSD"
       ],
@@ -108,6 +108,22 @@ export default {
         let resultData = totalList
         this.initChart(resultData)
       })
+    },
+    getIndicator(kline, data) {
+      const period = 12 / 5 * 60
+      return data.map((it, index) => {
+        if (index - period < 0) {
+          return 0
+        }
+        let totalData = 0
+        let totalKline = 0
+        for (let i = 0; i < period; i++) {
+          totalData += data[index - i]/1
+          totalKline += kline[index - i]/1
+        }
+        return totalKline / (Math.abs(totalData) * kline[index - 1])
+      })
+
     },
     getKline(timearr=[0, 7]) {
       // const storeKline = window.localStorage.getItem('kline')
