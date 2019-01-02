@@ -105,6 +105,23 @@ const bitmexapi = k2c(httpProxy({
   },
 }));
 
+
+const bcapi = k2c(httpProxy({
+  target: 'https://webapi.bc.game',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/bcapi/' : '/',     // rewrite path
+  },
+  onProxyReq (proxyReq) {
+    proxyReq.setHeader("Referer", "https://bc.game/atm")
+    proxyReq.setHeader("origin", "https://bc.game")
+  },
+  onProxyRes (proxyRes, req, res) {
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Method'] = '*';
+  },
+}));
+
 /**
  * @param {Egg.Application} app - egg application
  */
@@ -119,5 +136,6 @@ module.exports = app => {
   router.all('/okexapi/*', okexapi)
   router.all('/aicoin/*', aicoin)
   router.all('/bitmexapi/*', bitmexapi)
+  router.all('/bcapi/*', bcapi)
   router.get(/^\/(?!public)/, controller.home.index);
 };
