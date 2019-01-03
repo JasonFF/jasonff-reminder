@@ -9,6 +9,7 @@ import OtherPriceParse from './OtherPriceParse'
 import MyAccount from './MyAccount/MyAccount'
 import MAIndex from './MyAccount/Index'
 import Btc from './Btc'
+import DataKline from './DataKline'
 
 Vue.use(Router)
 
@@ -19,6 +20,11 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: Home
+    },
+    {
+      path: '/dataKline',
+      name: 'DataKline',
+      component: DataKline
     },
     {
       path: '/btc',
