@@ -32,7 +32,7 @@ export default {
         let dataList = []
 
         for (let i = 0; i < 100; i++) {
-          dataList = dataList.concat(BETDATA[`$${i+1}`])
+          dataList = dataList.concat(BETDATA[`$${i}`])
         }
         dataList = dataList.reverse()
         return dataList.map(it => {
@@ -40,7 +40,7 @@ export default {
             it.maxRate = 10000
           }
           return it
-        }).slice(1950,1980)
+        })
       })()
     }
   },
@@ -111,7 +111,7 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getIndicator(data.map(it => it.maxRate))
+                  data: this.getMidCount(data.map(it => it.maxRate))
               },
           ]
       };
@@ -125,6 +125,114 @@ export default {
       // const result = BOLL(list).mid
       // const result = MA(list, 20)
       return result
+    },
+    getMidCount(list, period) {
+      let downCount = 0
+      let upCount = 0
+      let result = []
+      list.forEach((it, index) => {
+        if (it < 200) {
+          downCount++
+        } else {
+          upCount++
+        }
+        result.push((downCount - upCount).toFixed(4))
+      })
+      return result
+    },
+    downCount() {
+
+
+      var config = {
+         downCount: { label: 'downCount', value: 0, type: 'number' },
+      }
+      function main () {
+        var perBet = 1
+        var downCount = config.downCount.value
+        var endPoint = 0
+        engine.on('GAME_STARTING', function () {
+          if (downCount >= 20) {
+            if (!endPoint) {
+              endPoint = 1
+            }
+          }
+          if (endPoint && downCount <= endPoint) {
+            endPoint = 0
+          }
+
+          if (endPoint) {
+            engine.bet(perBet, 2)
+            .then(function (res){
+              log.info('bet: ' + engine.getStatus());
+            })
+            .catch(function (err) {
+              log.error('Bet fail');
+            })
+          }
+          
+          log.info('starting: ' + downCount)
+        })
+
+        engine.on('GAME_ENDED', function () {
+          var history = engine.getHistory()
+          var firstHistory = history[0]
+          if (firstHistory.crash < 200) {
+            downCount++
+          } else {
+            downCount--
+          }
+          log.info(firstHistory.crash + ' downCount: ' + downCount)
+        })
+      }
+
+    },
+    getDataInChrome() {
+
+      let resultData = {}
+        for (let i = 0; i < 100; i++) {
+            setTimeout(function(){
+                  getData(i+1).then(res => {
+                    resultData[`$${i}`] = res
+                    window.localStorage.setItem('result', JSON.stringify(resultData))
+                })
+            }, 500 * i)
+        }
+        function getData(page) {
+            return fetch('https://webapi.bc.game/crash/result/history/', {
+                method: 'POST',
+                headers: {
+                  'content-type': 'application/json;charset=UTF-8'
+                },
+                body: `{"page":${page},"pageSize":20}`
+            }).then(res => res.json()).then(res => res.data.list)
+        }
+
+    },
+    getListInChrome() {
+      let result = JSON.parse(window.localStorage.getItem('result'))
+      let dataList = []
+      for (let i = 0; i < 100; i++) {
+        dataList = dataList.concat(result[`$${i}`])
+      }
+      dataList = dataList.reverse()
+      
+      let downCount = 0
+      let upCount = 0
+      let downCountList = []
+      dataList.forEach((it, index) => {
+        if (it.maxRate < 200) {
+          downCount++
+        } else {
+          upCount++
+        }
+        downCountList.push((downCount - upCount).toFixed(4))
+      })
+      let totalCount = 0
+      downCountList.forEach(it => {
+        totalCount = totalCount + it/1
+      })
+      let perCount = totalCount / downCountList.length
+      console.log(downCountList[downCountList.length -1], perCount, downCountList)
     }
   }
 }

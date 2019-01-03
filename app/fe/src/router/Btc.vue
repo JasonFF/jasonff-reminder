@@ -131,7 +131,7 @@ export default {
       //   return Promise.resolve(JSON.parse(storeKline))
       // }
       return this.$http({
-        url: 'http://www.abichi.club/bitmexapi/api/udf/history', 
+        url: 'http://localhost:7001/bitmexapi/api/udf/history', 
         params: {
           symbol: this.market,
           resolution: this.type,
