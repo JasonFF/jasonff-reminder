@@ -149,18 +149,18 @@ export default {
       function main () {
         var perBet = 1
         var downCount = config.downCount.value
-        var endPoint = 0
+        var endPoint = undefined
         engine.on('GAME_STARTING', function () {
-          if (downCount >= 20) {
-            if (!endPoint) {
-              endPoint = 1
+          if (downCount >= 8) {
+            if (endPoint === undefined) {
+              endPoint = -8
             }
           }
-          if (endPoint && downCount <= endPoint) {
-            endPoint = 0
+          if (endPoint !== undefined && downCount <= endPoint) {
+            endPoint = undefined
           }
 
-          if (endPoint) {
+          if (endPoint !== undefined) {
             engine.bet(perBet, 2)
             .then(function (res){
               log.info('bet: ' + engine.getStatus());
