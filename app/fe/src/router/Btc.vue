@@ -216,7 +216,7 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]}))
+                  data: this.getPercent(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1)
                   // data: this.getPercent(data, data.length - 1)
                   // data: this.getPercent(data, data.length - 1).map((it, index) => {
                   //   let basePrice = this.kline.c[data.length - 1]
