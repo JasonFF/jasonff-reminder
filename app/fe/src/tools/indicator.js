@@ -14,9 +14,9 @@ var Indicator = (function(){
         if (i != 0) {
           var lastObvValue = obvs[i-1];
           if (curTick[0] >= lastTick[0]) {
-            value = lastObvValue + curTick[1];
+            value = lastObvValue + curTick[1] * curTick[0];
           } else {
-            value = lastObvValue - curTick[1];
+            value = lastObvValue - curTick[1] * curTick[0];
           }
         }
         obvs.push(value);

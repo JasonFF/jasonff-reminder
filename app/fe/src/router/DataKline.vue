@@ -138,7 +138,12 @@ export default {
         }
         result.push((downCount - upCount).toFixed(4))
       })
-      return result
+      let total = 0
+      result.forEach(it => {
+        total = total + it/1
+      })
+      let average = total / result.length
+      return result.map(it => (it - average).toFixed(1)/1)
     },
     downCount() {
 
@@ -147,21 +152,26 @@ export default {
          downCount: { label: 'downCount', value: 0, type: 'number' },
       }
       function main () {
-        var perBet = 1
+        var baseBet = 0.1
         var downCount = config.downCount.value
+        var calBet = 1
+        var toEndPoint = -5
+        var toStartPoint = 0
         var endPoint = undefined
         engine.on('GAME_STARTING', function () {
-          if (downCount >= 8) {
+          log.info('starting: ' + downCount + ' cal: ' + calBet)
+          if (downCount >= toStartPoint) {
             if (endPoint === undefined) {
-              endPoint = -8
+              endPoint = toEndPoint
             }
           }
           if (endPoint !== undefined && downCount <= endPoint) {
             endPoint = undefined
+            calBet = 1
           }
 
           if (endPoint !== undefined) {
-            engine.bet(perBet, 2)
+            engine.bet((parseInt(calBet) * baseBet).toFixed(5)/1, 2)
             .then(function (res){
               log.info('bet: ' + engine.getStatus());
             })
@@ -170,7 +180,7 @@ export default {
             })
           }
           
-          log.info('starting: ' + downCount)
+          
         })
 
         engine.on('GAME_ENDED', function () {
@@ -178,10 +188,13 @@ export default {
           var firstHistory = history[0]
           if (firstHistory.crash < 200) {
             downCount++
+            if (endPoint) {
+              calBet = calBet + 0.05
+            }
           } else {
             downCount--
           }
-          log.info(firstHistory.crash + ' downCount: ' + downCount)
+          log.info(firstHistory.crash + ' downCount: ' + downCount )
         })
       }
 

@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import {RSI, MACD} from '@/tools/indicator.js'
+import {RSI, MACD, OBV} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
 import _ from 'lodash'
@@ -131,7 +131,7 @@ export default {
       //   return Promise.resolve(JSON.parse(storeKline))
       // }
       return this.$http({
-        url: 'http://localhost:7001/bitmexapi/api/udf/history', 
+        url: 'http://www.abichi.club/bitmexapi/api/udf/history', 
         params: {
           symbol: this.market,
           resolution: this.type,
@@ -216,7 +216,8 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getPercent(data, data.length - 1)
+                  data: OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]}))
+                  // data: this.getPercent(data, data.length - 1)
                   // data: this.getPercent(data, data.length - 1).map((it, index) => {
                   //   let basePrice = this.kline.c[data.length - 1]
                   //   return basePrice * (1 + it) / 100
