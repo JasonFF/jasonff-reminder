@@ -171,7 +171,14 @@ export default {
           }
 
           if (endPoint !== undefined) {
-            engine.bet((parseInt(calBet) * baseBet).toFixed(5)/1, 2)
+            var toBet = parseInt(calBet)
+            if (toBet > 5) {
+              toBet = 5
+            }
+            if (toBet < 1) {
+              toBet = 1
+            }
+            engine.bet(( toBet * baseBet).toFixed(5)/1, 2)
             .then(function (res){
               log.info('bet: ' + engine.getStatus());
             })
@@ -189,10 +196,13 @@ export default {
           if (firstHistory.crash < 200) {
             downCount++
             if (endPoint) {
-              calBet = calBet + 0.05
+              calBet = (calBet + 0.1).toFixed(5)/1
             }
           } else {
             downCount--
+            if (endPoint) {
+              calBet = (calBet - 0.05).toFixed(5)/1
+            }
           }
           log.info(firstHistory.crash + ' downCount: ' + downCount )
         })
