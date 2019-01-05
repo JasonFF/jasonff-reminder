@@ -11,6 +11,7 @@ import {MACD, KDJ, BOLL, RSI, MA} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
 import BETDATA from './BETDATA'
+import _ from 'lodash'
     function getExact(val) {
       if (!val) {
         return 0
@@ -22,6 +23,10 @@ import BETDATA from './BETDATA'
         return val.toFixed(7)/1
       }
       return val
+    }
+    function getRandomTrue() {
+      
+      return Math.floor(Math.random()*1000) < 495
     }
 export default {
   filters: {
@@ -45,9 +50,44 @@ export default {
     }
   },
   mounted() {
-    this.initChart(this.betData)
+    
+    let downCount = 0
+    let resultArr = []
+    for (let i = 0; i < 40000;i++) {
+      let result = Math.floor(Math.random()*1000)
+      // if (result>=990) {
+      //   resultArr.push(downCount)
+      // } else {
+        if (result < 495) {
+          downCount--
+        } else {
+          downCount++
+        }
+        resultArr.push(downCount)
+      // }
+      
+    }
+    // this.parseProfit(resultArr)
+    // this.initChart(resultArr)
+    this.initChart(this.getMidCount(this.betData.map(it => it.maxRate)))
+    // this.initChart(this.betData.map(it => it.maxRate))
   },
   methods: {
+    parseProfit(dataList) {
+      let ma = BOLL(dataList, 500).mid
+      let result = 0
+      dataList.forEach((it, i) => {
+        if (i <= 300 ) {
+          return
+        }
+        if (it < ma[i]) {
+          result = result + (dataList[i+1] - it)
+        } else {
+          // result--
+        }
+      })
+      console.log(result)
+    },
     initChart(data) {
         const option = {
           title: {
@@ -67,7 +107,7 @@ export default {
           },
           dataZoom: [{
               type: 'inside',
-              start: 90,
+              start: 0,
               end: 100
           }, {
               start: 0,
@@ -105,13 +145,14 @@ export default {
               {
                   name:'kline',
                   type:'line',
-                  data: data.map(it => it.maxRate)
+                  // data
+                  data
               },
               {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getMidCount(data.map(it => it.maxRate))
+                  data: this.getIndicator(data)
               },
           ]
       };
@@ -120,10 +161,10 @@ export default {
     },
     getIndicator(list) {
       // const result = KDJ(list.map((it, index)=>[it,it,it])).k
-      const result = MACD(list).diffs
+      // const result = MACD(list).deas
       // const result = RSI(list).rsi6
-      // const result = BOLL(list).mid
-      // const result = MA(list, 20)
+      const result = BOLL(list, 300).mid
+      // const result = MA(list, 1)
       return result
     },
     getMidCount(list, period) {
@@ -131,6 +172,10 @@ export default {
       let upCount = 0
       let result = []
       list.forEach((it, index) => {
+        // if (it < 101) {
+        //   result.push((downCount - upCount).toFixed(4))
+        //   return
+        // } 
         if (it < 200) {
           downCount++
         } else {
@@ -150,16 +195,64 @@ export default {
 
       var config = {
          downCount: { label: 'downCount', value: 0, type: 'number' },
+         calBet: { label: 'calBet', value: 1, type: 'number' },
       }
+      var getMaxHighAndMinLow = function (ticks) {
+        var maxHigh = ticks[0][0], minLow = ticks[0][1];
+        for (var i = 0; i < ticks.length; i++) {
+          var t = ticks[i], high = t[0], low = t[1];
+          if (high > maxHigh) {
+            maxHigh = high;
+          }
+          if (low < minLow) {
+            minLow = low;
+          }
+        }
+        return [maxHigh, minLow];
+      };
+      var kdj = function (ticks) {
+        var nineDaysTicks = [], days = 9, rsvs = [];
+        var ks = [], ds = [], js = [];
+        var lastK, lastD, curK, curD;
+        var maxAndMin, max, min;
+        for (var i = 0; i < ticks.length; i++) {
+          var t = ticks[i], close = t[2];
+          nineDaysTicks.push(t);
+          maxAndMin = getMaxHighAndMinLow(nineDaysTicks);
+          max = maxAndMin[0];
+          min = maxAndMin[1];
+          if (max == min) {
+            rsvs.push(0);
+          } else {
+            rsvs.push((close - min) / (max - min) * 100);
+          }
+          if (nineDaysTicks.length == days) {
+            nineDaysTicks.shift();
+          }
+          if (i == 0) {
+            lastK = lastD = rsvs[i];
+          }
+          curK = 2 / 3 * lastK + 1 / 3 * rsvs[i];
+          ks.push(curK);
+          lastK = curK;
+    
+          curD = 2 / 3 * lastD + 1 / 3 * curK;
+          ds.push(curD);
+          lastD = curD;
+    
+          js.push(3 * curK - 2 * curD);
+        }
+        return {"k": ks, "d": ds, "j": js};
+      };
       function main () {
         var baseBet = 0.1
         var downCount = config.downCount.value
-        var calBet = 1
-        var toEndPoint = -5
-        var toStartPoint = 0
+        var calBet = config.calBet.value
         var endPoint = undefined
         engine.on('GAME_STARTING', function () {
           log.info('starting: ' + downCount + ' cal: ' + calBet)
+
+
           if (downCount >= toStartPoint) {
             if (endPoint === undefined) {
               endPoint = toEndPoint
@@ -172,12 +265,7 @@ export default {
 
           if (endPoint !== undefined) {
             var toBet = parseInt(calBet)
-            if (toBet > 5) {
-              toBet = 5
-            }
-            if (toBet < 1) {
-              toBet = 1
-            }
+            
             engine.bet(( toBet * baseBet).toFixed(5)/1, 2)
             .then(function (res){
               log.info('bet: ' + engine.getStatus());
@@ -195,16 +283,63 @@ export default {
           var firstHistory = history[0]
           if (firstHistory.crash < 200) {
             downCount++
-            if (endPoint) {
-              calBet = (calBet + 0.1).toFixed(5)/1
-            }
           } else {
             downCount--
-            if (endPoint) {
-              calBet = (calBet - 0.05).toFixed(5)/1
-            }
           }
           log.info(firstHistory.crash + ' downCount: ' + downCount )
+          if (endPoint !== undefined) {
+            if (downCount >= 50) {
+              calBet = 6
+            }
+            if (calBet >= 6) {
+              if (downCount < 30) {
+                calBet = 5
+              }
+              return
+            }
+            if (downCount >= 30) {
+              calBet = 5
+            }
+            if (calBet >= 5) {
+              if (downCount < 20) {
+                calBet = 4
+              }
+              return
+            }
+            if (downCount >= 20) {
+              calBet = 4
+            }
+            if (calBet >= 4) {
+              if (downCount < 10) {
+                calBet = 3
+              }
+              return
+            }
+            if (downCount >= 10) {
+              calBet = 3
+            }
+            if (calBet >= 3) {
+              if (downCount < 0) {
+                calBet = 2
+              }
+              return
+            }
+            if (downCount >= 0) {
+              calBet = 2
+            }
+            if (calBet >= 2) {
+              if (downCount < -10) {
+                calBet = 1
+              }
+              return
+            }
+            if (downCount >= -10) {
+              calBet = 1
+            }
+            if (calBet >= 1) {
+              return
+            }
+          }
         })
       }
 
