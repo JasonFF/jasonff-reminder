@@ -145,7 +145,7 @@ var Indicator = (function(){
       }
       return mas;
     };
-  
+
     /**
      *
      * 计算boll指标,ma的周期为20日
@@ -155,9 +155,9 @@ var Indicator = (function(){
      * 一维数组类型，每个元素为当前Tick的收盘价格
      * @return {Object} 返回一个包含upper mid lower属性的对象,每个属性对应的类型为{Array[Number]}
      */
-    var boll = function(ticks) {
+    var boll = function(ticks, days) {
       //移动平均线周期为20
-      var maDays = 20, tickBegin = maDays - 1, maSum = 0, p = 0;
+      var maDays = days || 20, tickBegin = maDays - 1, maSum = 0, p = 0;
       var ups = [], mas = [], lows = [];
       for (var i = 0; i < ticks.length; i ++) {
         var c = ticks[i], ma, md, bstart, mdSum;

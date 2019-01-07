@@ -70,7 +70,12 @@ export default {
         let totalResult = 0
         let totalList = this.kline.c.map((it, index) => {
           let vol = res.v[index]
-          totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) > 0?1:-1)) 
+          if (res.c[index] == res.o[index]) {
+            totalResult += 0
+          } else {
+            totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) > 0?1:-1))
+          }
+           
           return totalResult
         })
         let resultData = totalList
@@ -102,7 +107,7 @@ export default {
         let totalResult = 0
         let totalList = this.kline.c.map((it, index) => {
           let vol = res.v[index]
-          totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) > 0?1:-1)) 
+          totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) >= 0?1:-1)) 
           return totalResult
         })
         let resultData = totalList
@@ -115,7 +120,7 @@ export default {
         if (index == 0) {
           return 0
         }
-        let indicator = ((Math.abs(it - obv[index - 1]) / (this.kline.c[index] - this.kline.c[index - 1])) / 1) || 0
+        let indicator = this.kline.c[index] == this.kline.c[index -1] ? 0: (Math.abs(it - obv[index - 1]) / (this.kline.c[index] - this.kline.c[index - 1]))
         result = result + indicator
         return result
       })
@@ -148,7 +153,7 @@ export default {
     initChart(data) {
         const option = {
           title: {
-              text: '均线'
+              text: 'obv'
           },
           tooltip: {
               trigger: 'axis'
@@ -209,10 +214,10 @@ export default {
                   data: this.kline.c
               },
               {
-                  name:'barSum',
+                  name:'obv',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getPercent(this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1), data.length - 1)
+                  data: this.getPercent(this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1), data.length -1)
                   // data: this.getPercent(data, data.length - 1)
                   // data: this.getPercent(data, data.length - 1).map((it, index) => {
                   //   let basePrice = this.kline.c[data.length - 1]
@@ -223,7 +228,7 @@ export default {
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
-    },
+    }
   }
 }
 </script>
