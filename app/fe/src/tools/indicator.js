@@ -13,10 +13,14 @@ var Indicator = (function(){
         var value = 0, curTick = ticks[i];
         if (i != 0) {
           var lastObvValue = obvs[i-1];
-          if (curTick[0] >= lastTick[0]) {
-            value = lastObvValue + curTick[1] * curTick[0];
-          } else {
-            value = lastObvValue - curTick[1] * curTick[0];
+          if (curTick[0] > lastTick[0]) {
+            value = lastObvValue + curTick[1];
+          } 
+          if (curTick[0] < lastTick[0]) {
+            value = lastObvValue - curTick[1];
+          }
+          if (curTick[0] == lastTick[0]) {
+            value = lastObvValue
           }
         }
         obvs.push(value);

@@ -109,19 +109,15 @@ export default {
         this.initChart(resultData)
       })
     },
-    getIndicator(kline, data) {
-      const period = 12 / 5 * 60
-      return data.map((it, index) => {
-        if (index - period < 0) {
+    getIndicator(obv) {
+      let result = 0
+      return obv.map((it, index) => {
+        if (index == 0) {
           return 0
         }
-        let totalData = 0
-        let totalKline = 0
-        for (let i = 0; i < period; i++) {
-          totalData += data[index - i]/1
-          totalKline += kline[index - i]/1
-        }
-        return totalKline / (Math.abs(totalData) * kline[index - 1])
+        let indicator = ((Math.abs(it - obv[index - 1]) / (this.kline.c[index] - this.kline.c[index - 1])) / 1) || 0
+        result = result + indicator
+        return result
       })
 
     },
@@ -216,7 +212,7 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getPercent(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1)
+                  data: this.getPercent(this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1), data.length - 1)
                   // data: this.getPercent(data, data.length - 1)
                   // data: this.getPercent(data, data.length - 1).map((it, index) => {
                   //   let basePrice = this.kline.c[data.length - 1]
