@@ -50,43 +50,32 @@ export default {
     }
   },
   mounted() {
-    
-    let downCount = 0
-    let resultArr = []
-    for (let i = 0; i < 40000;i++) {
-      let result = Math.floor(Math.random()*1000)
-      // if (result>=990) {
-      //   resultArr.push(downCount)
-      // } else {
-        if (result < 495) {
-          downCount--
-        } else {
-          downCount++
-        }
-        resultArr.push(downCount)
-      // }
-      
-    }
-    // this.parseProfit(resultArr)
-    // this.initChart(resultArr)
-    this.initChart(this.getMidCount(this.betData.map(it => it.maxRate)))
-    // this.initChart(this.betData.map(it => it.maxRate))
+    this.parseProfit()
   },
   methods: {
     parseProfit(dataList) {
-      let ma = BOLL(dataList, 500).mid
-      let result = 0
-      dataList.forEach((it, i) => {
-        if (i <= 300 ) {
-          return
-        }
-        if (it < ma[i]) {
-          result = result + (dataList[i+1] - it)
-        } else {
-          // result--
-        }
-      })
-      console.log(result)
+      
+      let downCount = 0
+      let resultArr = []
+      let totalCount = 10000
+      for (let i = 0; i < totalCount;i++) {
+        let result = Math.floor(Math.random()*100000)
+          if (result < 50000) {
+            downCount++
+          } else {
+            downCount--
+          }
+          resultArr.push(downCount)
+          // resultArr.push(0.5 - (downCount/(i+1)))
+        // }
+        
+      }
+      // console.log(_.max(resultArr) - _.min(resultArr))
+      // this.parseProfit(resultArr)
+      this.initChart(resultArr)
+      // this.initChart(this.getMidCount(this.betData.map(it => it.maxRate)))
+      // this.initChart(this.betData.map(it => it.maxRate))
+
     },
     initChart(data) {
         const option = {
@@ -152,7 +141,19 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getIndicator(data)
+                  data: this.getIndicator(data).upper
+              },
+              {
+                  name:'barSum',
+                  type:'line',
+                  yAxisIndex:1,
+                  data: this.getIndicator(data).mid
+              },
+              {
+                  name:'barSum',
+                  type:'line',
+                  yAxisIndex:1,
+                  data: this.getIndicator(data).lower
               },
           ]
       };
@@ -163,7 +164,7 @@ export default {
       // const result = KDJ(list.map((it, index)=>[it,it,it])).k
       // const result = MACD(list).deas
       // const result = RSI(list).rsi6
-      const result = BOLL(list, 300).mid
+      const result = BOLL(list, 2000)
       // const result = MA(list, 1)
       return result
     },

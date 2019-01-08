@@ -159,9 +159,11 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','indicator'] 
+              data:['kline','obv', 'indicator'],
+              top: '3%'
           },
           grid: {
+              top: '15%',
               left: '3%',
               right: '4%',
               bottom: '3%',
@@ -199,13 +201,13 @@ export default {
               // min: _.min(this.kline.c),
             },
             {
-                name: 'indicator',
+                name: 'obv',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
                 // max: _.max(data),
                 // min: _.min(data),
-            },
+            }
           ],
           series: [
               {
@@ -217,12 +219,20 @@ export default {
                   name:'obv',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getPercent(this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1), data.length -1)
+                  color: '#228B22',
+                  data: this.getPercent(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]}), this.kline.c.length-1), data.length -1)
                   // data: this.getPercent(data, data.length - 1)
                   // data: this.getPercent(data, data.length - 1).map((it, index) => {
                   //   let basePrice = this.kline.c[data.length - 1]
                   //   return basePrice * (1 + it) / 100
                   // })
+              },
+              {
+                  name:'indicator',
+                  type:'line',
+                  yAxisIndex:1,
+                  color: '#483D8B',
+                  data: this.getPercent(this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1), data.length -1)
               },
           ]
       };
