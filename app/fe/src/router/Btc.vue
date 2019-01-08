@@ -164,10 +164,10 @@ export default {
           },
           grid: {
               top: '15%',
-              left: '3%',
-              right: '4%',
-              bottom: '3%',
-              containLabel: true
+              left: '13%',
+              right: '14%',
+              bottom: '13%',
+              // containLabel: true
           },
           dataZoom: [{
               type: 'inside',
@@ -205,6 +205,16 @@ export default {
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
+                show: false,
+                // max: _.max(data),
+                // min: _.min(data),
+            },
+            {
+                name: 'indicator',
+                max: 'dataMax',
+                min: 'dataMin',
+                type: 'value',
+                show: false,
                 // max: _.max(data),
                 // min: _.min(data),
             }
@@ -220,7 +230,7 @@ export default {
                   type:'line',
                   yAxisIndex:1,
                   color: '#228B22',
-                  data: this.getPercent(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]}), this.kline.c.length-1), data.length -1)
+                  data: OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]}), this.kline.c.length-1)
                   // data: this.getPercent(data, data.length - 1)
                   // data: this.getPercent(data, data.length - 1).map((it, index) => {
                   //   let basePrice = this.kline.c[data.length - 1]
@@ -230,9 +240,9 @@ export default {
               {
                   name:'indicator',
                   type:'line',
-                  yAxisIndex:1,
+                  yAxisIndex:2,
                   color: '#483D8B',
-                  data: this.getPercent(this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1), data.length -1)
+                  data: this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1)
               },
           ]
       };
