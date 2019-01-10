@@ -23,6 +23,14 @@
         </RadioGroup>
       </Col>
     </Row>
+    <Row :gutter="16" style="padding: 10px 20px 20px;margin-top: 20px">
+      <Col span="8">
+        <Button long @click="chooseOkEos">eos季度</Button>
+      </Col>
+      <Col span="8">
+        <Button long @click="chooseOkXrp">xrp季度</Button>
+      </Col>
+    </Row>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
   </div>
 </template>
@@ -48,6 +56,30 @@ export default {
     // this.parseData()
   },
   methods: {
+    chooseOkEos() {
+      this.$http({
+        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=5min&contractType=quarter&limit=10000&coinVol=1'
+      }).then(res => {
+        this.kline = {
+          t: res.data.data.map(it => it[0]/1000),
+          c: res.data.data.map(it => it[4]),
+          v: res.data.data.map(it => it[5])
+        }
+        this.initChart()
+      })
+    },
+    chooseOkXrp() {
+      this.$http({
+        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=5min&contractType=quarter&limit=10000&coinVol=1'
+      }).then(res => {
+        this.kline = {
+          t: res.data.data.map(it => it[0]/1000),
+          c: res.data.data.map(it => it[4]),
+          v: res.data.data.map(it => it[5])
+        }
+        this.initChart()
+      })
+    },
     chooseBtn(item) {
       this.market = item
       let time = this.time
