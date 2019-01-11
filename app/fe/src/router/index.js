@@ -10,6 +10,7 @@ import MyAccount from './MyAccount/MyAccount'
 import MAIndex from './MyAccount/Index'
 import Btc from './Btc'
 import DataKline from './DataKline'
+import Bitmex from './Bitmex'
 
 Vue.use(Router)
 
@@ -25,6 +26,11 @@ export default new Router({
       path: '/dataKline',
       name: 'DataKline',
       component: DataKline
+    },
+    {
+      path: '/bitmex',
+      name: 'Bitmex',
+      component: Bitmex
     },
     {
       path: '/btc',
