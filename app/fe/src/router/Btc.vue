@@ -288,14 +288,14 @@ export default {
                   //   return basePrice * (1 + it) / 100
                   // })
               },
-              {
-                  name:'indicator',
-                  type:'line',
-                  yAxisIndex:2,
-                  color: '#483D8B',
-                  data: this.getDK()
-                  // data: this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1)
-              },
+              // {
+              //     name:'indicator',
+              //     type:'line',
+              //     yAxisIndex:2,
+              //     color: '#483D8B',
+              //     // data: this.getDK()
+              //     // data: this.getIndicator(OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]})), this.kline.c.length-1)
+              // },
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));

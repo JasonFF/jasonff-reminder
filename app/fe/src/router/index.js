@@ -11,6 +11,7 @@ import MAIndex from './MyAccount/Index'
 import Btc from './Btc'
 import DataKline from './DataKline'
 import Bitmex from './Bitmex'
+import Power from './Power'
 
 Vue.use(Router)
 
@@ -31,6 +32,11 @@ export default new Router({
       path: '/bitmex',
       name: 'Bitmex',
       component: Bitmex
+    },
+    {
+      path: '/power',
+      name: 'Power',
+      component: Power
     },
     {
       path: '/btc',

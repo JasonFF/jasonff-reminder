@@ -28,6 +28,31 @@ var Indicator = (function(){
       }
       return obvs;
     };
+
+    var obv2 = function (o, c, h, l, v) {
+      var obvs = [];
+      var total = 0;
+      c.forEach((it, index) => {
+        let direct = c[index] - o[index] == 0 ? 0 :(c[index] > o[index] ? 1 : -1)
+        let duo = c[index] - l[index]
+        let kong = h[index] - c[index]
+        if (duo + kong < 0.4) {
+          total = total + 0
+          obvs.push(total)
+          return
+        }
+        // console.log(duo/kong * direct)
+        // if (duo+kong == 0) {
+        //   total = total + 0
+        //   obvs.push(total)
+        //   return
+        // }
+        // total = total + direct*((duo)/(duo+kong) * v[index])
+        total = total + (duo)/(duo+kong) *v[index] * direct
+        obvs.push(total)
+      })
+      return obvs;
+    };
   
     var ema = function (lastEma, closePrice, units) {
       return (lastEma * (units - 1) + closePrice * 2) / (units + 1);
@@ -136,10 +161,15 @@ var Indicator = (function(){
      * @return {Array} mas
      */
     var ma = function(ticks, days) {
-      var maSum = 0, p = 0;
+      var maSum = 0;
       var mas = [];
       for (var i = 0; i < ticks.length; i++) {
-        maSum += ticks[i];
+        if (i < days) {
+          mas.push(ticks[i]);
+          maSum += ticks[i]
+          continue
+        }
+        maSum += ticks[i] - ticks[i - days];
         ma = maSum / days;
         mas.push(ma);
       }
@@ -216,7 +246,7 @@ var Indicator = (function(){
       }
       return {"rsi6": result["rsi6"], "rsi12": result["rsi12"], "rsi24": result["rsi24"]};
     };
-    return {"OBV": obv, "MACD": macd, "KDJ": kdj, "BOLL": boll, "RSI": rsi, "MA": ma};
+    return {"OBV": obv, "MACD": macd, "KDJ": kdj, "BOLL": boll, "RSI": rsi, "MA": ma, "OBV2": obv2};
   })();
   
   if (module) {
