@@ -56,6 +56,19 @@ export default {
     // this.parseData()
   },
   methods: {
+    getOBVPercent() {
+      let obv = OBV(this.kline.c.map((it, index) => [it, this.kline.v[index]]))
+      return obv.map((it, index) => {
+        let nowPrice = this.kline.c[index]
+        let nowObv = it
+        let maPrice = MA(this.kline.c, 100)
+        let maObv = MA(obv, 100)
+        let minObvMa = _.min(maObv)
+        let nowPriceMa = maPrice[index]
+        let nowObvMa = maObv[index]
+        return(( (nowObv - nowObvMa) / (nowObvMa + 2 * Math.abs(minObvMa)) - ((nowPrice - nowPriceMa) / nowPriceMa))*100).toFixed(2)
+      })
+    },
     chooseOkEos() {
       this.$http({
         url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=5min&contractType=quarter&limit=10000&coinVol=1'
@@ -121,7 +134,7 @@ export default {
       })
     },
     getKlineByTime() {
-      return Promise.all([4,3,2,1].map((it, index) => {
+      return Promise.all([6,5,4,3,2,1].map((it, index) => {
         return new Promise(resolve => {
           setTimeout(() => {
             resolve(this.getKline([(it - 1) * 7, it * 7]))
@@ -287,7 +300,7 @@ export default {
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
-                show: false,
+                // show: false,
                 // max: _.max(data),
                 // min: _.min(data),
             }
@@ -309,7 +322,7 @@ export default {
                   name:'indicator',
                   type:'line',
                   yAxisIndex:2,
-                  data: this.getRsiIndicator()
+                  data: this.getOBVPercent()
               },
           ]
       };
