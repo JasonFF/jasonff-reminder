@@ -31,6 +31,9 @@
         <Button long @click="chooseOkXrp">xrp季度</Button>
       </Col>
     </Row>
+    <h1 style="text-align: center">
+      {{zj.topVol.toFixed(2)}} / {{zj.totalVol.toFixed(2)}} / {{zj.percent.toFixed(2)}}
+    </h1>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
   </div>
 </template>
@@ -50,6 +53,11 @@ export default {
       buttonMarkets: [
         'XBTUSD', "ETHUSD"
       ],
+      zj: {
+        topVol: 0,
+        totalVol: 0,
+        percent: 0
+      }
     }
   },
   mounted() {
@@ -164,6 +172,33 @@ export default {
         let resultData = totalList
         this.initChart(resultData)
       })
+    },
+    getVolRank() {
+      let vItemList = this.kline.v.map((it,index) => {
+        return {
+          v: it,
+          index: index
+        }
+      })
+      vItemList.sort((a,b) => {
+        return b.v - a.v
+      })
+      // console.log(vItemList)
+      let zVolTotal = 0
+      let topTotal = 0
+      vItemList.forEach((it, index) => {
+        let direct = this.kline.c[it.index] == this.kline.o[it.index] ? 0:(this.kline.c[it.index] > this.kline.o[it.index] ? 1 : -1)
+        if (index < 30) {
+          topTotal = topTotal + direct * it.v 
+        }
+        zVolTotal = zVolTotal + direct * it.v
+      })
+      this.zj = {
+        topVol: topTotal,
+        totalVol: zVolTotal,
+        percent: topTotal/zVolTotal
+      }
+      // console.log(topTotal, zVolTotal, topTotal/zVolTotal)
     },
     getIndicator(obv) {
       let result = 0
@@ -328,6 +363,7 @@ export default {
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
+      this.getVolRank()
     }
   }
 }
