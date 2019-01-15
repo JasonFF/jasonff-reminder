@@ -64,17 +64,23 @@ export default {
     // this.parseData()
   },
   methods: {
-    getOBVPercent() {
-      let obv = OBV(this.kline.c.map((it, index) => [it, this.kline.v[index]]))
-      return obv.map((it, index) => {
-        let nowPrice = this.kline.c[index]
-        let nowObv = it
-        let maPrice = MA(this.kline.c, 100)
-        let maObv = MA(obv, 100)
-        let minObvMa = _.min(maObv)
-        let nowPriceMa = maPrice[index]
-        let nowObvMa = maObv[index]
-        return(( (nowObv - nowObvMa) / (nowObvMa + 2 * Math.abs(minObvMa)) - ((nowPrice - nowPriceMa) / nowPriceMa))*100).toFixed(2)
+    parseData(timearr) {
+      return this.getKline(timearr).then(res => {
+        this.kline = res
+        // console.log(rsi)
+        let totalResult = 0
+        let totalList = this.kline.c.map((it, index) => {
+          let vol = res.v[index]
+          if (res.c[index] == res.o[index]) {
+            totalResult += 0
+          } else {
+            totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) > 0?1:-1))
+          }
+           
+          return totalResult
+        })
+        let resultData = totalList
+        this.initChart(resultData)
       })
     },
     chooseOkEos() {
@@ -121,25 +127,6 @@ export default {
       if (time == '月') {
         this.getKlineByTime()
       }
-    },
-    parseData(timearr) {
-      return this.getKline(timearr).then(res => {
-        this.kline = res
-        // console.log(rsi)
-        let totalResult = 0
-        let totalList = this.kline.c.map((it, index) => {
-          let vol = res.v[index]
-          if (res.c[index] == res.o[index]) {
-            totalResult += 0
-          } else {
-            totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) > 0?1:-1))
-          }
-           
-          return totalResult
-        })
-        let resultData = totalList
-        this.initChart(resultData)
-      })
     },
     getKlineByTime() {
       return Promise.all([6,5,4,3,2,1].map((it, index) => {
@@ -188,7 +175,7 @@ export default {
       let topTotal = 0
       vItemList.forEach((it, index) => {
         let direct = this.kline.c[it.index] == this.kline.o[it.index] ? 0:(this.kline.c[it.index] > this.kline.o[it.index] ? 1 : -1)
-        if (index < 30) {
+        if (index < vItemList.length/5) {
           topTotal = topTotal + direct * it.v 
         }
         zVolTotal = zVolTotal + direct * it.v
@@ -199,37 +186,6 @@ export default {
         percent: topTotal/zVolTotal
       }
       // console.log(topTotal, zVolTotal, topTotal/zVolTotal)
-    },
-    getIndicator(obv) {
-      let result = 0
-      return obv.map((it, index) => {
-        if (index == 0) {
-          return 0
-        }
-        let indicator = this.kline.c[index] == this.kline.c[index -1] ? 0: (Math.abs(it - obv[index - 1]) / (this.kline.c[index] - this.kline.c[index - 1]))
-        result = result + indicator
-        return result
-      })
-
-    },
-    getDK() {
-      let d = 0
-      let k = 0
-      
-     return this.kline.c.map((it,index, _arr) => {
-        if (index > 0) {
-          if (it > _arr[index - 1]) {
-            d += this.kline.v[index]
-          }
-          if (it < _arr[index - 1]) {
-            k += this.kline.v[index]
-          }
-        }
-        if (d > 30 && k > 30) {
-          return d / (k+d) - k / (k+d)
-        }
-        return 0
-      })
     },
     getKline(timearr=[0, 7]) {
       // const storeKline = window.localStorage.getItem('kline')
@@ -258,28 +214,17 @@ export default {
     getOBV2() {
       return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
     },
-    getTruePrice() {
-      let ma = MA(this.kline.c, 100)
-      let obv = this.getOBV2()
-      let obvma = MA(obv, 100)
-      return ma.map((it, index) => {
-        let nowma = it
-        let nowobvma = obvma[index]
-        let nowobv = obv[index]
-        return (nowobv / nowobvma) / (this.kline.c[index] / nowma) - 1
-      })
-    },
     getRsiIndicator() {
       let {rsi6, rsi24} = RSI(this.kline.c)
-      let ma = MA(this.kline.c, 10)
+      
       return this.kline.c.map((it, index) => {
         if (index == 0) {
           return 0
         }
-        if (rsi6[index] < rsi24[index] && rsi6[index] < rsi6[index - 1] && rsi24[index] > 65 && ma[index] < ma[index - 1]) {
+        if (rsi6[index] < rsi24[index] && rsi6[index] < rsi6[index - 1] && rsi24[index] > 65) {
           return 1
         }
-        if (rsi6[index] > rsi24[index] && rsi6[index] > rsi6[index - 1] && rsi24[index] < 35 && ma[index] > ma[index - 1]) {
+        if (rsi6[index] > rsi24[index] && rsi6[index] > rsi6[index - 1] && rsi24[index] < 35) {
           return -1
         }
         return 0
@@ -350,7 +295,7 @@ export default {
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
-                // show: false,
+                show: false,
                 // max: _.max(data),
                 // min: _.min(data),
             }
@@ -368,24 +313,13 @@ export default {
                   yAxisIndex:1,
                   data: this.getOBV2()
               },
-              // {
-              //     name:'obv',
-              //     type:'line',
-              //     yAxisIndex:2,
-              //     data: OBV(this.kline.c.map((it,index) => [it, this.kline.v[index]]))
-              // },
-              // {
-              //     name:'ma',
-              //     type:'line',
-              //     yAxisIndex:2,
-              //     data: this.getTruePrice()
-              // },
-              // {
-              //     name:'obvma',
-              //     type:'line',
-              //     yAxisIndex:1,
-              //     data: MA(this.getOBV2(), 100)
-              // },
+              {
+                name:'indicator',
+                type:'line',
+                yAxisIndex:2,
+                color: "#ca8622",
+                data: this.getRsiIndicator()
+              }
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
