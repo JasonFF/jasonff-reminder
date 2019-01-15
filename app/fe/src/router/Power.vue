@@ -31,6 +31,9 @@
         <Button long @click="chooseOkXrp">xrp季度</Button>
       </Col>
     </Row>
+    <h1 style="text-align: center">
+      {{zj.topVol.toFixed(2)}} / {{zj.totalVol.toFixed(2)}} / {{zj.percent.toFixed(2)}}
+    </h1>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
   </div>
 </template>
@@ -50,12 +53,30 @@ export default {
       buttonMarkets: [
         'XBTUSD', "ETHUSD"
       ],
+      zj: {
+        topVol: 0,
+        totalVol: 0,
+        percent: 0
+      }
     }
   },
   mounted() {
     // this.parseData()
   },
   methods: {
+    getOBVPercent() {
+      let obv = OBV(this.kline.c.map((it, index) => [it, this.kline.v[index]]))
+      return obv.map((it, index) => {
+        let nowPrice = this.kline.c[index]
+        let nowObv = it
+        let maPrice = MA(this.kline.c, 100)
+        let maObv = MA(obv, 100)
+        let minObvMa = _.min(maObv)
+        let nowPriceMa = maPrice[index]
+        let nowObvMa = maObv[index]
+        return(( (nowObv - nowObvMa) / (nowObvMa + 2 * Math.abs(minObvMa)) - ((nowPrice - nowPriceMa) / nowPriceMa))*100).toFixed(2)
+      })
+    },
     chooseOkEos() {
       this.$http({
         url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=1min&contractType=quarter&limit=10000&coinVol=1'
@@ -121,7 +142,7 @@ export default {
       })
     },
     getKlineByTime() {
-      return Promise.all([4,3,2,1].map((it, index) => {
+      return Promise.all([6,5,4,3,2,1].map((it, index) => {
         return new Promise(resolve => {
           setTimeout(() => {
             resolve(this.getKline([(it - 1) * 7, it * 7]))
@@ -151,6 +172,33 @@ export default {
         let resultData = totalList
         this.initChart(resultData)
       })
+    },
+    getVolRank() {
+      let vItemList = this.kline.v.map((it,index) => {
+        return {
+          v: it,
+          index: index
+        }
+      })
+      vItemList.sort((a,b) => {
+        return b.v - a.v
+      })
+      // console.log(vItemList)
+      let zVolTotal = 0
+      let topTotal = 0
+      vItemList.forEach((it, index) => {
+        let direct = this.kline.c[it.index] == this.kline.o[it.index] ? 0:(this.kline.c[it.index] > this.kline.o[it.index] ? 1 : -1)
+        if (index < 30) {
+          topTotal = topTotal + direct * it.v 
+        }
+        zVolTotal = zVolTotal + direct * it.v
+      })
+      this.zj = {
+        topVol: topTotal,
+        totalVol: zVolTotal,
+        percent: topTotal/zVolTotal
+      }
+      // console.log(topTotal, zVolTotal, topTotal/zVolTotal)
     },
     getIndicator(obv) {
       let result = 0
@@ -342,6 +390,7 @@ export default {
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
+      this.getVolRank()
     }
   }
 }
