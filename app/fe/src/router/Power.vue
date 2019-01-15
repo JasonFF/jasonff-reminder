@@ -46,7 +46,7 @@ export default {
       kline: {},
       market: '',
       time: '周',
-      type: '5',
+      type: '1',
       buttonMarkets: [
         'XBTUSD', "ETHUSD"
       ],
@@ -58,7 +58,7 @@ export default {
   methods: {
     chooseOkEos() {
       this.$http({
-        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=5min&contractType=quarter&limit=10000&coinVol=1'
+        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=1min&contractType=quarter&limit=10000&coinVol=1'
       }).then(res => {
         this.kline = {
           t: res.data.data.map(it => it[0]/1000),
@@ -73,7 +73,7 @@ export default {
     },
     chooseOkXrp() {
       this.$http({
-        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=5min&contractType=quarter&limit=10000&coinVol=1'
+        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=1min&contractType=quarter&limit=10000&coinVol=1'
       }).then(res => {
         this.kline = {
           t: res.data.data.map(it => it[0]/1000),
@@ -207,16 +207,31 @@ export default {
         return ((it - firstVal) / Math.abs(firstVal) * 100).toFixed(2)
       })
     },
+    getOBV2() {
+      return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
+    },
+    getTruePrice() {
+      let ma = MA(this.kline.c, 100)
+      let obv = this.getOBV2()
+      let obvma = MA(obv, 100)
+      return ma.map((it, index) => {
+        let nowma = it
+        let nowobvma = obvma[index]
+        let nowobv = obv[index]
+        return (nowobv / nowobvma) / (this.kline.c[index] / nowma) - 1
+      })
+    },
     getRsiIndicator() {
       let {rsi6, rsi24} = RSI(this.kline.c)
+      let ma = MA(this.kline.c, 10)
       return this.kline.c.map((it, index) => {
         if (index == 0) {
           return 0
         }
-        if (rsi6[index] < rsi24[index] && rsi6[index] < rsi6[index - 1] && rsi24[index] > 65) {
+        if (rsi6[index] < rsi24[index] && rsi6[index] < rsi6[index - 1] && rsi24[index] > 65 && ma[index] < ma[index - 1]) {
           return 1
         }
-        if (rsi6[index] > rsi24[index] && rsi6[index] > rsi6[index - 1]  && rsi24[index] < 35) {
+        if (rsi6[index] > rsi24[index] && rsi6[index] > rsi6[index - 1] && rsi24[index] < 35 && ma[index] > ma[index - 1]) {
           return -1
         }
         return 0
@@ -287,7 +302,7 @@ export default {
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
-                show: false,
+                // show: false,
                 // max: _.max(data),
                 // min: _.min(data),
             }
@@ -296,21 +311,33 @@ export default {
               {
                   name:'kline',
                   type:'line',
+                  yAxisIndex:0,
                   data: this.kline.c
               },
               {
                   name:'obv',
                   type:'line',
                   yAxisIndex:1,
-                  color: '#228B22',
-                  data: OBV(this.kline.c.map((it, index) => {return [it, this.kline.v[index]]}), this.kline.c.length-1)
+                  data: this.getOBV2()
               },
-              {
-                  name:'indicator',
-                  type:'line',
-                  yAxisIndex:2,
-                  data: this.getRsiIndicator()
-              },
+              // {
+              //     name:'obv',
+              //     type:'line',
+              //     yAxisIndex:2,
+              //     data: OBV(this.kline.c.map((it,index) => [it, this.kline.v[index]]))
+              // },
+              // {
+              //     name:'ma',
+              //     type:'line',
+              //     yAxisIndex:2,
+              //     data: this.getTruePrice()
+              // },
+              // {
+              //     name:'obvma',
+              //     type:'line',
+              //     yAxisIndex:1,
+              //     data: MA(this.getOBV2(), 100)
+              // },
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));

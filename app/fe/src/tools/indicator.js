@@ -33,22 +33,18 @@ var Indicator = (function(){
       var obvs = [];
       var total = 0;
       c.forEach((it, index) => {
-        let direct = c[index] - o[index] == 0 ? 0 :(c[index] > o[index] ? 1 : -1)
-        let duo = c[index] - l[index]
-        let kong = h[index] - c[index]
-        if (duo + kong < 0.4) {
+        let duokongrange = h[index] - l[index]
+        if (duokongrange == 0) {
           total = total + 0
           obvs.push(total)
           return
         }
-        // console.log(duo/kong * direct)
-        // if (duo+kong == 0) {
-        //   total = total + 0
-        //   obvs.push(total)
-        //   return
-        // }
-        // total = total + direct*((duo)/(duo+kong) * v[index])
-        total = total + (duo)/(duo+kong) *v[index] * direct
+        let duo = h[index] - o[index]
+        let kong = o[index] - l[index]
+        let duoPercent = duo / duokongrange
+        let kongPercent = kong / duokongrange
+        let totalVol = v[index]
+        total = total + duoPercent * totalVol - kongPercent * totalVol
         obvs.push(total)
       })
       return obvs;
