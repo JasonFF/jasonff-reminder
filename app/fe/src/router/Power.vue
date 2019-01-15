@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
     <Row :gutter='16' style="padding: 10px 20px;margin-top: 10px">
       <Col style="margin-bottom: 10px" span="8" v-for="item in buttonMarkets" :key="item">
         <Button :class="{active: item == market}" @click="chooseBtn(item)" long>{{item}}</Button>
@@ -34,7 +35,7 @@
     <h1 style="text-align: center">
       {{zj.topVol.toFixed(2)}} / {{zj.totalVol.toFixed(2)}} / {{zj.percent.toFixed(2)}}
     </h1>
-    <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
+    
   </div>
 </template>
 
@@ -252,7 +253,7 @@ export default {
           },
           dataZoom: [{
               type: 'inside',
-              start: 90,
+              start: 0,
               end: 100
           }, {
               start: 0,
