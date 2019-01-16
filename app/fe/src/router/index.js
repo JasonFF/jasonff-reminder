@@ -12,6 +12,7 @@ import Btc from './Btc'
 import DataKline from './DataKline'
 import Bitmex from './Bitmex'
 import Power from './Power'
+import Stock from './Stock'
 
 Vue.use(Router)
 
@@ -37,6 +38,11 @@ export default new Router({
       path: '/power',
       name: 'Power',
       component: Power
+    },
+    {
+      path: '/stock',
+      name: 'Stock',
+      component: Stock
     },
     {
       path: '/btc',
