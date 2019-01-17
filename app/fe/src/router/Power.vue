@@ -174,12 +174,25 @@ export default {
       // console.log(vItemList)
       let zVolTotal = 0
       let topTotal = 0
+      const {h,l,o,c,v} = this.kline
       vItemList.forEach((it, index) => {
-        let direct = this.kline.c[it.index] == this.kline.o[it.index] ? 0:(this.kline.c[it.index] > this.kline.o[it.index] ? 1 : -1)
-        if (index < vItemList.length/5) {
-          topTotal = topTotal + direct * it.v 
+
+        let duokongrange = h[index] - l[index]
+
+        if (duokongrange == 0) {
+          zVolTotal = zVolTotal + 0
+          topTotal = topTotal + 0
+        } else {
+          let duo = h[index] - o[index]
+          let kong = o[index] - l[index]
+          let duoPercent = duo / duokongrange
+          let kongPercent = kong / duokongrange
+          let totalVol = v[index]
+          zVolTotal = zVolTotal + duoPercent * totalVol - kongPercent * totalVol
+          if (index < vItemList.length / 5) {
+            topTotal = topTotal + duoPercent * totalVol - kongPercent * totalVol
+          }
         }
-        zVolTotal = zVolTotal + direct * it.v
       })
       this.zj = {
         topVol: topTotal,
@@ -215,23 +228,23 @@ export default {
     getOBV2() {
       return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
     },
-    getRsiIndicator() {
-      let {rsi6, rsi24} = RSI(this.kline.c)
+    // getRsiIndicator() {
+    //   let {rsi6, rsi24} = RSI(this.kline.c)
       
-      return this.kline.c.map((it, index) => {
-        if (index == 0) {
-          return 0
-        }
-        if (rsi6[index] < rsi24[index] && rsi6[index] < rsi6[index - 1] && rsi24[index] > 65) {
-          return 1
-        }
-        if (rsi6[index] > rsi24[index] && rsi6[index] > rsi6[index - 1] && rsi24[index] < 35) {
-          return -1
-        }
-        return 0
-      })
+    //   return this.kline.c.map((it, index) => {
+    //     if (index == 0) {
+    //       return 0
+    //     }
+    //     if (rsi6[index] < rsi24[index] && rsi6[index] < rsi6[index - 1] && rsi24[index] > 65) {
+    //       return 1
+    //     }
+    //     if (rsi6[index] > rsi24[index] && rsi6[index] > rsi6[index - 1] && rsi24[index] < 35) {
+    //       return -1
+    //     }
+    //     return 0
+    //   })
 
-    },
+    // },
     initChart(data) {
         const option = {
           title: {
@@ -314,13 +327,13 @@ export default {
                   yAxisIndex:1,
                   data: this.getOBV2()
               },
-              {
-                name:'indicator',
-                type:'line',
-                yAxisIndex:2,
-                color: "#ca8622",
-                data: this.getRsiIndicator()
-              }
+              // {
+              //   name:'indicator',
+              //   type:'line',
+              //   yAxisIndex:2,
+              //   color: "#ca8622",
+              //   data: this.getRsiIndicator()
+              // }
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
