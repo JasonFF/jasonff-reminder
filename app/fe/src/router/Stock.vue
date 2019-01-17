@@ -50,13 +50,13 @@ export default {
     initChart(data) {
         const option = {
           title: {
-              text: 'obv'
+              text: 'indicator'
           },
           tooltip: {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','obv', 'indicator'],
+              data:['kline','indicator'],
               top: '3%'
           },
           grid: {
@@ -98,7 +98,7 @@ export default {
               // min: _.min(this.kline.c),
             },
             {
-                name: 'obv',
+                name: 'indicator',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
@@ -124,7 +124,7 @@ export default {
                   data: this.kline.c
               },
               {
-                  name:'obv',
+                  name:'indicator',
                   type:'line',
                   yAxisIndex:1,
                   data: this.getOBV2()
