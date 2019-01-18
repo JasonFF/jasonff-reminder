@@ -161,6 +161,22 @@ export default {
         this.initChart(resultData)
       })
     },
+    getATR() {
+      let topRange = 0
+      return this.kline.c.map((it, index) => {
+        let range = this.kline.h[index] - this.kline.l[index]
+        if (topRange < range) {
+          topRange = range
+        }
+        if (index < 300) {
+          return 0
+        }
+        if (topRange == 0) {
+          return 0
+        }
+        return range / topRange
+      })
+    },
     getVolRank() {
       let vItemList = this.kline.v.map((it,index) => {
         return {
@@ -254,7 +270,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','obv', 'indicator'],
+              data:['kline','obv', 'atr'],
               top: '3%'
           },
           grid: {
@@ -305,11 +321,11 @@ export default {
                 // min: _.min(data),
             },
             {
-                name: 'indicator',
+                name: 'atr',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
-                show: false,
+                // show: false,
                 // max: _.max(data),
                 // min: _.min(data),
             }
@@ -327,13 +343,13 @@ export default {
                   yAxisIndex:1,
                   data: this.getOBV2()
               },
-              // {
-              //   name:'indicator',
-              //   type:'line',
-              //   yAxisIndex:2,
-              //   color: "#ca8622",
-              //   data: this.getRsiIndicator()
-              // }
+              {
+                name:'atr',
+                type:'line',
+                yAxisIndex:2,
+                color: "#ca8622",
+                data: MA(this.getATR(), 200)
+              }
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));

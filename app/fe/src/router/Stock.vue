@@ -22,6 +22,22 @@ export default {
     })
   },
   methods: {
+    getATR() {
+      let topRange = 0
+      return this.kline.c.map((it, index) => {
+        let range = this.kline.h[index] - this.kline.l[index]
+        if (topRange < range) {
+          topRange = range
+        }
+        if (index < 300) {
+          return 0
+        }
+        if (topRange == 0) {
+          return 0
+        }
+        return range / topRange
+      })
+    },
     getKline() {
       return new Promise(resolve => {
         let kline = {
@@ -56,7 +72,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','indicator'],
+              data:['kline','indicator', 'atr'],
               top: '3%'
           },
           grid: {
@@ -107,11 +123,11 @@ export default {
                 // min: _.min(data),
             },
             {
-                name: 'indicator',
+                name: 'atr',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
-                show: false,
+                // show: false,
                 // max: _.max(data),
                 // min: _.min(data),
             }
@@ -128,6 +144,13 @@ export default {
                   type:'line',
                   yAxisIndex:1,
                   data: this.getOBV2()
+              },
+              {
+                name:'atr',
+                type:'line',
+                yAxisIndex:2,
+                color: "#ca8622",
+                data: MA(this.getATR(), 200)
               }
           ]
       };
