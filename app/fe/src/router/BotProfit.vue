@@ -21,7 +21,7 @@
   </div>
 </template>
 <script>
-import {MACD, KDJ, BOLL, RSI} from '@/tools/indicator.js'
+import {MACD, KDJ, BOLL, RSI, OBV2, MA, OBV} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
     function getExact(val) {
@@ -105,10 +105,10 @@ export default {
               data:['kline','indicator'] 
           },
           grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '3%',
-              containLabel: true
+              left: '6%',
+              right: '6%',
+              bottom: '6%',
+              containLabel: false
           },
           dataZoom: [{
               type: 'inside',
@@ -130,7 +130,7 @@ export default {
           xAxis: {
               type: 'category',
               boundaryGap: false,
-              data: this.kline.map(it => moment(it[0]*1000).format('MM-DD HH:mm:ss'))
+              data: this.kline.map(it => moment(it[0]).format('MM-DD HH:mm:ss'))
           },
           yAxis: [
             {
@@ -156,12 +156,67 @@ export default {
                   name:'barSum',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getPercent(data, data.length - 1)
+                  // data: OBV2(this.klineObj.o,this.klineObj.c,this.klineObj.h,this.klineObj.l,this.klineObj.v,)
+                  data: OBV(this.klineObj.c, this.klineObj.v)
               },
+              {
+                  name:'barSumma',
+                  type:'line',
+                  yAxisIndex:1,
+                  data: MA(OBV(this.klineObj.c,this.klineObj.v,), parseInt(this.kline.length/10))
+              },
+              {
+                  name:'klinema',
+                  type:'line',
+                  data: MA(this.kline.map(it=> it[4]),  parseInt(this.kline.length/10))
+              },
+              
+              
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
+    },
+    // botProfit() {
+    //   let obv = OBV2(this.klineObj.o,this.klineObj.c,this.klineObj.h,this.klineObj.l,this.klineObj.v,)
+    //   let obvma = MA(obv, 100)
+    //   let kline = this.kline.map(it => it[4])
+    //   let klinema = MA(kline, 30)
+    //   let totalMoney = 10000
+    //   let totalCoin = 10000/kline[0]
+    //   kline.forEach((it,index) => {
+    //     let price = it
+    //     if (obv[index] > obvma[index] && obv[index-1] < obvma[index-1]) {
+    //       totalCoin = totalCoin + 0.3*totalMoney/price
+    //       totalMoney = 0.7*totalMoney
+    //     }
+    //     if (obv[index] < obvma[index] && obv[index-1] > obvma[index-1]) {
+    //       totalMoney = totalMoney + 0.3*totalCoin * price
+    //       totalCoin = 0.7*totalCoin
+    //     }
+    //   })
+    //   let profit = ((totalMoney + totalCoin * kline[kline.length - 1]-20000)/20000 * 100).toFixed(2) + '%'
+    //   console.log(profit)
+    // },
+    botProfit() {
+      let kline = this.kline.map(it => it[4])
+      // let klinema = MA(kline, 30)
+      let rsi6 = RSI(kline).rsi6
+      let totalMoney = 10000
+      let totalCoin = 10000/kline[0]
+      kline.forEach((price,index) => {
+
+        if (rsi6 < 20) {
+          totalCoin = totalCoin + 0.1*totalMoney/price
+          totalMoney = 0.9*totalMoney
+        }
+        if (rsi6 > 80) {
+          totalMoney = totalMoney + 0.1*totalCoin * price
+          totalCoin = 0.9*totalCoin
+        }
+      })
+      let profit = ((totalMoney + totalCoin * kline[kline.length - 1]-20000)/20000 * 100).toFixed(2) + '%'
+      console.log(profit)
     },
     getPercent(list, index = 0) {
       let firstVal = list[index]
@@ -187,7 +242,7 @@ export default {
 // 2352, 低
 // 2367.37, 收
 // 17259.83 交易量
-      this.$http('http://www.abichi.club/zbapi/data/v1/kline', {
+      this.$http('http://13.230.68.110/zbapi/data/v1/kline', {
         params: {
           market: market,
           type: type,
@@ -201,16 +256,27 @@ export default {
     },
     
     parseData() {
-      const kline = this.kline
-        let totalResult = 0
-        let totalList = kline.map((it, index) => {
-          let vol = it[5]
-          totalResult += ( vol * it[4] *((it[4] - it[1]) > 0?1:-1)) 
-          return totalResult
+      let o = []
+      let c = []
+      let h = []
+      let l = []
+      let v = []
+        this.kline.forEach(it => {
+          o.push(it[1])
+          c.push(it[4])
+          h.push(it[2])
+          l.push(it[3])
+          v.push(it[5])
         })
-        let resultData = totalList
-        
-        this.initChart(resultData)
+        this.klineObj = {
+          o,
+          c,
+          h,
+          l,
+          v
+        }
+        this.initChart()
+        this.botProfit()
     },
   }
 }

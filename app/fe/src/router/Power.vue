@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <router-link to="/zb" class="navigation"></router-link>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
     <Row :gutter='16' style="padding: 10px 20px;margin-top: 10px">
       <Col style="margin-bottom: 10px" span="8" v-for="item in buttonMarkets" :key="item">
@@ -40,7 +41,7 @@
 </template>
 
 <script>
-import {RSI, MACD, OBV2, MA, OBV} from '@/tools/indicator.js'
+import {RSI, MACD, OBV2, MA, OBV, OBV3} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
 import _ from 'lodash'
@@ -86,7 +87,7 @@ export default {
     },
     chooseOkEos() {
       this.$http({
-        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=1min&contractType=quarter&limit=10000&coinVol=1'
+        url: 'http://13.230.68.110/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=1min&contractType=quarter&limit=10000&coinVol=1'
       }).then(res => {
         this.kline = {
           t: res.data.data.map(it => it[0]/1000),
@@ -101,7 +102,7 @@ export default {
     },
     chooseOkXrp() {
       this.$http({
-        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=1min&contractType=quarter&limit=10000&coinVol=1'
+        url: 'http://13.230.68.110/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=1min&contractType=quarter&limit=10000&coinVol=1'
       }).then(res => {
         this.kline = {
           t: res.data.data.map(it => it[0]/1000),
@@ -223,7 +224,7 @@ export default {
       //   return Promise.resolve(JSON.parse(storeKline))
       // }
       return this.$http({
-        url: 'http://www.abichi.club/bitmexapi/api/udf/history', 
+        url: 'http://13.230.68.110/bitmexapi/api/udf/history', 
         params: {
           symbol: this.market,
           resolution: this.type,
@@ -244,33 +245,39 @@ export default {
     getOBV2() {
       return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
     },
-    // getRsiIndicator() {
-    //   let {rsi6, rsi24} = RSI(this.kline.c)
-      
-    //   return this.kline.c.map((it, index) => {
-    //     if (index == 0) {
-    //       return 0
-    //     }
-    //     if (rsi6[index] < rsi24[index] && rsi6[index] < rsi6[index - 1] && rsi24[index] > 65) {
-    //       return 1
-    //     }
-    //     if (rsi6[index] > rsi24[index] && rsi6[index] > rsi6[index - 1] && rsi24[index] < 35) {
-    //       return -1
-    //     }
-    //     return 0
-    //   })
-
-    // },
+    getOBV3() {
+      return OBV3(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
+    },
+    botProfit() {
+      let obv = this.getOBV2()
+      let obvma = MA(this.getOBV2(), 30)
+      let kline = this.kline.c
+      let totalMoney = 10000
+      let totalCoin = 10000/kline[0]
+      kline.forEach((it,index) => {
+        let price = it
+        if (obv[index] > obvma[index]) {
+          totalCoin = totalCoin + totalMoney/price
+          totalMoney = 0
+        }
+        if (obv[index] < obvma[index]) {
+          totalMoney = totalMoney + totalCoin * price
+          totalCoin = 0
+        }
+      })
+      let profit = ((totalMoney + totalCoin * kline[kline.length - 1]-20000)/20000 * 100).toFixed(2) + '%'
+      console.log(profit)
+    },
     initChart(data) {
         const option = {
           title: {
-              text: 'obv'
+              text: 'indicator'
           },
           tooltip: {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','obv', 'atr'],
+              data:['kline','obv2', 'obv3'],
               top: '3%'
           },
           grid: {
@@ -312,7 +319,7 @@ export default {
               // min: _.min(this.kline.c),
             },
             {
-                name: 'obv',
+                name: 'obv2',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
@@ -321,14 +328,14 @@ export default {
                 // min: _.min(data),
             },
             {
-                name: 'atr',
+                name: 'obv3',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
-                // show: false,
+                show: false,
                 // max: _.max(data),
                 // min: _.min(data),
-            }
+            },
           ],
           series: [
               {
@@ -337,33 +344,53 @@ export default {
                   yAxisIndex:0,
                   data: this.kline.c
               },
+              // {
+              //     name:'klinema',
+              //     type:'line',
+              //     yAxisIndex:0,
+              //     data: MA(this.kline.c, parseInt(this.kline.c.length/30))
+              // },
               {
-                  name:'obv',
+                  name:'obv2',
                   type:'line',
                   yAxisIndex:1,
                   data: this.getOBV2()
               },
               {
-                name:'atr',
-                type:'line',
-                yAxisIndex:2,
-                color: "#ca8622",
-                data: MA(this.getATR(), 200)
-              }
+                  name:'obv3',
+                  type:'line',
+                  yAxisIndex:2,
+                  data: this.getOBV3()
+              },
+              // {
+              //     name:'obvma',
+              //     type:'line',
+              //     yAxisIndex:1,
+              //     data: MA(this.getOBV2(), parseInt(this.kline.c.length/30))
+              // },
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
-      this.getVolRank()
+      // this.getVolRank() 
+      // this.botProfit()
     }
   }
 }
 </script>
 
 <style scoped lang="less">
+.navigation {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    width: 50px;
+    height: 50px;
+    background-color: #ddd;
+  }
   .container {
     overflow: hidden;
-    padding: 20px 5px;
+    padding: 50px 5px;
     background-color: #333;
     min-height: 100%;
     color: #fff;

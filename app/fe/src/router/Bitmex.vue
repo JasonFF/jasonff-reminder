@@ -31,7 +31,7 @@ export default {
   methods: {
     getIndicator() {
       return this.$http({
-        url: 'http://www.abichi.club/bitmexapi/api/v1/trade?symbol=.XBTUSDPI2H&count=500&columns=price&reverse=true'
+        url: 'http://13.230.68.110/bitmexapi/api/v1/trade?symbol=.XBTUSDPI2H&count=500&columns=price&reverse=true'
       }).then(res => res.data).then(res => {
         let result = {}
         res.forEach((it, index) => {
@@ -55,7 +55,7 @@ export default {
       //   return Promise.resolve(JSON.parse(storeKline))
       // }
       return this.$http({
-        url: 'http://www.abichi.club/bitmexapi/api/udf/history', 
+        url: 'http://13.230.68.110/bitmexapi/api/udf/history', 
         params: {
           symbol: 'XBTUSD',
           resolution: 60,

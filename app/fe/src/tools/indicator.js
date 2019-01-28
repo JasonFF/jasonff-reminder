@@ -7,28 +7,41 @@ var Indicator = (function(){
      * ticks为二维数组类型，其中内层数组第一个值为收盘价，第二个值为成交量
      * @return {Array} obvs
      */
-    var obv = function (ticks) {
-      var lastTick, obvs = [], length = ticks.length;
-      for (var i = 0; i < length; i++) {
-        var value = 0, curTick = ticks[i];
-        if (i != 0) {
-          var lastObvValue = obvs[i-1];
-          if (curTick[0] > lastTick[0]) {
-            value = lastObvValue + curTick[1];
-          } 
-          if (curTick[0] < lastTick[0]) {
-            value = lastObvValue - curTick[1];
-          }
-          if (curTick[0] == lastTick[0]) {
-            value = lastObvValue
-          }
+    var obv = function (c, v) {
+      let totalVol = 0
+      return c.map((it, index) => {
+        let target = 0
+        if (it > c[index-1]) {
+          target = 1
         }
-        obvs.push(value);
-        lastTick = curTick;
-      }
+        if (it < c[index - 1]) {
+          target = -1
+        }
+        totalVol = totalVol + target * v[index]
+        return totalVol
+      })
+    };
+    var obv3 = function (o, c, h, l, v) {
+      var obvs = [];
+      var total = 0;
+      c.forEach((it, index) => {
+        if (index == 0) {
+          obvs.push(0)
+          return
+        }
+        let price = (c[index] + h[index] + l[index]) / 3
+        let beforePrice = (c[index-1] + h[index-1] + l[index-1]) / 3
+        let vol = v[index]
+        if (price > beforePrice) {
+          total = total + vol
+        }
+        if (price < beforePrice) {
+          total = total - vol
+        }
+        obvs.push(total)
+      })
       return obvs;
     };
-
     var obv2 = function (o, c, h, l, v) {
       var obvs = [];
       var total = 0;
@@ -242,7 +255,7 @@ var Indicator = (function(){
       }
       return {"rsi6": result["rsi6"], "rsi12": result["rsi12"], "rsi24": result["rsi24"]};
     };
-    return {"OBV": obv, "MACD": macd, "KDJ": kdj, "BOLL": boll, "RSI": rsi, "MA": ma, "OBV2": obv2};
+    return {"OBV": obv, "MACD": macd, "KDJ": kdj, "BOLL": boll, "RSI": rsi, "MA": ma, "OBV2": obv2, "OBV3": obv3};
   })();
   
   if (module) {

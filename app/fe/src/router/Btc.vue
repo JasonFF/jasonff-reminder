@@ -58,7 +58,7 @@ export default {
   methods: {
     chooseOkEos() {
       this.$http({
-        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=5min&contractType=quarter&limit=10000&coinVol=1'
+        url: 'http://13.230.68.110/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=5min&contractType=quarter&limit=10000&coinVol=1'
       }).then(res => {
         this.kline = {
           t: res.data.data.map(it => it[0]/1000),
@@ -70,7 +70,7 @@ export default {
     },
     chooseOkXrp() {
       this.$http({
-        url: 'http://www.abichi.club/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=5min&contractType=quarter&limit=10000&coinVol=1'
+        url: 'http://13.230.68.110/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=5min&contractType=quarter&limit=10000&coinVol=1'
       }).then(res => {
         this.kline = {
           t: res.data.data.map(it => it[0]/1000),
@@ -183,7 +183,7 @@ export default {
       //   return Promise.resolve(JSON.parse(storeKline))
       // }
       return this.$http({
-        url: 'http://www.abichi.club/bitmexapi/api/udf/history', 
+        url: 'http://13.230.68.110/bitmexapi/api/udf/history', 
         params: {
           symbol: this.market,
           resolution: this.type,

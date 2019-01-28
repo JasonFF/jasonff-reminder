@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <router-link to="/botprofit" class="navigation"></router-link>
-    <router-link to="/strategy" @click.native="sendData" class="navigation-second"></router-link>
+    <router-link to="/power" class="navigation"></router-link>
+    <!-- <router-link to="/strategy" @click.native="sendData" class="navigation-second"></router-link> -->
     <div class="item">
       <div class="left">
         zb
@@ -19,51 +19,32 @@
         {{zbOtcPrice[0]}}/{{zbOtcPrice[1]}}
       </div>
     </div>
+    <div class="item">
+      <div class="left">
+        pax
+      </div>
+      <div class="right">
+        {{paxPrice}}
+      </div>
+    </div>
     
     <div class="item">
       <div class="left">
-        husd
+        exchange
       </div>
       <div class="right">
-        {{husdPrice[0]}} || {{zbHusdPrice}} || {{zbHusdPrice|diff(hlPrice)}} 
+        {{hlPrice}}
       </div>
     </div>
-    <div class="table-box">
-      <table class="table-zb">
-        <thead>
-          <tr>
-            <th>
-              platform
-            </th>
-            <th>
-              price
-            </th>
-            <th>
-              refer
-            </th>
-          </tr>
-        </thead>
-        <thead>
-          <tr>
-            <td>zb -> hb</td>
-            <td>{{hbPrice[0]}}</td>
-            <td>{{hbPrice[0]|getRatio(zbOtcPrice[0]/1+0.001)}}</td>
-          </tr>
-          <tr>
-            <td>hb -> zb</td>
-            <td>{{hbPrice[1]}}</td>
-            <td>{{hbPrice[1]|getRatio(zbOtcPrice[0])}}</td>
-          </tr>
-          <tr>
-            <td>exchange</td>
-            <td>{{hlPrice}}</td>
-            <td>{{zbPrice[0]|diff(hlPrice)}}</td>
-          </tr>
-        </thead>
-      </table>
+    <div class="item">
+      <div class="left">
+        truePrice
+      </div>
+      <div class="right">
+        {{hlPrice/paxPrice/zbOtcPrice[0] | getFix}} / {{hlPrice/paxPrice/zbOtcPrice[1] | getFix}}
+      </div>
     </div>
     <div style="height: 20px;"></div>
-    <hr>
     <div class="table-box">
       <Row>
         <Col span="12">
@@ -211,7 +192,7 @@
 <script>
   import axios from 'axios'
   import jsonp from 'jsonp'
-  const baseUrl = 'http://www.abichi.club'
+  const baseUrl = 'http://13.230.68.110'
   import _ from 'lodash'
   import cheerio from 'cheerio'
 
@@ -264,12 +245,9 @@ function getZbOtc() {
       this.getHL()
       this.getZbOtcData()
       this.getOkexData()
-      this.getHusdData()
+      this.getPaxData()
     },
     computed: {
-      zbHusdPrice() {
-        return (this.zbPrice[1]/this.zbOtcPrice[0]/this.husdPrice[0]).toFixed(4)
-      },
       _hbBuyList() {
         const list = this.hbBuyList.sort((a, b) => {
           return  b.price - a.price
@@ -333,7 +311,7 @@ function getZbOtc() {
         okSellList: [],
         hbBuyList: [],
         hbSellList: [],
-        husdPrice: [],
+        paxPrice: ''
       }
     },
     filters: {
@@ -343,11 +321,14 @@ function getZbOtc() {
       getRatio(val1, val2) {
         return getFixed(val1 / val2)
       },
+      getFix(val) {
+        return getFixed(val)
+      }
     },
     methods: {
-      getHusdData() {
-        axios(`${baseUrl}/hbapi/market/detail/merged?symbol=usdthusd`).then(res => {
-          this.husdPrice = [res.data.tick.bid[0], res.data.tick.ask[0]]
+      getPaxData() {
+        axios(`${baseUrl}/zbapi/data/v1/ticker?market=pax_usdt`).then(res => {
+          this.paxPrice = res.data.ticker.last
         })
       },
       sendData() {

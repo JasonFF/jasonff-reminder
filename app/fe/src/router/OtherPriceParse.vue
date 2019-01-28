@@ -31,7 +31,7 @@ import moment from 'moment'
         // 17259.83 交易量
         return new Promise((resolve, reject) => {
           setTimeout(() => {
-            this.$http('http://www.abichi.club/zbapi/data/v1/kline', {
+            this.$http('http://13.230.68.110/zbapi/data/v1/kline', {
               params: {
                 market: market,
                 type: '5min',
