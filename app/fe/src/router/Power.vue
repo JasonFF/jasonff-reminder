@@ -12,7 +12,7 @@
     </Row>
     <router-link to="/zb" class="navigation"></router-link>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
-    
+    <h1 style="text-align: center">{{requestTime}}</h1>
   </div>
 </template>
 
@@ -27,6 +27,7 @@ export default {
       kline: {},
       market: '',
       weekNum: 5,
+      requestTime: '',
       time: '月',
       type: '1',
       buttonMarkets: [
@@ -85,6 +86,7 @@ export default {
       }
     },
     getKlineByTime() {
+      this.requestTime = 0
       const weekNum = this.weekNum
       let numList = []
       for (let i = weekNum; i > 0; i--) {
@@ -93,7 +95,10 @@ export default {
       return Promise.all(numList.map((it, index) => {
         return new Promise(resolve => {
           setTimeout(() => {
-            resolve(this.getKline([(it - 1) * 7, it * 7]))
+            resolve(this.getKline([(it - 1) * 7, it * 7]).then((res) => {
+              this.requestTime ++ 
+              return res
+            }))
           }, (1000 * index));
         })
       })).then(res => {
@@ -132,6 +137,15 @@ export default {
       return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
     },
     initChart(data) {
+      const time = this.kline.t.filter((it, index) => {
+        return index % (2 * this.weekNum) == 0
+      })
+      const kline = this.kline.c.filter((it, index) => {
+        return index % (2 * this.weekNum) == 0
+      })
+      const obv2 = this.getOBV2().filter((it, index) => {
+        return index % (2 * this.weekNum) == 0
+      })
         const option = {
           title: {
               text: 'indicator'
@@ -170,7 +184,7 @@ export default {
           xAxis: {
               type: 'category',
               boundaryGap: false,
-              data: this.kline.t.map(it => moment(it*1000).format('MM-DD HH:mm:ss'))
+              data: time.map(it => moment(it*1000).format('MM-DD HH:mm:ss'))
           },
           yAxis: [
             {
@@ -196,13 +210,13 @@ export default {
                   name:'kline',
                   type:'line',
                   yAxisIndex:0,
-                  data: this.kline.c
+                  data: kline
               },
               {
                   name:'indicator',
                   type:'line',
                   yAxisIndex:1,
-                  data: this.getOBV2()
+                  data: obv2
               },
           ]
       };
