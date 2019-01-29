@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import {RSI, MACD, OBV2, MA, OBV} from '@/tools/indicator.js'
+import {RSI, MACD, OBV2, MA, OBV, OBV3} from '@/tools/indicator.js'
 import echarts from 'echarts'
 import moment from 'moment'
 import _ from 'lodash'
@@ -63,6 +63,9 @@ export default {
     getOBV2() {
       return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
     },
+    getOBV3() {
+      return OBV3(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
+    },
     initChart(data) {
         const option = {
           title: {
@@ -72,7 +75,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','indicator', 'atr'],
+              data:['kline','obv2', 'obv3'],
               top: '3%'
           },
           grid: {
@@ -114,7 +117,7 @@ export default {
               // min: _.min(this.kline.c),
             },
             {
-                name: 'indicator',
+                name: 'obv2',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
@@ -123,14 +126,14 @@ export default {
                 // min: _.min(data),
             },
             {
-                name: 'atr',
+                name: 'obv3',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
-                // show: false,
+                show: false,
                 // max: _.max(data),
                 // min: _.min(data),
-            }
+            },
           ],
           series: [
               {
@@ -140,18 +143,17 @@ export default {
                   data: this.kline.c
               },
               {
-                  name:'indicator',
+                  name:'obv2',
                   type:'line',
                   yAxisIndex:1,
                   data: this.getOBV2()
               },
               {
-                name:'atr',
-                type:'line',
-                yAxisIndex:2,
-                color: "#ca8622",
-                data: MA(this.getATR(), 200)
-              }
+                  name:'obv3',
+                  type:'line',
+                  yAxisIndex:2,
+                  data: this.getOBV3()
+              },
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));

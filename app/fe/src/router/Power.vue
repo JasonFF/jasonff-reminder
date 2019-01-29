@@ -1,41 +1,17 @@
 <template>
   <div class="container">
-    <router-link to="/zb" class="navigation"></router-link>
-    <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
-    <Row :gutter='16' style="padding: 10px 20px;margin-top: 10px">
+    <Row :gutter='16' style="padding: 0 20px;">
       <Col style="margin-bottom: 10px" span="8" v-for="item in buttonMarkets" :key="item">
         <Button :class="{active: item == market}" @click="chooseBtn(item)" long>{{item}}</Button>
       </Col>
     </Row>
     <Row :gutter="16" style="text-align: center">
-
-      <Col span="12" >
-        <RadioGroup size="large" v-model="time" type="button">
-          <Radio label="日">日</Radio>
-          <Radio label="周">周</Radio>
-          <Radio label="月">月</Radio>
-        </RadioGroup>
-      </Col>
-
-      <Col span="12">
-        <RadioGroup size="large" v-model="type" type="button">
-          <Radio label="1">1</Radio>
-          <Radio label="5">5</Radio>
-          <Radio label="60">60</Radio>
-        </RadioGroup>
+      <Col span="12" offset="6">
+        <Input v-model="weekNum"></Input>
       </Col>
     </Row>
-    <Row :gutter="16" style="padding: 20px 20px 0">
-      <Col span="8">
-        <Button long @click="chooseOkEos">eos季度</Button>
-      </Col>
-      <Col span="8">
-        <Button long @click="chooseOkXrp">xrp季度</Button>
-      </Col>
-    </Row>
-    <h1 style="text-align: center">
-      {{zj.topVol.toFixed(2)}} / {{zj.totalVol.toFixed(2)}} / {{zj.percent.toFixed(2)}}
-    </h1>
+    <router-link to="/zb" class="navigation"></router-link>
+    <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
     
   </div>
 </template>
@@ -50,7 +26,8 @@ export default {
     return {
       kline: {},
       market: '',
-      time: '周',
+      weekNum: 5,
+      time: '月',
       type: '1',
       buttonMarkets: [
         'XBTUSD', "ETHUSD"
@@ -63,9 +40,15 @@ export default {
     }
   },
   mounted() {
-    // this.parseData()
+    this.init()
   },
   methods: {
+    init() {
+      const storeWeekNum = window.localStorage.getItem('weekNum')
+      if (storeWeekNum) {
+        this.weekNum = storeWeekNum
+      }
+    },
     parseData(timearr) {
       return this.getKline(timearr).then(res => {
         this.kline = res
@@ -85,36 +68,6 @@ export default {
         this.initChart(resultData)
       })
     },
-    chooseOkEos() {
-      this.$http({
-        url: 'http://13.230.68.110/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_eos&type=1min&contractType=quarter&limit=10000&coinVol=1'
-      }).then(res => {
-        this.kline = {
-          t: res.data.data.map(it => it[0]/1000),
-          o: res.data.data.map(it => it[1]),
-          h: res.data.data.map(it => it[2]),
-          l: res.data.data.map(it => it[3]),
-          c: res.data.data.map(it => it[4]),
-          v: res.data.data.map(it => it[5])
-        }
-        this.initChart()
-      })
-    },
-    chooseOkXrp() {
-      this.$http({
-        url: 'http://13.230.68.110/okexapi/v2/futures/pc/market/klineData.do?symbol=f_usd_xrp&type=1min&contractType=quarter&limit=10000&coinVol=1'
-      }).then(res => {
-        this.kline = {
-          t: res.data.data.map(it => it[0]/1000),
-          o: res.data.data.map(it => it[1]),
-          h: res.data.data.map(it => it[2]),
-          l: res.data.data.map(it => it[3]),
-          c: res.data.data.map(it => it[4]),
-          v: res.data.data.map(it => it[5])
-        }
-        this.initChart()
-      })
-    },
     chooseBtn(item) {
       this.market = item
       let time = this.time
@@ -127,11 +80,17 @@ export default {
         return
       }
       if (time == '月') {
+        window.localStorage.setItem('weekNum', this.weekNum)
         this.getKlineByTime()
       }
     },
     getKlineByTime() {
-      return Promise.all([6,5,4,3,2,1].map((it, index) => {
+      const weekNum = this.weekNum
+      let numList = []
+      for (let i = weekNum; i > 0; i--) {
+        numList.push(i)
+      }
+      return Promise.all(numList.map((it, index) => {
         return new Promise(resolve => {
           setTimeout(() => {
             resolve(this.getKline([(it - 1) * 7, it * 7]))
@@ -150,79 +109,12 @@ export default {
         })
         return result
       }).then(res => {
-         this.kline = res
-        // console.log(rsi)
-        let totalResult = 0
-        let totalList = this.kline.c.map((it, index) => {
-          let vol = res.v[index]
-          totalResult += ( vol * res.c[index] *((res.c[index] - res.o[index]) >= 0?1:-1)) 
-          return totalResult
-        })
-        let resultData = totalList
-        this.initChart(resultData)
+        this.kline = res
+        this.initChart()
       })
     },
-    getATR() {
-      let topRange = 0
-      return this.kline.c.map((it, index) => {
-        let range = this.kline.h[index] - this.kline.l[index]
-        if (topRange < range) {
-          topRange = range
-        }
-        if (index < 300) {
-          return 0
-        }
-        if (topRange == 0) {
-          return 0
-        }
-        return range / topRange
-      })
-    },
-    getVolRank() {
-      let vItemList = this.kline.v.map((it,index) => {
-        return {
-          v: it,
-          index: index
-        }
-      })
-      vItemList.sort((a,b) => {
-        return b.v - a.v
-      })
-      // console.log(vItemList)
-      let zVolTotal = 0
-      let topTotal = 0
-      const {h,l,o,c,v} = this.kline
-      vItemList.forEach((it, index) => {
-
-        let duokongrange = h[index] - l[index]
-
-        if (duokongrange == 0) {
-          zVolTotal = zVolTotal + 0
-          topTotal = topTotal + 0
-        } else {
-          let duo = h[index] - o[index]
-          let kong = o[index] - l[index]
-          let duoPercent = duo / duokongrange
-          let kongPercent = kong / duokongrange
-          let totalVol = v[index]
-          zVolTotal = zVolTotal + duoPercent * totalVol - kongPercent * totalVol
-          if (index < vItemList.length / 5) {
-            topTotal = topTotal + duoPercent * totalVol - kongPercent * totalVol
-          }
-        }
-      })
-      this.zj = {
-        topVol: topTotal,
-        totalVol: zVolTotal,
-        percent: topTotal/zVolTotal
-      }
-      // console.log(topTotal, zVolTotal, topTotal/zVolTotal)
-    },
+    
     getKline(timearr=[0, 7]) {
-      // const storeKline = window.localStorage.getItem('kline')
-      // if (storeKline) {
-      //   return Promise.resolve(JSON.parse(storeKline))
-      // }
       return this.$http({
         url: 'http://13.230.68.110/bitmexapi/api/udf/history', 
         params: {
@@ -236,37 +128,8 @@ export default {
         return res
       })
     },
-    getPercent(list, index = 0) {
-      let firstVal = list[index]
-      return list.map(it => {
-        return ((it - firstVal) / Math.abs(firstVal) * 100).toFixed(2)
-      })
-    },
     getOBV2() {
       return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
-    },
-    getOBV3() {
-      return OBV3(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
-    },
-    botProfit() {
-      let obv = this.getOBV2()
-      let obvma = MA(this.getOBV2(), 30)
-      let kline = this.kline.c
-      let totalMoney = 10000
-      let totalCoin = 10000/kline[0]
-      kline.forEach((it,index) => {
-        let price = it
-        if (obv[index] > obvma[index]) {
-          totalCoin = totalCoin + totalMoney/price
-          totalMoney = 0
-        }
-        if (obv[index] < obvma[index]) {
-          totalMoney = totalMoney + totalCoin * price
-          totalCoin = 0
-        }
-      })
-      let profit = ((totalMoney + totalCoin * kline[kline.length - 1]-20000)/20000 * 100).toFixed(2) + '%'
-      console.log(profit)
     },
     initChart(data) {
         const option = {
@@ -277,7 +140,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','obv2', 'obv3'],
+              data:['kline','indicator'],
               top: '3%'
           },
           grid: {
@@ -319,16 +182,7 @@ export default {
               // min: _.min(this.kline.c),
             },
             {
-                name: 'obv2',
-                max: 'dataMax',
-                min: 'dataMin',
-                type: 'value',
-                show: false,
-                // max: _.max(data),
-                // min: _.min(data),
-            },
-            {
-                name: 'obv3',
+                name: 'indicator',
                 max: 'dataMax',
                 min: 'dataMin',
                 type: 'value',
@@ -344,36 +198,16 @@ export default {
                   yAxisIndex:0,
                   data: this.kline.c
               },
-              // {
-              //     name:'klinema',
-              //     type:'line',
-              //     yAxisIndex:0,
-              //     data: MA(this.kline.c, parseInt(this.kline.c.length/30))
-              // },
               {
-                  name:'obv2',
+                  name:'indicator',
                   type:'line',
                   yAxisIndex:1,
                   data: this.getOBV2()
               },
-              {
-                  name:'obv3',
-                  type:'line',
-                  yAxisIndex:2,
-                  data: this.getOBV3()
-              },
-              // {
-              //     name:'obvma',
-              //     type:'line',
-              //     yAxisIndex:1,
-              //     data: MA(this.getOBV2(), parseInt(this.kline.c.length/30))
-              // },
           ]
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
-      // this.getVolRank() 
-      // this.botProfit()
     }
   }
 }
