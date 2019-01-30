@@ -41,7 +41,7 @@
         truePrice
       </div>
       <div class="right">
-        {{hlPrice/paxPrice/zbOtcPrice[0] | getFix}} / {{hlPrice/paxPrice/zbOtcPrice[1] | getFix}}
+        {{hlPrice/paxPrice/zbOtcPrice[0] | getFix}} / {{hlPrice/paxPrice/zbOtcPrice[1] | getFix}} ( {{hlPrice/paxPrice/0.99 | getFix}} / {{hlPrice/paxPrice/1 | getFix}} )
       </div>
     </div>
     <div style="height: 20px;"></div>
