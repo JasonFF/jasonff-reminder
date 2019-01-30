@@ -13,6 +13,7 @@
     <router-link to="/zb" class="navigation"></router-link>
     <div id="kline1" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
     <h1 style="text-align: center">{{requestTime}}</h1>
+    <div id="kline2" style="height: 500px;width: 100%;background:#ccc;margin-top: 10px"></div>
   </div>
 </template>
 
@@ -116,6 +117,7 @@ export default {
       }).then(res => {
         this.kline = res
         this.initChart()
+        this.initStressChart()
       })
     },
     
@@ -136,7 +138,7 @@ export default {
     getOBV2() {
       return OBV2(this.kline.o, this.kline.c, this.kline.h, this.kline.l, this.kline.v)
     },
-    initChart(data) {
+    initChart() {
       const time = this.kline.t.filter((it, index) => {
         return index % (2 * this.weekNum) == 0
       })
@@ -222,6 +224,94 @@ export default {
       };
       const kline1 = echarts.init(document.getElementById('kline1'));
       kline1.setOption(option);
+    },
+    initStressChart() {
+      const time = this.kline.t.filter((it, index) => {
+        return index % (2 * this.weekNum) == 0
+      })
+      let xRange = []
+      let yValue = []
+      let xRangeObj = {}
+      
+      this.kline.c.forEach((it,index) => {
+        if (xRangeObj[`$${parseInt(it)}`]) {
+          xRangeObj[`$${parseInt(it)}`] = xRangeObj[`$${parseInt(it)}`] + this.kline.v[index]
+        } else {
+          xRangeObj[`$${parseInt(it)}`] = this.kline.v[index]
+        }
+      })
+      let xRangeObjList = Object.keys(xRangeObj).map(key => {
+        return {
+          price: key.replace('$', ''),
+          vol: xRangeObj[key]
+        }
+      }).sort((a,b) => {
+        return a.price - b.price
+      }).forEach(it => {
+        xRange.push(it.price)
+        yValue.push(it.vol)
+      })
+        const option = {
+          title: {
+              text: 'stress'
+          },
+          tooltip: {
+              trigger: 'axis'
+          },
+          legend: {
+              data:['vol'],
+              top: '3%'
+          },
+          grid: {
+              top: '15%',
+              left: '13%',
+              right: '14%',
+              bottom: '13%',
+              // containLabel: true
+          },
+          dataZoom: [{
+              type: 'inside',
+              start: 0,
+              end: 100
+          }, {
+              start: 0,
+              end: 10,
+              handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+              handleSize: '80%',
+              handleStyle: {
+                  color: '#fff',
+                  shadowBlur: 3,
+                  shadowColor: 'rgba(0, 0, 0, 0.6)',
+                  shadowOffsetX: 2,
+                  shadowOffsetY: 2
+              }
+          }],
+          xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              data: xRange
+          },
+          yAxis: [
+            {
+              name: 'vol',
+              type: 'value',
+              max: 'dataMax',
+              min: 'dataMin',
+              // max: _.max(this.kline.c),
+              // min: _.min(this.kline.c),
+            },
+          ],
+          series: [
+              {
+                  name:'vol',
+                  type:'line',
+                  yAxisIndex:0,
+                  data: yValue
+              }
+          ]
+      };
+      const kline2 = echarts.init(document.getElementById('kline2'));
+      kline2.setOption(option);
     }
   }
 }
