@@ -215,7 +215,7 @@ function _getZbOtc(type) {
           type
         }
       }))
-    }, 300);
+    }, 1000 * type);
   })
 }
 
@@ -248,10 +248,10 @@ function getZbOtc() {
     name: 'Home',
     created() {
       this.getZbData()
-      this.getAllHbOtcData()
+      // this.getAllHbOtcData()
       this.getHL()
       this.getZbOtcData()
-      this.getOkexData()
+      // this.getOkexData()
       this.getPaxData()
     },
     computed: {
@@ -445,7 +445,7 @@ function getZbOtc() {
         let storeData = window.localStorage.getItem('zbOtcPrice')
         if (storeData) {
           this.zbOtcPrice = storeData ? JSON.parse(storeData) : []
-          this.zbOtcPrice = [this.zbOtcPrice[0]+'*', this.zbOtcPrice[1]+'*']
+          this.zbOtcPrice = [(this.zbOtcPrice[0]/10).toFixed(4), (this.zbOtcPrice[1]/10).toFixed(4)]
         }
         getZbOtc().then(prices => {
           window.localStorage.setItem('zbOtcPrice', JSON.stringify(prices))
