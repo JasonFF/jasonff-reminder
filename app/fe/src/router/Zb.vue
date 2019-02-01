@@ -16,7 +16,14 @@
         zbotc
       </div>
       <div class="right">
-        {{zbOtcPrice[0]}}/{{zbOtcPrice[1]}}
+        <Row>
+          <Col span="12">
+            <Input v-model="zbOtcPrice[0]"></Input>
+          </Col>
+          <Col span="12">
+            <Input v-model="zbOtcPrice[1]"></Input>
+          </Col>
+        </Row>
       </div>
     </div>
     <div class="item">
@@ -203,7 +210,7 @@
 function _getZbOtc(type) {
   return new Promise((resovle, reject) => {
     setTimeout(() => {
-      resovle(axios(`${baseUrl}/zbotcapistr/otc/trade/qc_cny`, {
+      resovle(axios(`${baseUrl}/zbotcapi/otc/trade/qc_cny`, {
         params: {
           type
         }

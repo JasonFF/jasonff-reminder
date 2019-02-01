@@ -156,7 +156,7 @@ export default {
               trigger: 'axis'
           },
           legend: {
-              data:['kline','indicator'],
+              data:['kline','indicator', 'indicatorPrice'],
               top: '3%'
           },
           grid: {
