@@ -16,7 +16,7 @@
         zbotc
       </div>
       <div class="right">
-        <Row>
+        <Row :gutter="10">
           <Col span="12">
             <Input v-model="zbOtcPrice[0]"></Input>
           </Col>
@@ -239,7 +239,7 @@ function parseContent(content) {
 
 function getZbOtc() {
   return Promise.all([_getZbOtc(1), _getZbOtc(2)]).then(res => {
-    return [parseContent(res[0].data.data), parseContent(res[1].data.data)]
+    return [parseContent(res[0].data), parseContent(res[1].data)]
   })
 }
 
@@ -442,7 +442,13 @@ function getZbOtc() {
           })])
       },
       getZbOtcData() {
+        let storeData = window.localStorage.getItem('zbOtcPrice')
+        if (storeData) {
+          this.zbOtcPrice = storeData ? JSON.parse(storeData) : []
+          this.zbOtcPrice = [this.zbOtcPrice[0]+'*', this.zbOtcPrice[1]+'*']
+        }
         getZbOtc().then(prices => {
+          window.localStorage.setItem('zbOtcPrice', JSON.stringify(prices))
           this.zbOtcPrice = prices
         })
       }
