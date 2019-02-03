@@ -1,8 +1,23 @@
 <template>
   <div class="container">
-    <Row :gutter='16' style="padding: 0 20px;">
+    <Row :gutter='16' style="padding: 0 20px; margin-bottom: 10px">
       <Col style="margin-bottom: 10px" span="8" v-for="item in buttonMarkets" :key="item">
         <Button :class="{active: item == market}" @click="chooseBtn(item)" long>{{item}}</Button>
+      </Col>
+      <Col span="12" >
+        <RadioGroup size="large" v-model="time" type="button">
+          <Radio label="日">日</Radio>
+          <Radio label="周">周</Radio>
+          <Radio label="月">月</Radio>
+        </RadioGroup>
+      </Col>
+
+      <Col span="12">
+        <RadioGroup size="large" v-model="type" type="button">
+          <Radio label="1">1</Radio>
+          <Radio label="5">5</Radio>
+          <Radio label="60">60</Radio>
+        </RadioGroup>
       </Col>
     </Row>
     <Row :gutter="16" style="text-align: center">
