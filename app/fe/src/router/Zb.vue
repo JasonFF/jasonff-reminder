@@ -48,7 +48,17 @@
         truePrice
       </div>
       <div class="right">
-        {{hlPrice/paxPrice/zbOtcPrice[0] | getFix}} / {{hlPrice/paxPrice/zbOtcPrice[1] | getFix}} ( {{hlPrice/paxPrice/0.99 | getFix}} / {{hlPrice/paxPrice/1 | getFix}} )
+        {{hlPrice/paxPrice/zbOtcPrice[0] | getFix}} / {{hlPrice/paxPrice/zbOtcPrice[1] | getFix}}
+        <div>
+          ( qc: {{hlPrice/paxPrice/0.99 | getFix}} / {{hlPrice/paxPrice/1 | getFix}} )
+        </div>
+        <div>
+          ( usd=1: {{hlPrice/1/zbOtcPrice[0] | getFix}} / {{hlPrice/1/zbOtcPrice[1] | getFix}} )
+        </div>
+        <div>
+          ( qcusd: {{hlPrice/1/0.99 | getFix}} / {{hlPrice/1/1 | getFix}} )
+        </div>
+        
       </div>
     </div>
     <div style="height: 20px;"></div>
@@ -94,105 +104,6 @@
         </Col>
       </Row>
     </div>
-    <div style="height: 20px;"></div>
-    <hr>
-    <div class="table-box">
-      <Row>
-        <Col span="12">
-          <table class="table-zb">
-            <thead>
-              <tr>
-                <th colspan="2">buy</th>
-              </tr>
-              <tr>
-                <th>price</th>
-                <th>amount</th>
-                <th>count</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in okBuyList">
-                <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </Col>
-        <Col span="12">
-          <table class="table-zb">
-            <thead>
-              <tr>
-                <th colspan="2">sell</th>
-              </tr>
-              <tr>
-                <th>price</th>
-                <th>amount</th>
-                <th>count</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in okSellList">
-                <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </Col>
-      </Row>
-      
-
-    </div>
-    <div style="height: 20px;"></div>
-    <hr>
-    <div class="table-box">
-      <Row>
-        <Col span="12">
-          <table class="table-zb">
-            <thead>
-              <tr>
-                <th colspan="2">buy</th>
-              </tr>
-              <tr>
-                <th>price</th>
-                <th>amount</th>
-                <th>count</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in _hbBuyList">
-                <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </Col>
-        <Col span="12">
-          <table class="table-zb">
-            <thead>
-              <tr>
-                <th colspan="2">sell</th>
-              </tr>
-              <tr>
-                <th>price</th>
-                <th>amount</th>
-                <th>count</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in _hbSellList">
-                <td>{{item.price}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
-                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </Col>
-      </Row>
-    </div>
-
     
   </div>
 </template>
