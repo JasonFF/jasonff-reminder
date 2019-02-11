@@ -37,7 +37,7 @@
     
     <div class="item">
       <div class="left">
-        exchange
+        汇率
       </div>
       <div class="right">
         {{hlPrice}}
@@ -63,6 +63,7 @@
     </div>
     <div style="height: 20px;"></div>
     <div class="table-box">
+      <div style="text-align: center">zb usdt 大单监控 ( > 5000)</div>
       <Row>
         <Col span="12">
           <table class="table-zb">
@@ -98,6 +99,106 @@
               <tr v-for="item in zbBids">
                 <td>{{item[0]}}</td>
                 <td style="text-align: right;padding-right: 10px">{{item[1]}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+      </Row>
+    </div>
+    <div style="height: 20px;"></div>
+    <hr>
+    <div class="table-box">
+      <div style="text-align: center">okex 商家监控</div>
+      <Row>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">buy</th>
+              </tr>
+              <tr>
+                <th>价格</th>
+                <th>数量</th>
+                <th>商家数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in okBuyList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">sell</th>
+              </tr>
+              <tr>
+                <th>价格</th>
+                <th>数量</th>
+                <th>商家数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in okSellList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+      </Row>
+      
+
+    </div>
+    <div style="height: 20px;"></div>
+    <hr>
+    <div class="table-box">
+      <div style="text-align: center">hb 商家监控</div>
+      <Row>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">buy</th>
+              </tr>
+              <tr>
+               <th>价格</th>
+                <th>数量</th>
+                <th>商家数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in _hbBuyList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Col>
+        <Col span="12">
+          <table class="table-zb">
+            <thead>
+              <tr>
+                <th colspan="2">sell</th>
+              </tr>
+              <tr>
+                <th>价格</th>
+                <th>数量</th>
+                <th>商家数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in _hbSellList">
+                <td>{{item.price}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.amount}}</td>
+                <td style="text-align: right;padding-right: 10px">{{item.count}}</td>
               </tr>
             </tbody>
           </table>
@@ -159,10 +260,10 @@ function getZbOtc() {
     name: 'Home',
     created() {
       this.getZbData()
-      // this.getAllHbOtcData()
+      this.getAllHbOtcData()
       this.getHL()
       this.getZbOtcData()
-      // this.getOkexData()
+      this.getOkexData()
       this.getPaxData()
     },
     computed: {
