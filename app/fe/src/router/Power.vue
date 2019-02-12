@@ -118,7 +118,14 @@ export default {
           }, (1000 * index));
         })
       })).then(res => {
-        let result = res[0]
+        let result = {
+          c: [],
+          h: [],
+          l: [],
+          o: [],
+          t: [],
+          v: [],
+        }
         console.log(res)
         res.forEach(it => {
           result.c = result.c.concat(it.c)
